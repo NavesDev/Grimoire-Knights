@@ -52,7 +52,23 @@ const painter = P => (ctx, r, m) => {
 const fire = { ...M.palettes.fire, robe: '#1f1a2e', robeDark: '#151122', mask: '#e8e0cc' };
 const wind = { ...fire, accent: '#2f8456', eye: '#8affc0' };
 
+// Mage animations plus the cape (swings back when walking) and intro: the boss opens its arms at the top of the tower.
+const animations = {
+  ...M.humanoid(a => ({
+    idle: { cape: { rotation: [`-3 + ${M.sin(90, 2)}`, 0, M.sin(45, 1.5)] } },
+    walk: { cape: { rotation: [`-10 - math.abs(${M.sin(360, 8)})`, 0, 0] } },
+    cast: { cape: { rotation: [[0, [-3, 0, 0]], [0.4, [-12, 0, 0], 'catmullrom'], [0.8, [-3, 0, 0], 'catmullrom']] } }
+  })[a]),
+  intro: { loop: 'once', length: 2, bones: {
+    body: { rotation: [[0, [8, 0, 0]], [0.8, [8, 0, 0]], [1.3, [-8, 0, 0], 'catmullrom'], [2, [0, 0, 0], 'catmullrom']] },
+    head: { rotation: [[0, [20, 0, 0]], [0.8, [20, 0, 0]], [1.3, [-15, 0, 0], 'catmullrom'], [2, [0, 0, 0], 'catmullrom']] },
+    right_arm: { rotation: [[0, [0, 0, 0]], [0.8, [-10, 0, 10], 'catmullrom'], [1.3, [-20, 0, -70], 'catmullrom'], [1.6, [-20, 0, -65]], [2, [0, 0, 0], 'catmullrom']] },
+    left_arm: { rotation: [[0, [0, 0, 0]], [0.8, [-10, 0, -10], 'catmullrom'], [1.3, [-20, 0, 70], 'catmullrom'], [1.6, [-20, 0, 65]], [2, [0, 0, 0], 'catmullrom']] },
+    cape: { rotation: [[0, [-3, 0, 0]], [1.3, [-25, 0, 0], 'catmullrom'], [2, [-3, 0, 0], 'catmullrom']] }
+  } }
+};
+
 module.exports = {
-  name: 'renegade_captain', group: 'enemy', kind: 'entity', spec,
+  name: 'renegade_captain', group: 'enemy', kind: 'entity', spec, animations,
   textures: { renegade_captain_fire: painter(fire), renegade_captain_wind: painter(wind) }
 };

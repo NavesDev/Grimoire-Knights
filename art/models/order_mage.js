@@ -74,12 +74,45 @@ const painter = P => (ctx, r, m) => {
   }
 };
 
+// Humanoid animations shared with renegade_captain. extra(anim) adds bones per animation (hood tip, cape).
+// Death and hurt come from the vanilla renderer (tilt and red tint), so they have no animation.
+const sin = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed}${phase ? ' + ' + phase : ''}) * ${amp}`;
+const humanoid = (extra = () => ({})) => ({
+  idle: { loop: 'loop', length: 4, bones: {
+    body: { rotation: [sin(90, 1), 0, 0] },
+    head: { rotation: [sin(90, 2, 90), sin(45, 4), 0] },
+    right_arm: { rotation: [sin(90, 3), 0, `${sin(90, 2)} + 3`] },
+    left_arm: { rotation: [sin(90, -3), 0, `${sin(90, -2)} - 3`] },
+    ...extra('idle') } },
+  walk: { loop: 'loop', length: 1, bones: {
+    right_leg: { rotation: [sin(360, 30), 0, 0] },
+    left_leg: { rotation: [sin(360, -30), 0, 0] },
+    right_arm: { rotation: [sin(360, -25), 0, 3] },
+    left_arm: { rotation: [sin(360, 25), 0, -3] },
+    robe_front: { rotation: [`math.abs(${sin(360, 18)})`, 0, 0] },
+    robe_back: { rotation: [`-math.abs(${sin(360, 12)})`, 0, 0] },
+    body: { position: [0, `math.abs(${sin(360, 0.5)})`, 0] },
+    ...extra('walk') } },
+  // Right arm raises toward the target and thrusts; the grimoire floats at grimoire_anchor.
+  cast: { loop: 'once', length: 0.8, bones: {
+    right_arm: { rotation: [[0, [0, 0, 0]], [0.25, [100, 10, 0], 'catmullrom'], [0.4, [85, 10, 0], 'catmullrom'], [0.55, [95, 10, 0], 'catmullrom'], [0.8, [0, 0, 0], 'catmullrom']] },
+    body: { rotation: [[0, [0, 0, 0]], [0.25, [0, -12, 0], 'catmullrom'], [0.55, [4, -12, 0], 'catmullrom'], [0.8, [0, 0, 0], 'catmullrom']] },
+    head: { rotation: [[0, [0, 0, 0]], [0.25, [0, 12, 0], 'catmullrom'], [0.8, [0, 0, 0], 'catmullrom']] },
+    ...extra('cast') } }
+});
+
+const animations = humanoid(a => ({
+  idle: { hood_tip: { rotation: [sin(90, 4, 45), 0, 0] } },
+  walk: { hood_tip: { rotation: [sin(720, 6), 0, 0] } },
+  cast: {}
+})[a]);
+
 const fire = { robe: '#2b2340', robeDark: '#1d1730', trim: '#c9a24a', trim2: '#e8c76a', accent: '#a3301c', leather: '#4a3020', shadow: '#120e18', eye: '#ff8a2a', skin: '#c9a07c', boot: '#2e211a', pants: '#1f1a26' };
 const wind = { ...fire, accent: '#2f8456', eye: '#8affc0' };
 
 module.exports = {
-  name: 'order_mage', group: 'enemy', kind: 'entity', spec,
+  name: 'order_mage', group: 'enemy', kind: 'entity', spec, animations,
   textures: { order_mage_fire: painter(fire), order_mage_wind: painter(wind) },
   // Shared with renegade_captain.
-  arm, hood, lowerBody, painter, palettes: { fire, wind }
+  arm, hood, lowerBody, painter, humanoid, sin, palettes: { fire, wind }
 };
