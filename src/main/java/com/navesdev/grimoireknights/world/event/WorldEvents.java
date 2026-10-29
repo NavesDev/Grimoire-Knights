@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -66,6 +67,8 @@ public final class WorldEvents {
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
         BlockPos spawn = new BlockPos(x, y, z);
         event.getSettings().setSpawn(spawn, 0f);
+        // Everyone starts on the plaza; the vanilla spread could drop new players on the tower roof.
+        level.getGameRules().getRule(GameRules.RULE_SPAWN_RADIUS).set(0, level.getServer());
         // Cancelling skips vanilla's bonus chest, so place it here when the world asked for one.
         if (level.getServer().getWorldData().worldGenOptions().generateBonusChest()) {
             level.registryAccess().registry(Registries.CONFIGURED_FEATURE)
