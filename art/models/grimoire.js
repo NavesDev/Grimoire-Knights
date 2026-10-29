@@ -85,7 +85,9 @@ const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'book', orig
   { name: 'front_cover', origin: [0, 8, 1.5], cubes: [...cover(1, 2, true),
     { name: 'emblem', from: [2, 5.5, 2], to: [6, 10.5, 2.5], paint: { south: 'emblem', all: 'metal' }, hide: ['north'], res: 4 },
     { name: 'pages_front', from: [0, 3, 0], to: [7.5, 13, 1], paint: { north: 'page', all: 'page_edge' } }] },
-  { name: 'flip_page', origin: [0, 8, 0], cubes: [{ name: 'page', from: [0, 3, 0], to: [7.5, 13, 0], mat: 'page' }] }
+  { name: 'flip_page', origin: [0, 8, 0], cubes: [{ name: 'page', from: [0, 3, 0], to: [7.5, 13, 0], mat: 'page' }] },
+  // Where an anti-magic sword comes out of the open pages (draw animation; the book lies flat then).
+  { name: 'sword_anchor', origin: [2, 8, 0] }
 ] }] }];
 
 const painter = P => (ctx, r, m) => {
@@ -146,8 +148,14 @@ const palettes = {
 };
 
 // float runs on root in its own controller; the others move book and its pages.
-// open holds the open pose; flip turns one page while open; choose is the ceremony descent.
+// open holds the open pose; flip turns one page while open; draw brings out an anti-magic sword;
+// choose is the ceremony descent.
 const OPEN = 75;
+// The grimoire entity floats at the player's left, away from the sword hand (FLOAT_AT, model units from
+// the player's feet, facing the player's yaw; +x is the player's left, -z forward) and the code keeps it
+// there. draw moves the book by DRAW_AT, across to just in front of the right hand.
+const FLOAT_AT = [12, 14, -3];
+const DRAW_AT = [-18, -8, -7];
 // flip_page turns around the middle of the spine, but the page blocks turn with their covers
 // (pivots at z -1.5 and 1.5). So at angle a the page also moves to lie on the block it rests on,
 // a hair above it: back block for a > 0, front block for a < 0.
@@ -156,21 +164,31 @@ const page = a => {
   const round = v => Math.round(v * 1000) / 1000 || 0;
   return { rotation: [0, round(a), 0], position: [round(-pz * Math.sin(r) + e * n * Math.sin(r)), 0, round(pz - pz * Math.cos(r) + e * n * Math.cos(r))] };
 };
-// Samples angle(s) for s in 0..1 with smoothstep, so covers and page stay in step without clipping.
+// Samples each phase [length, k => {bone: angle}] for k in 0..1 with smoothstep, so covers and page stay
+// in step without clipping. flip_page also moves (page); book tilts on z; the rest turn on y.
 const STEPS = 6;
-const sampled = (length, angles) => {
+// travel k (0..1) moves book from where it floats to DRAW_AT; it shares book with the tilt, on position.
+const pose = (bone, a) => bone === 'flip_page' ? page(a) : bone === 'travel' ? { position: DRAW_AT.map(v => Math.round(v * a * 1000) / 1000) }
+  : { rotation: bone === 'book' ? [0, 0, a] : [0, a, 0] };
+const channelBone = bone => bone === 'travel' ? 'book' : bone;
+const phases = list => {
   const bones = {};
-  for (let i = 0; i <= STEPS; i++) {
-    const s = i / STEPS, t = Math.round(length * s * 1000) / 1000, k = s * s * (3 - 2 * s);
-    Object.entries(angles(k)).forEach(([bone, a]) => {
-      const pose = bone === 'flip_page' ? page(a) : { rotation: [0, a, 0] };
-      Object.entries(pose).forEach(([ch, v]) => ((bones[bone] ||= {})[ch] ||= []).push([t, v]));
-    });
-  }
+  let t0 = 0;
+  list.forEach(([length, angles]) => {
+    for (let i = 0; i <= STEPS; i++) {
+      const s = i / STEPS, t = Math.round((t0 + length * s) * 1000) / 1000, k = s * s * (3 - 2 * s);
+      Object.entries(angles(k)).forEach(([bone, a]) => Object.entries(pose(bone, a)).forEach(([ch, v]) => {
+        const keys = ((bones[channelBone(bone)] ||= {})[ch] ||= []);
+        if (!keys.length || keys[keys.length - 1][0] !== t) keys.push([t, v]);
+      }));
+    }
+    t0 += length;
+  });
   return bones;
 };
+const sampled = (length, angles) => phases([[length, angles]]);
 const covers = k => ({ back_cover: OPEN * k, front_cover: -OPEN * k, flip_page: OPEN * k });
-const opened = Object.fromEntries(Object.entries(covers(1)).map(([b, a]) => [b, b === 'flip_page' ? page(a) : { rotation: [0, a, 0] }]));
+const opened = Object.fromEntries(Object.entries(covers(1)).map(([b, a]) => [b, pose(b, a)]));
 const swing = (from, to) => sampled(0.5, k => covers(from + (to - from) * k));
 const animations = {
   float: { loop: 'loop', length: 3, bones: { root: {
@@ -180,6 +198,15 @@ const animations = {
   open: { loop: 'hold', length: 0.5, bones: swing(0, 1) },
   close: { loop: 'once', length: 0.5, bones: swing(1, 0) },
   flip: { loop: 'once', length: 0.6, bones: { ...opened, ...sampled(0.6, k => ({ flip_page: OPEN - 2 * OPEN * k })) } },
+  // Anti-magic: from where it floats at the player's left, the book flies in front of the right hand, lies flat
+  // with the pages up and opens; pages riffle while the sword comes out at sword_anchor (sword summon starts
+  // at 0.35 s and is grabbed around 1.05 s); then it closes, stands up and flies back.
+  draw: { loop: 'once', length: 1.5, bones: phases([
+    [0.35, k => ({ ...covers(k), book: 90 * k, travel: k })],
+    [0.4, k => ({ flip_page: OPEN - 2 * OPEN * k })],
+    [0.3, () => ({})],
+    [0.45, k => ({ back_cover: OPEN * (1 - k), front_cover: -OPEN * (1 - k), flip_page: -OPEN * (1 - k), book: 90 * (1 - k), travel: 1 - k })]
+  ]) },
   choose: { loop: 'once', length: 2, bones: { book: {
     position: [[0, [0, 12, 0], 'catmullrom'], [1.6, [0, -0.6, 0], 'catmullrom'], [2, [0, 0, 0], 'catmullrom']],
     rotation: [[0, [0, 720, 0], 'catmullrom'], [1.6, [0, 0, 0], 'catmullrom']]
@@ -187,6 +214,6 @@ const animations = {
 };
 
 module.exports = {
-  name: 'grimoire', group: 'grimoire', kind: 'entity', spec, animations,
+  name: 'grimoire', group: 'grimoire', kind: 'entity', spec, animations, FLOAT_AT,
   textures: Object.fromEntries(Object.entries(palettes).map(([k, p]) => ['grimoire_' + k, painter(p)]))
 };

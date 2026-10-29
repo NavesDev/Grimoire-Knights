@@ -3,6 +3,9 @@
 // hexagonal ends and a round cross boss, spiral-wrapped grip, teardrop pommel.
 const K = load('./lib.js');
 const S = load('./sword_painter.js');
+// root pivots at the pommel base: the sword grows out of the grimoire pages from there (sword_anim.js).
+const BASE = -8.5;
+const A = load('./sword_anim.js');
 
 const BLADE_TOP = 27.75;
 const bronze = (n, f, t, m = 'bronze') => ({ name: n, from: f, to: t, mat: m });
@@ -24,7 +27,7 @@ const pommel = [
   bronze('pommel_point', [-0.4, -8.5, -0.4], [0.4, -7.75, 0.4])
 ];
 
-const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'sword', origin: [0, 0, 0], cubes: [
+const spec = [{ name: 'root', origin: [0, BASE, 0], children: [{ name: 'sword', origin: [0, 0, 0], cubes: [
   bronze('grip', [-0.6, -5.5, -0.6], [0.6, 2.5, 0.6], 'wrap'),
   ...pommel,
   bronze('guard', [-3.5, 2.5, -0.75], [3.5, 3.75, 0.75]),
@@ -72,4 +75,4 @@ const painter = (ctx, r, m) => {
   } else S.painter(P)(ctx, r, m);
 };
 
-module.exports = { name: 'reverse_blade', group: 'ability', kind: 'entity', spec, textures: { reverse_blade: painter } };
+module.exports = { name: 'reverse_blade', group: 'ability', kind: 'entity', spec, animations: A.animations(), textures: { reverse_blade: painter } };

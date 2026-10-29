@@ -1,6 +1,9 @@
 // Anti-magic greatsword (ref: Demon-Slayer Sword). Grip point at the origin, blade up.
 // Hilt is plain tarnished bronze: thin cross with pointed ends, a langet over the blade, flared pommel.
 const S = load('./sword_painter.js');
+// root pivots at the pommel base: the sword grows out of the grimoire pages from there (sword_anim.js).
+const BASE = -10;
+const A = load('./sword_anim.js');
 
 const blade = (n, f, t, face = 'blade') => ({ name: n, from: f, to: t, paint: { north: face, south: face, all: 'edge' } });
 const bronze = (n, f, t) => ({ name: n, from: f, to: t, mat: 'bronze' });
@@ -17,7 +20,7 @@ const langet = (side, z0, z1) => [
   bronze('langet_tip_' + side, [-0.25, 10, z0], [0.25, 11.5, z1])
 ];
 
-const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'sword', origin: [0, 0, 0], cubes: [
+const spec = [{ name: 'root', origin: [0, BASE, 0], children: [{ name: 'sword', origin: [0, 0, 0], cubes: [
   bronze('grip', [-0.5, -8, -0.5], [0.5, 3, 0.5]),
   bronze('pommel_neck', [-0.75, -9, -0.75], [0.75, -8, 0.75]),
   bronze('pommel_cap', [-1.25, -10, -1.25], [1.25, -9, 1.25]),
@@ -32,4 +35,4 @@ const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'sword', ori
   ...langet('front', -1.25, -0.75),
   ...langet('back', 0.75, 1.25)] }] }] }];
 
-module.exports = { name: 'greatsword', group: 'ability', kind: 'entity', spec, textures: { greatsword: S.painter(S.anti) } };
+module.exports = { name: 'greatsword', group: 'ability', kind: 'entity', spec, animations: A.animations(), textures: { greatsword: S.painter(S.anti) } };
