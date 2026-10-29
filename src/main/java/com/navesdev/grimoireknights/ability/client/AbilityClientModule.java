@@ -10,7 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
@@ -24,6 +26,7 @@ public final class AbilityClientModule {
 
     public static void register(IEventBus modBus) {
         modBus.addListener(RegisterKeyMappingsEvent.class, event -> event.register(ABILITY_1));
+        modBus.addListener(RegisterGuiLayersEvent.class, event -> event.registerAbove(VanillaGuiLayers.HOTBAR, Ids.id("mana"), ManaHud::render));
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class,
                 event -> event.registerEntityRenderer(AbilityModule.FIREBALL.get(), FireballRenderer::new));
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, event -> {
