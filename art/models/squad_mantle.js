@@ -60,8 +60,19 @@ const painter = (layer, P) => (ctx, r, m) => {
 const tintable = { cloth: '#d8d8d8', gold: '#d4ad4a', trim: '#d4ad4a', field: '#2a2a2a' };
 const preview = { cloth: '#1c1a1e', gold: '#d4ad4a', trim: '#d4ad4a', field: '#0e0e0e' };
 
+const sin = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed}${phase ? ' + ' + phase : ''}) * ${amp}`;
+// Worn as armor: body follows the player. The tail (from Knight) and hood swing back when walking.
+const animations = {
+  idle: { loop: 'loop', length: 3, bones: {
+    tail: { rotation: [`-2 + ${sin(120, 2)}`, 0, sin(60, 2)] },
+    hood: { rotation: [sin(120, 1.5, 60), 0, 0] } } },
+  walk: { loop: 'loop', length: 1, bones: {
+    tail: { rotation: [`-8 - math.abs(${sin(360, 8)})`, 0, sin(360, 3)] },
+    hood: { rotation: [`-math.abs(${sin(360, 4)})`, 0, 0] } } }
+};
+
 module.exports = {
-  name: 'squad_mantle', group: 'cosmetic', kind: 'entity', spec,
+  name: 'squad_mantle', group: 'cosmetic', kind: 'entity', spec, animations,
   textures: { squad_mantle_cloth: painter('cloth', tintable), squad_mantle_trim: painter('trim', tintable) },
   preview: painter('both', preview), painter, palettes: { tintable, preview }
 };
