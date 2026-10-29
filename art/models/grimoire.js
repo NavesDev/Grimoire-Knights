@@ -145,7 +145,48 @@ const palettes = {
   anti_5: { cover: '#1d1b1b', edge: '#0b0a0a', frame: '#48403b', emblemBg: '#3a1212', leaf: '#141111', leafEdge: '#a3261c', leafDark: '#4a1512', leafLight: '#2e2828', core: '#c0302a', page: '#cfc3a0', pageShade: '#a8996f', ribbon: '#5a1414', leaves: 5, wear: 0.3, scratch: 14 }
 };
 
+// float runs on root in its own controller; the others move book and its pages.
+// open holds the open pose; flip turns one page while open; choose is the ceremony descent.
+const OPEN = 75;
+// flip_page turns around the middle of the spine, but the page blocks turn with their covers
+// (pivots at z -1.5 and 1.5). So at angle a the page also moves to lie on the block it rests on,
+// a hair above it: back block for a > 0, front block for a < 0.
+const page = a => {
+  const r = a * Math.PI / 180, pz = a >= 0 ? -1.5 : 1.5, n = Math.sign(a) || 1, e = 0.05 * Math.abs(a) / OPEN;
+  const round = v => Math.round(v * 1000) / 1000 || 0;
+  return { rotation: [0, round(a), 0], position: [round(-pz * Math.sin(r) + e * n * Math.sin(r)), 0, round(pz - pz * Math.cos(r) + e * n * Math.cos(r))] };
+};
+// Samples angle(s) for s in 0..1 with smoothstep, so covers and page stay in step without clipping.
+const STEPS = 6;
+const sampled = (length, angles) => {
+  const bones = {};
+  for (let i = 0; i <= STEPS; i++) {
+    const s = i / STEPS, t = Math.round(length * s * 1000) / 1000, k = s * s * (3 - 2 * s);
+    Object.entries(angles(k)).forEach(([bone, a]) => {
+      const pose = bone === 'flip_page' ? page(a) : { rotation: [0, a, 0] };
+      Object.entries(pose).forEach(([ch, v]) => ((bones[bone] ||= {})[ch] ||= []).push([t, v]));
+    });
+  }
+  return bones;
+};
+const covers = k => ({ back_cover: OPEN * k, front_cover: -OPEN * k, flip_page: OPEN * k });
+const opened = Object.fromEntries(Object.entries(covers(1)).map(([b, a]) => [b, b === 'flip_page' ? page(a) : { rotation: [0, a, 0] }]));
+const swing = (from, to) => sampled(0.5, k => covers(from + (to - from) * k));
+const animations = {
+  float: { loop: 'loop', length: 3, bones: { root: {
+    position: [0, 'math.sin(query.anim_time * 120) * 0.6', 0],
+    rotation: ['math.sin(query.anim_time * 120 + 90) * 2', 0, 'math.sin(query.anim_time * 60) * 3']
+  } } },
+  open: { loop: 'hold', length: 0.5, bones: swing(0, 1) },
+  close: { loop: 'once', length: 0.5, bones: swing(1, 0) },
+  flip: { loop: 'once', length: 0.6, bones: { ...opened, ...sampled(0.6, k => ({ flip_page: OPEN - 2 * OPEN * k })) } },
+  choose: { loop: 'once', length: 2, bones: { book: {
+    position: [[0, [0, 12, 0], 'catmullrom'], [1.6, [0, -0.6, 0], 'catmullrom'], [2, [0, 0, 0], 'catmullrom']],
+    rotation: [[0, [0, 720, 0], 'catmullrom'], [1.6, [0, 0, 0], 'catmullrom']]
+  } } }
+};
+
 module.exports = {
-  name: 'grimoire', group: 'grimoire', kind: 'entity', spec,
+  name: 'grimoire', group: 'grimoire', kind: 'entity', spec, animations,
   textures: Object.fromEntries(Object.entries(palettes).map(([k, p]) => ['grimoire_' + k, painter(p)]))
 };
