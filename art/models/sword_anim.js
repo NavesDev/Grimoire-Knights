@@ -18,10 +18,11 @@ const animations = (turn = 90) => ({
   }, sword: { rotation: [0, turn, 0] } } }
 });
 
-// Flight on the greatsword (as Asta rides his): bobs and sways under the player; the renderer lays it flat.
+// Flight on the greatsword (as Asta rides his): the renderer lays it flat, tip forward, so local z is up and
+// local y runs along the blade. Bobs up and down and rolls on the blade; player_ride's sword pose follows both.
 const ride = { loop: 'loop', length: 2, bones: { sword: {
-  position: [0, 'math.sin(query.anim_time * 180) * 0.4', 0],
-  rotation: ['math.sin(query.anim_time * 180 + 90) * 2', 0, 'math.sin(query.anim_time * 90) * 3']
+  position: [0, 0, 'math.sin(query.anim_time * 180) * 0.4'],
+  rotation: [0, 'math.sin(query.anim_time * 90) * 3', 0]
 } } };
 
 module.exports = { animations, ride };

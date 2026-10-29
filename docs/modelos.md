@@ -160,10 +160,17 @@ Rig `player_demon.js`: voo na forma demônio, cada pose com o `fly_<dir>` de mes
 | `awaken` | once 4,1 s | Junto com o `awaken` da forma demônio: curva-se agarrando o braço, treme, abre os braços quando as asas estouram, curva de novo na união e se levanta |
 | `revert` | once 4,1 s | Junto com o `revert`: o poder escoa, fica exausto e se recupera no fim |
 
-Rig `player_ride.js`: voo em pé, como skate voador, na vassoura e no montante. Corpo de lado na prancha (pé esquerdo à frente, `body` y -90), cabeça virada para onde vai, braços abertos ao longo da prancha. O renderer põe o jogador em pé sobre a vassoura ou a espada deitada.
+Rig `player_ride.js`: voo em pé, como skate voador, na vassoura e no montante. Corpo de lado na prancha (pé esquerdo para o bico, `body` y -90), cabeça virada para onde vai, braços abertos ao longo da prancha. O renderer põe o jogador em pé sobre a vassoura ou a espada deitada e inclina os dois ao manobrar.
 
-| Animação | Loop | Uso |
-|---|---|---|
-| `broom_hover` | loop 2 s | Junto com o `hover` da vassoura: em pé, balançando com ela |
-| `broom_fly` | loop 0,5 s | Junto com o `fly` da vassoura: inclinado para a frente, braços mais baixos |
-| `sword` | loop 2 s | Junto com o `ride` do montante: mesma postura, balançando com a lâmina |
+- Com o corpo girado 90°, `x` e `z` do `body` giram no mesmo eixo (gimbal lock): a inclinação é montada em eixos do mundo e convertida para Euler ZYX no `player_ride.js`.
+- Sem joelho, inclinar para a frente ou para trás baixa um quadril: cada perna abre ao longo da prancha só o bastante para os dois pés (pelo canto mais baixo) ficarem no chão da prancha.
+- Cada pose sobe, desce e rola junto com a animação do prop de mesma duração; conferido no Blockbench com os pés a até 0,1 da prancha.
+- Ainda não testado no jogo: se o playerAnimator aplica o `body` na mesma ordem ZYX.
+
+| Animação | Loop | Par | Uso |
+|---|---|---|---|
+| `broom_hover`, `sword_hover` | 2 s | vassoura `hover` / montante `ride` | Parado no ar, em pé |
+| `broom_forward`, `sword_forward` | 0,5 s / 2 s | vassoura `fly` / montante `ride` | Inclina para o bico, braço de trás alto |
+| `broom_backward`, `sword_backward` | 0,5 s / 2 s | idem | Inclina para a cauda, freando, braço da frente alto |
+| `broom_left`, `sword_left` | 0,5 s / 2 s | idem | Inclina nos calcanhares, braços para a frente, olha para a curva |
+| `broom_right`, `sword_right` | 0,5 s / 2 s | idem | Inclina nas pontas dos pés, braços para trás, olha para a curva |

@@ -155,16 +155,16 @@
 				"sword": {
 					"rotation": {
 						"vector": [
-							"-math.sin(query.anim_time * 180 + 90) * 2",
 							0,
-							"math.sin(query.anim_time * 90) * 3"
+							"-math.sin(query.anim_time * 90) * 3",
+							0
 						]
 					},
 					"position": {
 						"vector": [
 							0,
-							"math.sin(query.anim_time * 180) * 0.4",
-							0
+							0,
+							"math.sin(query.anim_time * 180) * 0.4"
 						]
 					}
 				}
