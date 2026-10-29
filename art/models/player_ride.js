@@ -1,5 +1,5 @@
 // Player poses while flying on the broom or on the anti-magic greatsword, for playerAnimator. Both are ridden
-// standing, like a flying skateboard: body turned sideways on the board (left foot toward the nose), head
+// standing, like a flying skateboard: body turned sideways on the board (right foot toward the nose), head
 // turned to look where it goes, arms out along the board. Same rig as player_sword.js; sampled, no Molang.
 // The board flies nose first (-z); the player faces +x, so the toes point right of the flight and the heels
 // left. Each pose bobs and rolls with its prop (broom.js hover/fly, sword_anim.js ride) so the feet stay on
@@ -31,8 +31,8 @@ const legs = (body, roll) => {
   // lowest corner of the foot, so a tilted foot rests on its edge instead of sinking into the board
   const foot = (y, a, nose) => y + Math.min(...[[-2, -2], [-2, 2], [2, -2], [2, 2]].map(([x, z]) =>
     new THREE.Vector3(x, -LEG, z).applyMatrix4(world(a, nose)).y));
-  const hips = { left: hip(HIP), right: hip(-HIP) }; // left foot toward the nose
-  const floor = Math.max(foot(hips.left, SPLAY, true), foot(hips.right, SPLAY, false));
+  const hips = { left: hip(HIP), right: hip(-HIP) }; // with body turned, the right hip is toward the nose
+  const floor = Math.max(foot(hips.right, SPLAY, true), foot(hips.left, SPLAY, false));
   const angle = (y, nose) => {
     let lo = SPLAY, hi = 80;
     for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; foot(y, mid, nose) > floor ? hi = mid : lo = mid; }
@@ -40,7 +40,7 @@ const legs = (body, roll) => {
   };
   const inv = body.clone().invert();
   const local = (y, nose) => euler(inv.clone().multiply(world(angle(y, nose), nose)));
-  return { left_leg: local(hips.left, true), right_leg: local(hips.right, false), floor };
+  return { right_leg: local(hips.right, true), left_leg: local(hips.left, false), floor };
 };
 
 // o: pitch, roll (degrees), bob (y), look (head turn past the nose, + toward the toes), front and back arm
@@ -52,8 +52,8 @@ const stance = o => {
     body: { rotation: euler(body), position: [0, o.bob - l.floor, 0] },
     head: { rotation: [o.roll * 0.5, 80 - (o.look || 0), -o.pitch * 0.7] },
     left_leg: { rotation: l.left_leg }, right_leg: { rotation: l.right_leg },
-    left_arm: { rotation: [o.swing || 0, 0, o.front] },
-    right_arm: { rotation: [o.swing || 0, 0, -o.back] }
+    right_arm: { rotation: [o.swing || 0, 0, -o.front] },
+    left_arm: { rotation: [o.swing || 0, 0, o.back] }
   };
 };
 

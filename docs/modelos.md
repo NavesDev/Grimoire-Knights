@@ -160,7 +160,7 @@ Rig `player_demon.js`: voo na forma demônio, cada pose com o `fly_<dir>` de mes
 | `awaken` | once 4,1 s | Junto com o `awaken` da forma demônio: curva-se agarrando o braço, treme, abre os braços quando as asas estouram, curva de novo na união e se levanta |
 | `revert` | once 4,1 s | Junto com o `revert`: o poder escoa, fica exausto e se recupera no fim |
 
-Rig `player_ride.js`: voo em pé, como skate voador, na vassoura e no montante. Corpo de lado na prancha (pé esquerdo para o bico, `body` y -90), cabeça virada para onde vai, braços abertos ao longo da prancha. O renderer põe o jogador em pé sobre a vassoura ou a espada deitada e inclina os dois ao manobrar.
+Rig `player_ride.js`: voo em pé, como skate voador, na vassoura e no montante. Corpo de lado na prancha (pé direito para o bico, `body` y -90), cabeça virada para onde vai, braços abertos ao longo da prancha. O renderer põe o jogador em pé sobre a vassoura ou a espada deitada e inclina os dois ao manobrar.
 
 - Com o corpo girado 90°, `x` e `z` do `body` giram no mesmo eixo (gimbal lock): a inclinação é montada em eixos do mundo e convertida para Euler ZYX no `player_ride.js`.
 - Sem joelho, inclinar para a frente ou para trás baixa um quadril: cada perna abre ao longo da prancha só o bastante para os dois pés (pelo canto mais baixo) ficarem no chão da prancha.
