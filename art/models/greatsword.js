@@ -35,4 +35,4 @@ const spec = [{ name: 'root', origin: [0, BASE, 0], children: [{ name: 'sword', 
   ...langet('front', -1.25, -0.75),
   ...langet('back', 0.75, 1.25)] }] }] }];
 
-module.exports = { name: 'greatsword', group: 'ability', kind: 'entity', spec, animations: A.animations(), textures: { greatsword: S.painter(S.anti) } };
+module.exports = { name: 'greatsword', group: 'ability', kind: 'entity', spec, animations: { ...A.animations(), ride: A.ride }, textures: { greatsword: S.painter(S.anti) } };

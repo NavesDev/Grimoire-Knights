@@ -35,4 +35,4 @@ const painter = (ctx, r, m) => {
   }
 };
 
-module.exports = { name: 'katana', group: 'ability', kind: 'entity', spec, animations: { ...A.animations(-90), ride: A.ride }, textures: { katana: painter } };
+module.exports = { name: 'katana', group: 'ability', kind: 'entity', spec, animations: A.animations(-90), textures: { katana: painter } };

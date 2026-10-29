@@ -94,7 +94,7 @@ Golpes e especiais são poses do jogador (playerAnimator); a espada só entra e 
 |---|---|---|
 | `summon` | hold | Sai das páginas crescendo e sobe um pouco para ser pega |
 | `sheath` | once | Desce e afunda de volta nas páginas |
-| `ride` | loop | Só a katana: voo na espada, balançando sob o jogador |
+| `ride` | loop | Só o montante: voo na espada como prancha (o Asta voa na espada grande), balançando sob o jogador; o renderer deita a espada com a ponta para a frente |
 
 ### Grifo
 Asas modeladas abertas; `idle` e `walk` dobram as asas sobre o corpo. Morte e dano ficam com o renderer vanilla.
@@ -159,3 +159,11 @@ Rig `player_demon.js`: voo na forma demônio, cada pose com o `fly_<dir>` de mes
 | `dash` | loop 0,4 s | Rasante: corpo deitado, punho direito à frente, pernas juntas |
 | `awaken` | once 4,1 s | Junto com o `awaken` da forma demônio: curva-se agarrando o braço, treme, abre os braços quando as asas estouram, curva de novo na união e se levanta |
 | `revert` | once 4,1 s | Junto com o `revert`: o poder escoa, fica exausto e se recupera no fim |
+
+Rig `player_ride.js`: voo em pé, como skate voador, na vassoura e no montante. Corpo de lado na prancha (pé esquerdo à frente, `body` y -90), cabeça virada para onde vai, braços abertos ao longo da prancha. O renderer põe o jogador em pé sobre a vassoura ou a espada deitada.
+
+| Animação | Loop | Uso |
+|---|---|---|
+| `broom_hover` | loop 2 s | Junto com o `hover` da vassoura: em pé, balançando com ela |
+| `broom_fly` | loop 0,5 s | Junto com o `fly` da vassoura: inclinado para a frente, braços mais baixos |
+| `sword` | loop 2 s | Junto com o `ride` do montante: mesma postura, balançando com a lâmina |

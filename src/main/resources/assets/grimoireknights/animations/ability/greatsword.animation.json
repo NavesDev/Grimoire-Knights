@@ -147,6 +147,28 @@
 					}
 				}
 			}
+		},
+		"animation.greatsword.ride": {
+			"loop": true,
+			"animation_length": 2,
+			"bones": {
+				"sword": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 180 + 90) * 2",
+							0,
+							"math.sin(query.anim_time * 90) * 3"
+						]
+					},
+					"position": {
+						"vector": [
+							0,
+							"math.sin(query.anim_time * 180) * 0.4",
+							0
+						]
+					}
+				}
+			}
 		}
 	},
 	"geckolib_format_version": 2
