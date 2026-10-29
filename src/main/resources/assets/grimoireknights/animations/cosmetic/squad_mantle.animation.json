@@ -1,0 +1,54 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.squad_mantle.idle": {
+			"loop": true,
+			"animation_length": 3,
+			"bones": {
+				"tail": {
+					"rotation": {
+						"vector": [
+							"2 - math.sin(query.anim_time * 120) * 2",
+							0,
+							"math.sin(query.anim_time * 60) * 2"
+						]
+					}
+				},
+				"hood": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 120 + 60) * 1.5",
+							0,
+							0
+						]
+					}
+				}
+			}
+		},
+		"animation.squad_mantle.walk": {
+			"loop": true,
+			"animation_length": 1,
+			"bones": {
+				"tail": {
+					"rotation": {
+						"vector": [
+							"8 + math.abs(math.sin(query.anim_time * 360) * 8)",
+							0,
+							"math.sin(query.anim_time * 360) * 3"
+						]
+					}
+				},
+				"hood": {
+					"rotation": {
+						"vector": [
+							"math.abs(math.sin(query.anim_time * 360) * 4)",
+							0,
+							0
+						]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

@@ -1,0 +1,37 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.magic_torch.idle": {
+			"loop": true,
+			"animation_length": 3,
+			"bones": {
+				"crystal": {
+					"rotation": {
+						"vector": [
+							0,
+							"-query.anim_time * 120",
+							0
+						]
+					},
+					"position": {
+						"vector": [
+							0,
+							"math.sin(query.anim_time * 120) * 0.4",
+							0
+						]
+					}
+				},
+				"glow": {
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 240) * 0.12",
+							"1 + math.sin(query.anim_time * 240) * 0.12",
+							"1 + math.sin(query.anim_time * 240) * 0.12"
+						]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

@@ -1,0 +1,412 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.grimoire_altar.idle": {
+			"loop": true,
+			"animation_length": 1,
+			"bones": {
+				"flicker_nw": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360) * 4",
+							0,
+							"math.sin(query.anim_time * 720 + 40) * 4"
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1080) * 0.08",
+							"1 + math.sin(query.anim_time * 720) * 0.15",
+							"1 + math.sin(query.anim_time * 1080) * 0.08"
+						]
+					}
+				},
+				"flame_core_nw": {
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1440 + 180) * 0.12",
+							"1 + math.sin(query.anim_time * 1080 + 180) * 0.2",
+							"1 + math.sin(query.anim_time * 1440 + 180) * 0.12"
+						]
+					}
+				},
+				"flicker_ne": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360 + 90) * 4",
+							0,
+							"math.sin(query.anim_time * 720 + 130) * 4"
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1080 + 131) * 0.08",
+							"1 + math.sin(query.anim_time * 720 + 97) * 0.15",
+							"1 + math.sin(query.anim_time * 1080 + 131) * 0.08"
+						]
+					}
+				},
+				"flame_core_ne": {
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1440 + 241) * 0.12",
+							"1 + math.sin(query.anim_time * 1080 + 253) * 0.2",
+							"1 + math.sin(query.anim_time * 1440 + 241) * 0.12"
+						]
+					}
+				},
+				"flicker_sw": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360 + 180) * 4",
+							0,
+							"math.sin(query.anim_time * 720 + 220) * 4"
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1080 + 262) * 0.08",
+							"1 + math.sin(query.anim_time * 720 + 194) * 0.15",
+							"1 + math.sin(query.anim_time * 1080 + 262) * 0.08"
+						]
+					}
+				},
+				"flame_core_sw": {
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1440 + 302) * 0.12",
+							"1 + math.sin(query.anim_time * 1080 + 326) * 0.2",
+							"1 + math.sin(query.anim_time * 1440 + 302) * 0.12"
+						]
+					}
+				},
+				"flicker_se": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360 + 270) * 4",
+							0,
+							"math.sin(query.anim_time * 720 + 310) * 4"
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1080 + 393) * 0.08",
+							"1 + math.sin(query.anim_time * 720 + 291) * 0.15",
+							"1 + math.sin(query.anim_time * 1080 + 393) * 0.08"
+						]
+					}
+				},
+				"flame_core_se": {
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1440 + 363) * 0.12",
+							"1 + math.sin(query.anim_time * 1080 + 399) * 0.2",
+							"1 + math.sin(query.anim_time * 1440 + 363) * 0.12"
+						]
+					}
+				}
+			}
+		},
+		"animation.grimoire_altar.activate": {
+			"animation_length": 1.5,
+			"bones": {
+				"flicker_nw": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360) * 4",
+							0,
+							"math.sin(query.anim_time * 720 + 40) * 4"
+						]
+					},
+					"scale": {
+						"0.0": {
+							"vector": [
+								1,
+								1,
+								1
+							]
+						},
+						"0.2917": {
+							"pre": {
+								"vector": [
+									1.5,
+									1.9,
+									1.5
+								]
+							},
+							"post": {
+								"vector": [
+									1.5,
+									1.9,
+									1.5
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.0833": {
+							"post": {
+								"vector": [
+									1.35,
+									1.6,
+									1.35
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.5": {
+							"post": {
+								"vector": [
+									1,
+									1,
+									1
+								]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"flame_core_nw": {
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1440 + 180) * 0.12",
+							"1 + math.sin(query.anim_time * 1080 + 180) * 0.2",
+							"1 + math.sin(query.anim_time * 1440 + 180) * 0.12"
+						]
+					}
+				},
+				"flicker_ne": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360) * 4",
+							0,
+							"math.sin(query.anim_time * 720 + 40) * 4"
+						]
+					},
+					"scale": {
+						"0.0": {
+							"vector": [
+								1,
+								1,
+								1
+							]
+						},
+						"0.2917": {
+							"pre": {
+								"vector": [
+									1.5,
+									1.9,
+									1.5
+								]
+							},
+							"post": {
+								"vector": [
+									1.5,
+									1.9,
+									1.5
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.0833": {
+							"post": {
+								"vector": [
+									1.35,
+									1.6,
+									1.35
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.5": {
+							"post": {
+								"vector": [
+									1,
+									1,
+									1
+								]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"flame_core_ne": {
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1440 + 241) * 0.12",
+							"1 + math.sin(query.anim_time * 1080 + 253) * 0.2",
+							"1 + math.sin(query.anim_time * 1440 + 241) * 0.12"
+						]
+					}
+				},
+				"flicker_sw": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360) * 4",
+							0,
+							"math.sin(query.anim_time * 720 + 40) * 4"
+						]
+					},
+					"scale": {
+						"0.0": {
+							"vector": [
+								1,
+								1,
+								1
+							]
+						},
+						"0.2917": {
+							"pre": {
+								"vector": [
+									1.5,
+									1.9,
+									1.5
+								]
+							},
+							"post": {
+								"vector": [
+									1.5,
+									1.9,
+									1.5
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.0833": {
+							"post": {
+								"vector": [
+									1.35,
+									1.6,
+									1.35
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.5": {
+							"post": {
+								"vector": [
+									1,
+									1,
+									1
+								]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"flame_core_sw": {
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1440 + 302) * 0.12",
+							"1 + math.sin(query.anim_time * 1080 + 326) * 0.2",
+							"1 + math.sin(query.anim_time * 1440 + 302) * 0.12"
+						]
+					}
+				},
+				"flicker_se": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360) * 4",
+							0,
+							"math.sin(query.anim_time * 720 + 40) * 4"
+						]
+					},
+					"scale": {
+						"0.0": {
+							"vector": [
+								1,
+								1,
+								1
+							]
+						},
+						"0.2917": {
+							"pre": {
+								"vector": [
+									1.5,
+									1.9,
+									1.5
+								]
+							},
+							"post": {
+								"vector": [
+									1.5,
+									1.9,
+									1.5
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.0833": {
+							"post": {
+								"vector": [
+									1.35,
+									1.6,
+									1.35
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.5": {
+							"post": {
+								"vector": [
+									1,
+									1,
+									1
+								]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"flame_core_se": {
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 1440 + 363) * 0.12",
+							"1 + math.sin(query.anim_time * 1080 + 399) * 0.2",
+							"1 + math.sin(query.anim_time * 1440 + 363) * 0.12"
+						]
+					}
+				},
+				"lectern": {
+					"rotation": {
+						"0.0": {
+							"vector": [
+								0,
+								0,
+								0
+							]
+						},
+						"0.1667": {
+							"vector": [
+								-2,
+								0,
+								1.5
+							]
+						},
+						"0.2917": {
+							"vector": [
+								1.5,
+								0,
+								-1.5
+							]
+						},
+						"0.4583": {
+							"vector": [
+								-1,
+								0,
+								1
+							]
+						},
+						"0.5833": {
+							"vector": [
+								0,
+								0,
+								0
+							]
+						}
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}
