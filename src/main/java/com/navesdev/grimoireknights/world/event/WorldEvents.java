@@ -22,12 +22,15 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 
 public final class WorldEvents {
     /** Natural spawns blocked in the safe zone; commands, eggs and spawners still work. */
-    private static final Set<MobSpawnType> NATURAL = Set.of(MobSpawnType.NATURAL, MobSpawnType.CHUNK_GENERATION, MobSpawnType.PATROL, MobSpawnType.EVENT);
+    private static final Set<MobSpawnType> NATURAL = Set.of(MobSpawnType.NATURAL, MobSpawnType.CHUNK_GENERATION);
     private static final int TRAIL_LENGTH = 10;
     private static final int TOWER_SEARCH_CHUNKS = 100;
 
@@ -59,19 +62,44 @@ public final class WorldEvents {
         int z = plaza.minZ() + 1;
         level.getChunk(x >> 4, z >> 4);
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        event.getSettings().setSpawn(new BlockPos(x, y, z), 0f);
+        BlockPos spawn = new BlockPos(x, y, z);
+        event.getSettings().setSpawn(spawn, 0f);
+        // Cancelling skips vanilla's bonus chest, so place it here when the world asked for one.
+        if (level.getServer().getWorldData().worldGenOptions().generateBonusChest()) {
+            level.registryAccess().registry(Registries.CONFIGURED_FEATURE)
+                    .flatMap(features -> features.getHolder(MiscOverworldFeatures.BONUS_CHEST))
+                    .ifPresent(feature -> feature.value().place(level, level.getChunkSource().getGenerator(), level.random, spawn));
+        }
         event.setCanceled(true);
         GrimoireKnights.LOGGER.info("Spawn set at the starter village, {} {} {}", x, y, z);
     }
 
     /** Safe zone: hostile mobs do not spawn naturally inside the starter village. */
     public static void onSpawnCheck(MobSpawnEvent.PositionCheck event) {
-        if (!(event.getEntity() instanceof Enemy) || !NATURAL.contains(event.getSpawnType())) return;
-        ServerLevel level = event.getLevel().getLevel();
-        Structure village = level.registryAccess().registryOrThrow(Registries.STRUCTURE).get(WorldStructures.STARTER_VILLAGE);
-        if (village != null && level.structureManager().getStructureWithPieceAt(event.getEntity().blockPosition(), village).isValid()) {
+        if (event.getEntity() instanceof Enemy && NATURAL.contains(event.getSpawnType())
+                && inStarterVillage(event.getLevel().getLevel(), event.getEntity().blockPosition())) {
             event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
         }
+    }
+
+    /** Pillager patrols skip the position check; they are stopped here. */
+    public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
+        if (event.getSpawnType() == MobSpawnType.PATROL && event.getEntity() instanceof Enemy
+                && inStarterVillage(event.getLevel().getLevel(), event.getEntity().blockPosition())) {
+            event.setSpawnCancelled(true);
+        }
+    }
+
+    /** Phantoms skip the position check too. */
+    public static void onPhantoms(PlayerSpawnPhantomsEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && inStarterVillage(player.serverLevel(), player.blockPosition())) {
+            event.setResult(PlayerSpawnPhantomsEvent.Result.DENY);
+        }
+    }
+
+    private static boolean inStarterVillage(ServerLevel level, BlockPos pos) {
+        Structure village = level.registryAccess().registryOrThrow(Registries.STRUCTURE).get(WorldStructures.STARTER_VILLAGE);
+        return village != null && level.structureManager().getStructureWithPieceAt(pos, village).isValid();
     }
 
     /** The calling: a trail of particles from the player toward the nearest Grimoire Tower. */
