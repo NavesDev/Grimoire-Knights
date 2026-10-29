@@ -93,6 +93,28 @@ Golpes e especiais são poses do jogador (playerAnimator); a espada só entra e 
 | `sheath` | once | Desce e afunda de volta nas páginas |
 | `ride` | loop | Só a katana: voo na espada, balançando sob o jogador |
 
+### Grifo
+Asas modeladas abertas; `idle` e `walk` dobram as asas sobre o corpo. Morte e dano ficam com o renderer vanilla.
+
+| Animação | Loop | Uso |
+|---|---|---|
+| `idle` | loop | Parado: cabeça olhando em volta, cauda balançando |
+| `walk` | loop | Passo em diagonal (frente esquerda com trás direita) |
+| `fly` | loop | Bate as asas, pontas atrasadas, patas recolhidas |
+| `glide` | loop | Plana com as asas abertas |
+| `attack` | once | Empina girando no quadril, patas de trás dão um passo cada uma, garrada com a pata esquerda, asas abrem, cauda chicoteia, volta e bica |
+
+### Construções, vassoura e manto
+| Modelo | Animação | Loop | Uso |
+|---|---|---|---|
+| Altar | `idle` | loop | Chamas das velas tremendo: dois planos cruzados com gota recortada (`flicker_<vela>`) e miolo claro pulsando fora de fase (`flame_core_<vela>`); usar render type cutout |
+| Altar | `activate` | once | Ao evoluir, resetar ou invocar: chamas crescem, atril treme |
+| Núcleo da torre | `idle` / `active` | loop | Orbe flutua e gira, anéis giram; `active` 4x mais rápido e orbe pulsando |
+| Tocha mágica | `idle` | loop | Cristal gira e flutua, brilho pulsa |
+| Estandarte | `wave` | loop | Pano balança na trave, só para a frente (fica a 0,25 do mastro), parte de baixo atrasada |
+| Vassoura | `hover` / `fly` | loop | Parada no ar balançando / cerdas tremulando no voo; inclinação ao pilotar vem do código |
+| Manto | `idle` / `walk` | loop | Cauda e capuz balançam; no `walk` vão para trás |
+
 ## Poses do jogador (playerAnimator)
 Rig `player_sword.js` (`kind: 'player'`): o `run.js` grava só o `.bbmodel` e `assets/grimoireknights/player_animation/player_sword.json`, sem geo nem textura.
 
