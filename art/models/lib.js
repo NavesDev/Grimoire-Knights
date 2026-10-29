@@ -32,7 +32,8 @@ function noiseFill(ctx, r, base, amt, seed) {
 }
 
 // Builds the bone tree from a spec and packs every face into its own UV rect.
-// spec: [{name, origin, rotation, cubes: [{name, from, to, origin, rotation, inflate, mat | paint: {face|all: mat}, hide}], children}]
+// spec: [{name, origin, rotation, cubes: [{name, from, to, origin, rotation, inflate, mat | paint: {face|all: mat}, hide, res}], children}]
+// res multiplies the texel density of one cube, for cut-out shapes that need finer edges.
 function build(spec, density) {
   Undo.initEdit({ outliner: true, elements: [], textures: [] });
   const cubes = [];
@@ -56,7 +57,8 @@ function build(spec, density) {
       cube.faces[f].texture = null;
       return;
     }
-    rects.push({ cube, spec, face: f, w: Math.max(1, Math.round(w * density)), h: Math.max(1, Math.round(h * density)) });
+    const d = density * (spec.res || 1);
+    rects.push({ cube, spec, face: f, w: Math.max(1, Math.round(w * d)), h: Math.max(1, Math.round(h * d)) });
   }));
   rects.sort((a, b) => b.h - a.h || b.w - a.w);
   let size = 16, ok = false;
