@@ -1,0 +1,113 @@
+package com.navesdev.grimoireknights.grimoire;
+
+import com.navesdev.grimoireknights.GrimoireKnights;
+import com.navesdev.grimoireknights.core.Ids;
+import com.navesdev.grimoireknights.grimoire.block.GrimoireAltarBlockEntity;
+import com.navesdev.grimoireknights.grimoire.config.GrimoireConfig;
+import com.navesdev.grimoireknights.grimoire.entity.Priest;
+import com.navesdev.grimoireknights.grimoire.network.CeremonyPayload;
+import com.navesdev.grimoireknights.grimoire.network.ElementChoicePayload;
+import com.navesdev.grimoireknights.quest.QuestService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
+
+/**
+ * The first-grimoire ceremony, once per player: the priest holds it at a Grimoire Altar after the calling is full.
+ * A grimoire comes down from the shelves and chooses the player; with no magic, the forgotten grimoire quest starts instead.
+ */
+public final class CeremonyService {
+    public static final ResourceLocation FORGOTTEN_GRIMOIRE_QUEST = Ids.id("forgotten_grimoire");
+    /** The grimoire comes down from this high above the altar (the tower's shelves). */
+    private static final int SHELF_HEIGHT = 8;
+
+    public enum Result { GRIMOIRE, NO_MAGIC, CHOOSING, ALREADY_DONE }
+
+    /** Free choice waiting for the player's pick: player to altar (null when held without an altar). */
+    private static final Map<UUID, Optional<BlockPos>> PENDING_CHOICE = new HashMap<>();
+
+    private CeremonyService() {}
+
+    /** Right-click on the priest. */
+    public static void talk(ServerPlayer player, Priest priest) {
+        if (GrimoireService.data(player).ceremonyDone()) {
+            say(player, "priest.done");
+        } else if (!GrimoireService.callingFull(player)) {
+            say(player, "priest.calling");
+        } else {
+            Optional<BlockPos> altar = findAltar(player.serverLevel(), priest.blockPosition(), GrimoireConfig.PRIEST_ALTAR_RADIUS.get());
+            if (altar.isEmpty()) {
+                say(player, "priest.go_to_tower");
+            } else {
+                say(player, "priest.begin");
+                start(player, altar.get());
+            }
+        }
+    }
+
+    /** Runs the ceremony; {@code altar} null runs it where the player stands (test command). */
+    public static Result start(ServerPlayer player, @Nullable BlockPos altar) {
+        if (GrimoireService.data(player).ceremonyDone()) return Result.ALREADY_DONE;
+        List<ResourceLocation> elements = GrimoireRegistries.ELEMENTS.keySet().stream().sorted().toList();
+        if (player.serverLevel().getGameRules().getBoolean(GrimoireGameRules.FREE_ELEMENT_CHOICE) && !elements.isEmpty()) {
+            PENDING_CHOICE.put(player.getUUID(), Optional.ofNullable(altar));
+            PacketDistributor.sendToPlayer(player, new ElementChoicePayload(elements));
+            return Result.CHOOSING;
+        }
+        return finish(player, altar, GrimoireService.drawElement(player.getRandom()));
+    }
+
+    /** The player's free-choice pick. Denied unless a choice is pending and the element exists. */
+    public static boolean choose(ServerPlayer player, ResourceLocation element) {
+        Optional<BlockPos> altar = PENDING_CHOICE.get(player.getUUID());
+        if (altar == null || !GrimoireRegistries.ELEMENTS.containsKey(element) || GrimoireService.data(player).ceremonyDone()) {
+            GrimoireKnights.LOGGER.debug("Denied element choice {} from {}", element, player.getGameProfile().getName());
+            return false;
+        }
+        PENDING_CHOICE.remove(player.getUUID());
+        finish(player, altar.orElse(null), Optional.of(element));
+        return true;
+    }
+
+    static void forget(ServerPlayer player) {
+        PENDING_CHOICE.remove(player.getUUID());
+    }
+
+    private static Result finish(ServerPlayer player, @Nullable BlockPos altar, Optional<ResourceLocation> element) {
+        if (altar != null && player.serverLevel().getBlockEntity(altar) instanceof GrimoireAltarBlockEntity altarEntity) {
+            altarEntity.activate();
+        }
+        if (element.isEmpty()) {
+            player.setData(GrimoireModule.GRIMOIRE_DATA, GrimoireService.data(player).withoutMagic());
+            say(player, "ceremony.no_magic");
+            QuestService.GiveResult quest = QuestService.give(player, FORGOTTEN_GRIMOIRE_QUEST);
+            if (quest != QuestService.GiveResult.OK) {
+                GrimoireKnights.LOGGER.error("Forgotten grimoire quest not given to {}: {}", player.getGameProfile().getName(), quest);
+            }
+            return Result.NO_MAGIC;
+        }
+        GrimoireService.give(player, element.get(), GrimoireService.CEREMONY_LEAVES);
+        BlockPos from = (altar != null ? altar : player.blockPosition()).above(SHELF_HEIGHT);
+        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player,
+                new CeremonyPayload(player.getId(), from, element.get(), GrimoireService.CEREMONY_LEAVES));
+        return Result.GRIMOIRE;
+    }
+
+    private static Optional<BlockPos> findAltar(ServerLevel level, BlockPos center, int radius) {
+        return BlockPos.findClosestMatch(center, radius, radius / 2 + 2,
+                pos -> level.getBlockState(pos).is(GrimoireModule.ALTAR.get()));
+    }
+
+    private static void say(ServerPlayer player, String key) {
+        player.sendSystemMessage(Component.translatable(Ids.key("message", key)));
+    }
+}

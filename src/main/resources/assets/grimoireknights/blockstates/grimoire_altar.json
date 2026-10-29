@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "grimoireknights:block/grimoire_altar"
+    },
+    "facing=south": {
+      "model": "grimoireknights:block/grimoire_altar"
+    },
+    "facing=east": {
+      "model": "grimoireknights:block/grimoire_altar"
+    },
+    "facing=west": {
+      "model": "grimoireknights:block/grimoire_altar"
+    }
+  }
+}
