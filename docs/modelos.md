@@ -118,6 +118,22 @@ Asas modeladas abertas; `idle` e `walk` dobram as asas sobre o corpo. Morte e da
 | Vassoura | `hover` / `fly` | loop | Parada no ar balançando / cerdas tremulando no voo; inclinação ao pilotar vem do código |
 | Manto | `idle` / `walk` | loop | Cauda e capuz balançam; no `walk` vão para trás |
 
+### Forma demônio
+Corpo, cabeça, braços e pernas seguem a pose do jogador no renderer; as animações mexem só nos extras. `idle` e `fly_*` só giram; `awaken`, `revert` e `transform_<n>` só escalam, então podem tocar em controllers separados.
+
+Pele (placas dos braços, tentáculos, peito, marcas da união, pernas; `SPREAD` no `demon_form.js`) não escala: a anti-magia se espalha pela textura. Cada texel tem a hora em que vira, pela distância até onde a peça começa (mão, ombros, quadril) somada a ruído em manchas e pontinhos adiantados; aparece vermelho-sangue, escurece e fica com a cor final. As texturas são geradas por quadro em `textures/entity/awakening/demon_form_spread/` (`awaken_NN`, `transform_1_NN`, `transform_3_NN`, `transform_4_NN`, 8 por segundo, `FPS`); o renderer troca a textura pelo tempo da animação e, no `revert`, usa `awaken_NN` de trás para frente. Fora dessas animações usa `demon_form.png`.
+
+Chifres, asas, coroa e cauda crescem como peça, em surtos com tempos próprios: chifres e cauda segmento por segmento, asas nascem dobradas e abrem passando do ponto. A transformação inteira está 25% mais lenta (`PACE`) para o espalhamento ser visto.
+
+| Animação | Loop | Uso |
+|---|---|---|
+| `idle` | loop | Asas respirando, cauda balançando |
+| `awaken` | once | Despertar ligado: os estágios se espalham em ordem; os acima do estágio do jogador ficam escondidos |
+| `revert` | once | Despertar acabou: o mesmo ao contrário, do último estágio para o primeiro |
+| `transform_1` a `transform_4` | once | Novo estágio (quest do demônio): só aquele estágio se espalha |
+| `fly_hover`, `fly_forward`, `fly_backward`, `fly_left`, `fly_right` | loop | Bater de asas de cada direção de voo (do estágio 2 em diante), junto com a pose do jogador |
+| `fly_dash` | loop | Rasante: asas varridas para trás, tremendo rápido, cauda esticada |
+
 ## Poses do jogador (playerAnimator)
 Rig `player_sword.js` (`kind: 'player'`): o `run.js` grava só o `.bbmodel` e `assets/grimoireknights/player_animation/player_sword.json`, sem geo nem textura.
 
@@ -131,3 +147,15 @@ Rig `player_sword.js` (`kind: 'player'`): o `run.js` grava só o `.bbmodel` e `a
 |---|---|---|
 | `walk` | loop 1 s | Andar com espada: lâmina à frente, baixa; braço livre e pernas no passo |
 | `run` | loop 0,6 s | Correr: tronco inclinado, espada no ombro com a lâmina descendo pelas costas, braço livre bombeando |
+
+Rig `player_demon.js`: voo na forma demônio, cada pose com o `fly_<dir>` de mesma duração.
+
+| Animação | Loop | Uso |
+|---|---|---|
+| `hover` | loop 1 s | Parado no ar: pernas soltas, sobe e desce a cada batida |
+| `forward` | loop 0,8 s | Inclinado para a frente, pernas para trás, braços varridos, cabeça olhando à frente |
+| `backward` | loop 1 s | Inclinado para trás, braços e pernas à frente, freando |
+| `left` / `right` | loop 0,8 s | Inclina para o lado da curva, braço de fora aberto |
+| `dash` | loop 0,4 s | Rasante: corpo deitado, punho direito à frente, pernas juntas |
+| `awaken` | once 4,1 s | Junto com o `awaken` da forma demônio: curva-se agarrando o braço, treme, abre os braços quando as asas estouram, curva de novo na união e se levanta |
+| `revert` | once 4,1 s | Junto com o `revert`: o poder escoa, fica exausto e se recupera no fim |
