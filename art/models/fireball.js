@@ -1,22 +1,38 @@
 // Fire magic 1 projectile. Flies toward north (-z); the trail points south.
 const K = load('./lib.js');
 
-const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'ball', origin: [0, 4, 0], cubes: [
-  { name: 'core', from: [-2, 2, -2], to: [2, 6, 2], mat: 'core' },
-  { name: 'body_x', from: [-3, 2.5, -2.5], to: [3, 5.5, 2.5], mat: 'inner' },
-  { name: 'body_y', from: [-2.5, 1, -2.5], to: [2.5, 7, 2.5], mat: 'inner' },
-  { name: 'body_z', from: [-2.5, 2.5, -3], to: [2.5, 5.5, 3], mat: 'inner' }
-], children: [
-  { name: 'flames', origin: [0, 4, 0], cubes: [
-    { name: 'shell', from: [-3.2, 1.2, -3.2], to: [3.2, 6.8, 3.2], origin: [0, 4, 0], rotation: [0, 45, 0], mat: 'outer' },
-    { name: 'lick_left', from: [-4.5, 4, 0], to: [-2.5, 6, 4], origin: [0, 4, 0], rotation: [0, -15, 0], mat: 'tongue' },
-    { name: 'lick_right', from: [2.5, 2, 0], to: [4.5, 4, 4], origin: [0, 4, 0], rotation: [0, 15, 0], mat: 'tongue' },
-    { name: 'lick_top', from: [-1, 6.5, 0], to: [1, 8.5, 4], origin: [0, 4, 0], rotation: [-15, 0, 0], mat: 'tongue' }] },
-  { name: 'trail', origin: [0, 4, 3], cubes: [
-    { name: 'trail_1', from: [-2, 2, 3], to: [2, 6, 6.5], mat: 'tongue' },
-    { name: 'trail_2', from: [-1.5, 2.5, 6.5], to: [1.5, 5.5, 9.5], mat: 'tongue' },
-    { name: 'trail_3', from: [-1, 3, 9.5], to: [1, 5, 12], mat: 'tongue' },
-    { name: 'trail_4', from: [-0.5, 3.5, 12], to: [0.5, 4.5, 14], mat: 'tongue' }] }
+// Bones: core (pulses), two shells spinning opposite ways, six tongues swept back that flicker on their
+// own phase, a trail chain that whips, and embers orbiting the ball.
+const C = [0, 4, 0];
+const TONGUES = [7, 5, 8, 5, 7, 4];
+const tongue = (len, k) => {
+  const a = k * Math.PI / 3, x = Math.cos(a) * 3.4, y = C[1] + Math.sin(a) * 3.4;
+  return { name: 'tongue_' + (k + 1), origin: [x, y, 1], rotation: [-15 * Math.sin(a), 15 * Math.cos(a), 0],
+    cubes: [{ name: 'tongue_cube_' + (k + 1), from: [x - 1, y - 1, 1], to: [x + 1, y + 1, 1 + len], mat: 'tongue' }] };
+};
+const TRAIL = [[4, 3, 3.5], [3, 6.5, 3], [2, 9.5, 2.5], [1, 12, 2]];
+const trail = i => {
+  const [w, z, len] = TRAIL[i];
+  return { name: 'trail_' + (i + 1), origin: [0, C[1], z],
+    cubes: [{ name: 'trail_cube_' + (i + 1), from: [-w / 2, C[1] - w / 2, z], to: [w / 2, C[1] + w / 2, z + len], mat: 'tongue' }],
+    children: i + 1 < TRAIL.length ? [trail(i + 1)] : [] };
+};
+const EMBERS = [[45, 0], [135, 2.5], [225, 1], [315, 4]];
+
+const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'ball', origin: C, children: [
+  { name: 'core', origin: C, cubes: [
+    { name: 'core_cube', from: [-2, 2, -2], to: [2, 6, 2], mat: 'core' },
+    { name: 'body_x', from: [-3, 2.5, -2.5], to: [3, 5.5, 2.5], mat: 'inner' },
+    { name: 'body_y', from: [-2.5, 1, -2.5], to: [2.5, 7, 2.5], mat: 'inner' },
+    { name: 'body_z', from: [-2.5, 2.5, -3], to: [2.5, 5.5, 3], mat: 'inner' }] },
+  { name: 'shell_a', origin: C, cubes: [{ name: 'shell_a_cube', from: [-3.2, 0.8, -3.2], to: [3.2, 7.2, 3.2], origin: C, rotation: [0, 45, 0], mat: 'outer' }] },
+  { name: 'shell_b', origin: C, cubes: [{ name: 'shell_b_cube', from: [-3.6, 0.4, -3.6], to: [3.6, 7.6, 3.6], origin: C, rotation: [45, 0, 0], mat: 'outer' }] },
+  { name: 'tongues', origin: C, children: TONGUES.map(tongue) },
+  trail(0),
+  { name: 'embers', origin: C, cubes: EMBERS.map(([deg, z], k) => {
+    const a = deg * Math.PI / 180, x = Math.cos(a) * 5.5, y = C[1] + Math.sin(a) * 5.5;
+    return { name: 'ember_' + (k + 1), from: [x - 0.5, y - 0.5, z - 0.5], to: [x + 0.5, y + 0.5, z + 0.5], mat: 'inner' };
+  }) }
 ] }] }];
 
 const pick = (rnd, arr) => arr[Math.floor(rnd() * arr.length)];
@@ -33,4 +49,17 @@ const painter = (ctx, r, m) => {
   }
 };
 
-module.exports = { name: 'fireball', group: 'ability', kind: 'entity', spec, textures: { fireball: painter } };
+// spin (1 s loop; every frequency is a whole number of turns per second so it loops cleanly).
+const wave = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed} + ${phase}) * ${amp}`;
+const animations = { spin: { loop: 'loop', length: 1, bones: {
+  core: { scale: Array(3).fill(`1 + ${wave(1440, 0.07)}`) },
+  shell_a: { rotation: [0, 0, 'query.anim_time * 360'] },
+  shell_b: { rotation: [0, 0, 'query.anim_time * -720'] },
+  tongues: { rotation: [0, 0, 'query.anim_time * 360'] },
+  ...Object.fromEntries(TONGUES.map((_, k) => ['tongue_' + (k + 1), { scale: [
+    `1 + ${wave(1080, 0.15, k * 97)}`, `1 + ${wave(1080, 0.15, k * 97)}`, `1 + ${wave(1440, 0.35, k * 131)}`] }])),
+  ...Object.fromEntries(TRAIL.map((_, i) => ['trail_' + (i + 1), { rotation: [wave(720, 8, i * 60), wave(720, 8, i * 60 + 90), 0] }])),
+  embers: { rotation: [wave(360, 10), wave(360, 10, 90), 'query.anim_time * 720'] }
+} } };
+
+module.exports = { name: 'fireball', group: 'ability', kind: 'entity', spec, animations, textures: { fireball: painter } };
