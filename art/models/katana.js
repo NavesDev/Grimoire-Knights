@@ -19,7 +19,7 @@ const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'sword', ori
   { name: 'habaki', from: [-1, 2.75, -0.5], to: [1.25, 4, 0.5], mat: 'metal' }
 ], children: [segment(1, 4, 7, segment(2, 11, 7, segment(3, 18, 7, segment(4, 25, 6, tip))))] }] }];
 
-const P = { blade: '#222228', bevel: '#2c2c33', blot: '#18161a', edge: '#6c6c78', ridge: '#30303a', metal: '#3a3431', grip: '#1e1a1a', gripDark: '#5a1d1d', chip: 0.3 };
+const P = { ...S.anti, blade: '#18181d', edge: '#3a3a43', grip: '#1a1616', gripDark: '#3d1717', chip: 0.25 };
 
 // Single-edged blade: only the outer column (cutting edge) is light and chipped.
 const painter = (ctx, r, m) => {
@@ -27,8 +27,8 @@ const painter = (ctx, r, m) => {
   const { u, v, w, h } = r, rnd = K.rng(41 + u + v * 3);
   for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) {
     const edge = i === w - 1;
-    if (edge && rnd() < P.chip) continue;
-    K.px(ctx, u + i, v + j, edge ? P.edge : (i === w - 2 && rnd() < 0.6) ? K.shade(P.edge, 0.8) : K.shade(P.blade, 1 + (rnd() - 0.5) * 0.15));
+    const chipped = edge && rnd() < P.chip;
+    K.px(ctx, u + i, v + j, chipped ? P.ridge : edge ? P.edge : (i === w - 2 && rnd() < 0.6) ? K.shade(P.edge, 0.8) : K.shade(P.blade, 1 + (rnd() - 0.5) * 0.15));
   }
 };
 
