@@ -28,4 +28,10 @@ const painter = (ctx, r, m) => {
   }
 };
 
-module.exports = { name: 'magic_torch', group: 'building', kind: 'block', spec, textures: { magic_torch: painter } };
+const sin = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed}${phase ? ' + ' + phase : ''}) * ${amp}`;
+const animations = { idle: { loop: 'loop', length: 3, bones: {
+  crystal: { rotation: [0, 'query.anim_time * 120', 0], position: [0, sin(120, 0.4), 0] },
+  glow: { scale: Array(3).fill(`1 + ${sin(240, 0.12)}`) }
+} } };
+
+module.exports = { name: 'magic_torch', group: 'building', kind: 'block', spec, animations, textures: { magic_torch: painter } };

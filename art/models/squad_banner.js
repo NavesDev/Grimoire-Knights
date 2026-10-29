@@ -45,8 +45,16 @@ const painter = (layer, P) => (ctx, r, m) => {
 };
 
 const P = Mantle.palettes;
+const sin = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed}${phase ? ' + ' + phase : ''}) * ${amp}`;
+// wave: the cloth swings from the crossbar, the lower part lagging behind. It hangs only 0.25 in front of the
+// pole, so it swings forward only (+x moves it away from the pole) and never back into the wood.
+const animations = { wave: { loop: 'loop', length: 3, bones: {
+  cloth_upper: { rotation: [`4 + ${sin(120, 4)}`, sin(240, 2), 0] },
+  cloth_lower: { rotation: [`5 + ${sin(120, 5, -60)}`, sin(240, 3, -60), 0] }
+} } };
+
 module.exports = {
-  name: 'squad_banner', group: 'building', kind: 'block', spec,
+  name: 'squad_banner', group: 'building', kind: 'block', spec, animations,
   textures: { squad_banner_cloth: painter('cloth', P.tintable), squad_banner_trim: painter('trim', P.tintable) },
   preview: painter('both', P.preview)
 };

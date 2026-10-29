@@ -1,0 +1,30 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.squad_banner.wave": {
+			"loop": true,
+			"animation_length": 3,
+			"bones": {
+				"cloth_upper": {
+					"rotation": {
+						"vector": [
+							"-4 - math.sin(query.anim_time * 120) * 4",
+							"-math.sin(query.anim_time * 240) * 2",
+							0
+						]
+					}
+				},
+				"cloth_lower": {
+					"rotation": {
+						"vector": [
+							"-5 - math.sin(query.anim_time * 120 + -60) * 5",
+							"-math.sin(query.anim_time * 240 + -60) * 3",
+							0
+						]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

@@ -1,9 +1,17 @@
 // Grimoire Altar block: castle stone, rune circle, candles, lectern. The grimoire floats at book_anchor.
 const K = load('./lib.js');
 
-const candle = (n, x, z, hgt) => ({ name: 'candle_' + n, origin: [x, 3, z], cubes: [
-  { name: 'wax_' + n, from: [x - 0.75, 3, z - 0.75], to: [x + 0.75, 3 + hgt, z + 0.75], mat: 'wax' },
-  { name: 'flame_' + n, from: [x - 0.25, 3 + hgt, z - 0.25], to: [x + 0.25, 4.25 + hgt, z + 0.25], mat: 'flame' }] });
+// Candle flame like vanilla fire: two crossed planes with a teardrop cut out of the texture (cutout), in
+// flicker_<n>, plus a smaller, brighter crossed pair in flame_core_<n> that pulses out of phase.
+const candle = (n, x, z, hgt) => {
+  const y = 3 + hgt, cross = (name, w, h, y0, mat) => [45, -45].map((a, k) => ({ name: `${name}_${k ? 'b' : 'a'}_${n}`,
+    from: [x - w / 2, y0, z], to: [x + w / 2, y0 + h, z], origin: [x, y0, z], rotation: [0, a, 0], mat, res: 8 }));
+  return { name: 'candle_' + n, origin: [x, 3, z], cubes: [
+    { name: 'wax_' + n, from: [x - 0.75, 3, z - 0.75], to: [x + 0.75, y, z + 0.75], mat: 'wax' },
+    { name: 'wick_' + n, from: [x - 0.125, y, z - 0.125], to: [x + 0.125, y + 0.5, z + 0.125], mat: 'wick' }],
+  children: [{ name: 'flicker_' + n, origin: [x, y + 0.25, z], cubes: cross('flame', 1.25, 2.25, y + 0.25, 'flame'),
+    children: [{ name: 'flame_core_' + n, origin: [x, y + 0.25, z], cubes: cross('core', 0.6, 1.2, y + 0.3, 'flame_core') }] }] };
+};
 
 const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'altar', origin: [0, 0, 0], cubes: [
   { name: 'plinth', from: [-8, 0, -8], to: [8, 3, 8], paint: { up: 'stone_top', all: 'stone' } },
@@ -37,7 +45,16 @@ const painter = P => (ctx, r, m) => {
     else if (m === 'wood') c = (j % 3 === 2) ? K.shade(P.wood, 0.75) : n(P.wood, 0.12);
     else if (m === 'lectern_top') c = (i >= 8 && i < w - 8) ? n(P.cloth, 0.1) : (i === 7 || i === w - 8) ? P.gold : n(P.wood, 0.12);
     else if (m === 'wax') c = j < 2 ? '#f7efd6' : n(P.wax, 0.08);
-    else if (m === 'flame') c = j < 1 ? '#fff6c0' : '#ffb03a';
+    else if (m === 'wick') c = '#2a2420';
+    // Flame (cutout): teardrop with a round base, widest a third of the way up; blue root, white heart, orange then red edge.
+    else if (m === 'flame' || m === 'flame_core') {
+      const v = 1 - (j + 0.5) / h, u = Math.abs(i + 0.5 - w / 2) / (w / 2);
+      const width = v < 0.3 ? Math.sqrt(0.35 + 0.65 * v / 0.3) : Math.pow((1 - v) / 0.7, 0.8);
+      if (u > width) continue;
+      const d = u / width;
+      if (m === 'flame_core') c = d < 0.5 ? '#ffffff' : '#fff1a0';
+      else c = v < 0.12 ? (d < 0.6 ? '#7ab4ff' : '#3f6fd0') : d > 0.75 ? (v > 0.6 ? '#d93a12' : '#f2600c') : d > 0.4 ? '#ffa62e' : '#ffe27a';
+    }
     else c = '#ff00ff';
     px(i, j, c);
   }
@@ -47,4 +64,22 @@ const painter = P => (ctx, r, m) => {
   }
 };
 
-module.exports = { name: 'grimoire_altar', group: 'building', kind: 'block', spec, textures: { grimoire_altar: painter(palette) }, painter, palette };
+const sin = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed}${phase ? ' + ' + phase : ''}) * ${amp}`;
+const CANDLES = ['nw', 'ne', 'sw', 'se'];
+// Each candle has its own phase; the core pulses against the outer flame. Whole turns per loop.
+const flame = (n, k, s = 1) => ({
+  ['flicker_' + n]: { rotation: [sin(360, 4, k * 90), 0, sin(720, 4, k * 90 + 40)], scale: [`${s} + ${sin(1080, 0.08, k * 131)}`, `${s} + ${sin(720, 0.15, k * 97)}`, `${s} + ${sin(1080, 0.08, k * 131)}`] },
+  ['flame_core_' + n]: { scale: [`1 + ${sin(1440, 0.12, k * 61 + 180)}`, `1 + ${sin(1080, 0.2, k * 73 + 180)}`, `1 + ${sin(1440, 0.12, k * 61 + 180)}`] }
+});
+const flames = s => Object.assign({}, ...CANDLES.map((n, k) => flame(n, k, s)));
+// idle: flames flicker; activate (evolve, reset, summon): flames flare up and the lectern shudders.
+const animations = {
+  idle: { loop: 'loop', length: 1, bones: flames(1) },
+  activate: { loop: 'once', length: 1.5, bones: {
+    ...flames(1),
+    ...Object.fromEntries(CANDLES.map(n => ['flicker_' + n, { ...flame(n, 0)['flicker_' + n], scale: [[0, [1, 1, 1]], [0.3, [1.5, 1.9, 1.5], 'catmullrom'], [1.1, [1.35, 1.6, 1.35], 'catmullrom'], [1.5, [1, 1, 1], 'catmullrom']] }])),
+    lectern: { rotation: [[0, [0, 0, 0]], [0.15, [2, 0, 1.5]], [0.3, [-1.5, 0, -1.5]], [0.45, [1, 0, 1]], [0.6, [0, 0, 0]]] }
+  } }
+};
+
+module.exports = { name: 'grimoire_altar', group: 'building', kind: 'block', spec, animations, textures: { grimoire_altar: painter(palette) }, painter, palette };

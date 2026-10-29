@@ -1,0 +1,93 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.mage_tower_core.idle": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"orb": {
+					"rotation": {
+						"vector": [
+							0,
+							"-query.anim_time * 90",
+							0
+						]
+					},
+					"position": {
+						"vector": [
+							0,
+							"math.sin(query.anim_time * 90) * 0.6",
+							0
+						]
+					}
+				},
+				"ring_a": {
+					"rotation": {
+						"vector": [
+							0,
+							"-query.anim_time * 90",
+							0
+						]
+					}
+				},
+				"ring_b": {
+					"rotation": {
+						"vector": [
+							0,
+							"-query.anim_time * -180",
+							0
+						]
+					}
+				}
+			}
+		},
+		"animation.mage_tower_core.active": {
+			"loop": true,
+			"animation_length": 1,
+			"bones": {
+				"orb": {
+					"rotation": {
+						"vector": [
+							0,
+							"-query.anim_time * 360",
+							0
+						]
+					},
+					"position": {
+						"vector": [
+							0,
+							"math.sin(query.anim_time * 360) * 0.6",
+							0
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 720) * 0.08",
+							"1 + math.sin(query.anim_time * 720) * 0.08",
+							"1 + math.sin(query.anim_time * 720) * 0.08"
+						]
+					}
+				},
+				"ring_a": {
+					"rotation": {
+						"vector": [
+							0,
+							"-query.anim_time * 360",
+							0
+						]
+					}
+				},
+				"ring_b": {
+					"rotation": {
+						"vector": [
+							0,
+							"-query.anim_time * -720",
+							0
+						]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

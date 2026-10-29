@@ -30,4 +30,16 @@ const painter = (ctx, r, m) => {
     K.px(ctx, u + i, v + j, ['#7b5cff', '#9d7bff', '#b9a0ff', '#6a48f0'][Math.floor(rnd() * 4)]);
 };
 
-module.exports = { name: 'mage_tower_core', group: 'building', kind: 'block', spec, textures: { mage_tower_core: painter } };
+const sin = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed}${phase ? ' + ' + phase : ''}) * ${amp}`;
+// Ring spins are whole turns per loop so they loop cleanly. active: the tower is in use, everything faster.
+const spin = (length, k) => ({
+  orb: { rotation: [0, `query.anim_time * ${90 * k}`, 0], position: [0, sin(360 / length, 0.6), 0] },
+  ring_a: { rotation: [0, `query.anim_time * ${90 * k}`, 0] },
+  ring_b: { rotation: [0, `query.anim_time * ${-180 * k}`, 0] }
+});
+const animations = {
+  idle: { loop: 'loop', length: 4, bones: spin(4, 1) },
+  active: { loop: 'loop', length: 1, bones: { ...spin(1, 4), orb: { ...spin(1, 4).orb, scale: Array(3).fill(`1 + ${sin(720, 0.08)}`) } } }
+};
+
+module.exports = { name: 'mage_tower_core', group: 'building', kind: 'block', spec, animations, textures: { mage_tower_core: painter } };
