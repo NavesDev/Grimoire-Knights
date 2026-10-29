@@ -92,3 +92,17 @@ Golpes e especiais são poses do jogador (playerAnimator); a espada só entra e 
 | `summon` | hold | Sai das páginas crescendo e sobe um pouco para ser pega |
 | `sheath` | once | Desce e afunda de volta nas páginas |
 | `ride` | loop | Só a katana: voo na espada, balançando sob o jogador |
+
+## Poses do jogador (playerAnimator)
+Rig `player_sword.js` (`kind: 'player'`): o `run.js` grava só o `.bbmodel` e `assets/grimoireknights/player_animation/player_sword.json`, sem geo nem textura.
+
+- O playerAnimator lê o formato GeckoLib, mas sem Molang: loops viram quadros-chave numéricos (`loop` no `player_sword.js`, 12 por ciclo).
+- Ossos: `body` (o jogador todo), `head`, `torso`, `right_arm`, `left_arm`, `right_leg`, `left_leg`, irmãos como no jogador vanilla.
+- Parte sem quadro-chave volta para a pose padrão, não para a do vanilla; por isso andar e correr animam pernas e braços. `head` fica sem chave para seguir o olhar (conferir no jogo).
+- Espada na mão: lâmina à frente com o fio para baixo (katana com a curva para cima), igual ao fim do saque. Quem orienta é o renderer do item na mão; as poses não giram a espada.
+- Ainda não testado no jogo: sinais dos eixos e se o `head` sem chave segue a câmera.
+
+| Animação | Loop | Uso |
+|---|---|---|
+| `walk` | loop 1 s | Andar com espada: lâmina à frente, baixa; braço livre e pernas no passo |
+| `run` | loop 0,6 s | Correr: tronco inclinado, espada no ombro com a lâmina descendo pelas costas, braço livre bombeando |
