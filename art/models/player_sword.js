@@ -52,4 +52,4 @@ const animations = {
   }))
 };
 
-module.exports = { name: 'player_sword', group: 'player', kind: 'player', spec, animations, textures: { player_sword: painter } };
+module.exports = { name: 'player_sword', group: 'player', kind: 'player', spec, animations, loop, textures: { player_sword: painter } };
