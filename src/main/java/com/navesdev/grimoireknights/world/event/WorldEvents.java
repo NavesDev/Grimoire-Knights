@@ -35,6 +35,7 @@ public final class WorldEvents {
     /** Natural spawns blocked in the safe zone; commands, eggs and spawners still work. */
     private static final Set<MobSpawnType> NATURAL = Set.of(MobSpawnType.NATURAL, MobSpawnType.CHUNK_GENERATION);
     private static final int TRAIL_LENGTH = 10;
+    private static final int SPAWN_RADIUS = 4;
     private static final int TOWER_SEARCH_CHUNKS = 100;
 
     private WorldEvents() {}
@@ -67,8 +68,8 @@ public final class WorldEvents {
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
         BlockPos spawn = new BlockPos(x, y, z);
         event.getSettings().setSpawn(spawn, 0f);
-        // Everyone starts on the plaza; the vanilla spread could drop new players on the tower roof.
-        level.getGameRules().getRule(GameRules.RULE_SPAWN_RADIUS).set(0, level.getServer());
+        // Spread players over the plaza only: the tower wall is 6 blocks away, out of this radius (vanilla 10 reaches its roof).
+        level.getGameRules().getRule(GameRules.RULE_SPAWN_RADIUS).set(SPAWN_RADIUS, level.getServer());
         // Cancelling skips vanilla's bonus chest, so place it here when the world asked for one.
         if (level.getServer().getWorldData().worldGenOptions().generateBonusChest()) {
             level.registryAccess().registry(Registries.CONFIGURED_FEATURE)
