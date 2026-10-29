@@ -32,7 +32,7 @@ Com o Blockbench aberto e o servidor MCP do Blockbench ligado, rodar pelo `risky
 O Blockbench não carrega arquivos com `require`; o trecho acima lê cada `.js` e entrega `load`, `fs`, `path` e `__dirname`.
 
 ## Convenções que o código precisa saber
-- **Grimório:** ossos `front_cover`, `back_cover` e `flip_page` giram no eixo Y em volta da lombada para abrir. Texturas `grimoire_<elemento>_<folhas>`.
+- **Grimório:** ossos `front_cover`, `back_cover` e `flip_page` giram no eixo Y em volta da lombada para abrir. `sword_anchor` marca onde a espada anti-magia sai. Texturas `grimoire_<elemento>_<folhas>`.
 - **Manto e estandarte:** duas texturas desenhadas uma sobre a outra. `_cloth` é cinza claro, tingida com a cor do esquadrão; `_trim` tem borda, madeira, ouro e a placa do brasão. O osso `tail` do manto aparece a partir de Cavaleiro.
 - **Manto:** frente aberta (duas abas e gola com fecho), placa do brasão na aba esquerda. Esquadrão preto usa tinta escura no `_cloth`.
 - **Forma demônio:** camada sobre o jogador. Ossos `s1_` a `s4_` são os estágios (braço, meio corpo, forma completa, união); o renderer mostra todos até o estágio atual, e osso escondido esconde os filhos. Estágios 1 a 3 são só preto (anti-magia): 1 braço direito e tentáculos no peito; 2 chifre direito e asa pequena; 3 braço esquerdo com seus tentáculos e as duas asas inteiras (a pequena fica escondida dentro da direita), tronco e pernas ainda à mostra. Estágio 4 (união) cobre tronco e pernas e põe chifre esquerdo, headband preta com a marca vermelha, marcas vermelhas fixas (peito; risco com espinhos na frente e atrás dos braços e na canela), ombreiras com estrela vermelha em relevo, garras e cauda. O rosto do jogador fica à mostra. Asas (preto escuro, chama rasgada) e frente da headband são planos com a forma recortada na textura; asas, tentáculos, marcas e ponta da cauda usam transparência: renderizar com render type cutout.
@@ -62,4 +62,33 @@ animations: {
 | `float` | loop | Flutua ao lado do jogador (`root`), controller próprio |
 | `open` / `close` | hold / once | Abre e fecha as capas |
 | `flip` | once | Vira uma página com o livro aberto, ao lançar magia |
+| `draw` | once | Anti-magia: sai da esquerda do jogador para a frente da mão direita, deita, abre e folheia enquanto a espada sai em `sword_anchor` (pega por volta de 1,05 s), depois fecha e volta |
 | `choose` | once | Cerimônia: desce girando até o jogador |
+
+A entidade do grimório fica parada em `FLOAT_AT` (`grimoire.js`): à esquerda do jogador, longe da mão da espada, virada para onde ele olha. O `draw` leva o livro dali até a mão pelo osso `book` (posição), sem mexer na entidade; o `float` continua no `root`. A pose do jogador esticando o braço e puxando a espada vai no playerAnimator, sincronizada com o `draw`.
+
+### Mago da Ordem e Capitão renegado
+Mesmas animações (`humanoid` no `order_mage.js`); morte e dano ficam com o renderer vanilla (tomba e pinta de vermelho).
+
+| Animação | Loop | Uso |
+|---|---|---|
+| `idle` | loop | Parado: respiração, braços e ponta do capuz balançando |
+| `walk` | loop | Pernas e braços alternados, saia abre na frente e atrás |
+| `cast` | once | Braço direito aponta para o alvo e empurra; grimório em `grimoire_anchor` |
+| `intro` | once | Só o Capitão: abre os braços no topo da torre |
+
+O Capitão também balança a capa (`cape`) em todas.
+
+### Bola de fogo
+| Animação | Loop | Uso |
+|---|---|---|
+| `spin` | loop | Núcleo pulsa, duas cascas giram em sentidos opostos, 6 línguas tremem cada uma no seu ritmo, rastro em corrente chicoteia, brasas orbitam |
+
+### Espadas (`sword_anim.js`)
+Golpes e especiais são poses do jogador (playerAnimator); a espada só entra e sai. O `root` gira em volta da base do pomo: o renderer põe essa base no `sword_anchor` do grimório durante `summon` e `sheath`, e a espada cresce para fora das páginas a partir dela. O `summon` começa 0,35 s depois do `draw` do grimório; no fim a espada passa para a mão. Em `summon` e `sheath` o osso `sword` gira 90° em y (-90° na katana, que tem um fio só): a lâmina sai de perfil para o jogador, com o fio para a frente.
+
+| Animação | Loop | Uso |
+|---|---|---|
+| `summon` | hold | Sai das páginas crescendo e sobe um pouco para ser pega |
+| `sheath` | once | Desce e afunda de volta nas páginas |
+| `ride` | loop | Só a katana: voo na espada, balançando sob o jogador |
