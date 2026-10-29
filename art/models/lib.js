@@ -124,4 +124,27 @@ const mirrorGroup = (g, from = 'left', to = 'right') => ({
   children: (g.children || []).map(ch => mirrorGroup(ch, from, to))
 });
 
-module.exports = { FACES, rng, shade, px, noiseFill, build, render, applyTexture, writePng, mirrorCube, mirrorGroup };
+// Adds the model's animations to the project, named animation.<model>.<name>.
+// anims: {name: {loop: 'loop' | 'hold' | 'once', length, bones: {bone: {rotation | position | scale: keys}}}}
+// keys: [[time, [x, y, z], interpolation?]], or one [x, y, z] for a constant or Molang value (e.g. a sin loop).
+// Rotations are in Blockbench's convention; the export flips them for GeckoLib.
+function animate(model, anims) {
+  Undo.initEdit({ animations: [] });
+  const names = Object.entries(anims).map(([name, a]) => {
+    const anim = new Animation({ name: `animation.${model}.${name}`, loop: a.loop || 'once', length: a.length }).add(false);
+    Object.entries(a.bones).forEach(([bone, channels]) => {
+      const group = Group.all.find(g => g.name === bone);
+      if (!group) throw new Error(`animation ${name}: no bone ${bone} in ${model}`);
+      const animator = anim.getBoneAnimator(group);
+      Object.entries(channels).forEach(([channel, keys]) => {
+        (Array.isArray(keys[0]) ? keys : [[0, keys]]).forEach(([time, [x, y, z], interpolation]) =>
+          animator.addKeyframe({ channel, time, data_points: [{ x, y, z }], interpolation: interpolation || 'linear' }));
+      });
+    });
+    return anim.name;
+  });
+  Undo.finishEdit('Add animations');
+  return names;
+}
+
+module.exports = { FACES, rng, shade, px, noiseFill, build, render, applyTexture, writePng, mirrorCube, mirrorGroup, animate };

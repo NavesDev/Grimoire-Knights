@@ -11,13 +11,15 @@ Modelos 3D (GeckoLib) gerados por script dentro do Blockbench. O script é a fon
 | `art/blockbench/<modelo>.bbmodel` | Gerado; versionado para abrir e ver no Blockbench |
 | `assets/grimoireknights/geo/<funcionalidade>/` | Gerado; geometria usada pelo jogo |
 | `assets/grimoireknights/textures/{entity,block}/<funcionalidade>/` | Gerado; texturas e variantes |
+| `assets/grimoireknights/animations/<funcionalidade>/` | Gerado; animações usadas pelo jogo |
 
 ## Regras
 - Mudança de modelo vai no `.js`. Editar `.geo.json`, `.png` ou `.bbmodel` à mão se perde na próxima geração.
 - Variante nova (elemento, patente) é uma paleta nova no `.js` do modelo.
 - Modelo novo: criar `art/models/<modelo>.js` e incluir em `MODELS` no `run.js`.
 - Todos os modelos usam 2 pixels de textura por unidade (`DENSITY` no `run.js`); um cubo pode multiplicar isso com `res` quando a forma é recortada na textura (asas, headband e marca do peito da forma demônio).
-- A geração é determinística: rodar de novo sem mudar o script dá os mesmos arquivos.
+- Animação nova ou ajuste de animação também vai no `.js` (campo `animations`); animação feita à mão no Blockbench se perde na próxima geração.
+- A geração é determinística para geo, texturas e animações; o `.bbmodel` muda só nos UUIDs.
 - Um agente por vez no Blockbench: a geração abre e fecha projetos no app.
 
 ## Como gerar
@@ -37,5 +39,27 @@ O Blockbench não carrega arquivos com `require`; o trecho acima lê cada `.js` 
 - **Capitão renegado:** mesmo esqueleto do mago; o tamanho maior vem da escala no renderer.
 - **Âncoras:** `grimoire_anchor` (magos) e `book_anchor` (altar) marcam onde o grimório flutua.
 
-## Ponto em aberto
-Animações ainda não existem. Como `run.js` reescreve o `.bbmodel`, a geração precisa preservar as animações antes de elas serem criadas no Blockbench.
+## Animações
+Campo `animations` no `.js` do modelo; `K.animate` (`lib.js`) cria no projeto e o `run.js` grava o `.animation.json`.
+
+```js
+animations: {
+  float: { loop: 'loop', length: 3, bones: { root: { position: [0, 'math.sin(query.anim_time * 120) * 0.6', 0] } } },
+  open: { loop: 'hold', length: 0.5, bones: { front_cover: { rotation: [[0, [0, 0, 0]], [0.5, [0, -75, 0], 'catmullrom']] } } }
+}
+```
+
+- Nome no jogo: `animation.<modelo>.<nome>` (ex.: `animation.grimoire.open`).
+- `loop`: `loop`, `hold` (para no último quadro) ou `once`.
+- Canal: lista de `[tempo, [x, y, z], interpolação]` (padrão `linear`), ou um `[x, y, z]` só, constante ou Molang. Loop contínuo fica melhor em Molang com `query.anim_time`.
+- Rotação na convenção do Blockbench; a exportação inverte para o GeckoLib.
+- Evitar dois controllers mexendo no mesmo osso ao mesmo tempo: o balanço fica no `root` e o resto nos ossos de baixo.
+- Conferir no Blockbench: modo Animate, escolher a animação e mover a linha do tempo.
+
+### Grimório
+| Animação | Loop | Uso |
+|---|---|---|
+| `float` | loop | Flutua ao lado do jogador (`root`), controller próprio |
+| `open` / `close` | hold / once | Abre e fecha as capas |
+| `flip` | once | Vira uma página com o livro aberto, ao lançar magia |
+| `choose` | once | Cerimônia: desce girando até o jogador |

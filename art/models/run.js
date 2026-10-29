@@ -1,5 +1,5 @@
 // Generates models inside Blockbench: for each model, opens a GeckoLib project, builds it,
-// writes the textures and geo to assets/ and the .bbmodel to art/blockbench/.
+// writes the textures, geo and animations to assets/ and the .bbmodel to art/blockbench/.
 // Usage: see docs/modelos.md.
 const MODELS = [
   'grimoire', 'fireball', 'order_mage', 'renegade_captain', 'greatsword', 'katana', 'reverse_blade', 'broom',
@@ -35,12 +35,20 @@ function generate(id) {
   const geo = path.join(ASSETS, 'geo', def.group, def.name + '.geo.json');
   fs.mkdirSync(path.dirname(geo), { recursive: true });
   fs.writeFileSync(geo, Codecs.bedrock.compile());
+  written.push(path.relative(ROOT, geo));
+  if (def.animations) {
+    const names = K.animate(def.name, def.animations);
+    const file = path.join(ASSETS, 'animations', def.group, def.name + '.animation.json');
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, JSON.stringify(Animator.buildFile(null, names), null, '\t') + '\n');
+    written.push(path.relative(ROOT, file));
+  }
   const bb = path.join(ROOT, 'art/blockbench', def.name + '.bbmodel');
   fs.mkdirSync(path.dirname(bb), { recursive: true });
   fs.writeFileSync(bb, Codecs.project.compile({ compressed: false }));
   Project.save_path = bb;
   Project.saved = true;
-  written.push(path.relative(ROOT, geo), path.relative(ROOT, bb));
+  written.push(path.relative(ROOT, bb));
   return written;
 }
 
