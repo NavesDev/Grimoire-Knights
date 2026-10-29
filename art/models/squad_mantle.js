@@ -4,7 +4,10 @@
 const K = load('./lib.js');
 
 const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'body', origin: [0, 24, 0], children: [{ name: 'mantle', origin: [0, 24, 0], cubes: [
-  { name: 'front', from: [-8.5, 17, -3], to: [8.5, 24.5, -2.25], origin: [0, 24.5, -2.6], rotation: [10, 0, 0], paint: { north: 'front', all: 'cloth' } },
+  // Open front: two flaps over the shoulders and a collar with the clasp, chest left uncovered.
+  { name: 'front_left', from: [4.25, 17.5, -3], to: [8.5, 24.5, -2.25], origin: [6, 24.5, -2.6], rotation: [10, 0, 0], paint: { north: 'front', all: 'cloth' } },
+  { name: 'front_right', from: [-8.5, 17.5, -3], to: [-4.25, 24.5, -2.25], origin: [-6, 24.5, -2.6], rotation: [10, 0, 0], paint: { north: 'flap', all: 'cloth' } },
+  { name: 'collar', from: [-4.25, 23.25, -3], to: [4.25, 24.5, -2.25], origin: [0, 24.5, -2.6], rotation: [10, 0, 0], paint: { north: 'collar', all: 'cloth' } },
   { name: 'back', from: [-8.5, 15, 2.25], to: [8.5, 24.5, 3], origin: [0, 24.5, 2.6], rotation: [-8, 0, 0], paint: { south: 'back', all: 'cloth' } },
   { name: 'side_left', from: [8, 17, -3], to: [8.75, 24.5, 3], origin: [8.4, 24.5, 0], rotation: [0, 0, -10], paint: { east: 'side', all: 'cloth' } },
   { name: 'side_right', from: [-8.75, 17, -3], to: [-8, 24.5, 3], origin: [-8.4, 24.5, 0], rotation: [0, 0, 10], paint: { west: 'side', all: 'cloth' } },
@@ -23,16 +26,17 @@ const painter = (layer, P) => (ctx, r, m) => {
   const cloth = layer !== 'trim', trim = layer !== 'cloth';
   const isTrim = (i, j) => {
     if (r.face === 'down' || m === 'gold') return true;
-    if (['front', 'back', 'side', 'tail'].includes(m)) return j >= h - 2 || (m === 'front' && (i < 1 || i >= w - 1));
+    if (['front', 'flap', 'back', 'side', 'tail'].includes(m)) return j >= h - 2 || ((m === 'front' || m === 'flap') && (i < 1 || i >= w - 1));
+    if (m === 'collar') return j >= h - 1;
     if (m === 'hood') return j === 0;
     if (m === 'hood_top') return j === h - 1;
     return false;
   };
-  // Crest plate on the wearer's left chest; the crest symbol is drawn at runtime.
+  // Crest plate on the wearer's left flap; the crest symbol is drawn at runtime.
   const crest = (i, j) => {
     if (m !== 'front') return null;
-    const d = Math.hypot(i - 8.5, j - 6.5);
-    return d <= 4.6 && d >= 3.6 ? 'ring' : d < 3.6 ? 'field' : null;
+    const d = Math.hypot(i - (w - 1) / 2, j - 5.5);
+    return d <= 3.4 && d >= 2.5 ? 'ring' : d < 2.5 ? 'field' : null;
   };
   for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) {
     const e = crest(i, j);
@@ -47,14 +51,14 @@ const painter = (layer, P) => (ctx, r, m) => {
       continue;
     }
     if (cloth) {
-      const fold = (m === 'back' || m === 'tail' || m === 'front') && (i % 6 === 0) ? 0.9 : 1;
+      const fold = (m === 'back' || m === 'tail') && (i % 6 === 0) ? 0.9 : 1;
       px(i, j, K.shade(P.cloth, fold * (1 + (rnd() - 0.5) * 0.08)));
     }
   }
 };
 
 const tintable = { cloth: '#d8d8d8', gold: '#d4ad4a', trim: '#d4ad4a', field: '#2a2a2a' };
-const preview = { cloth: '#26222a', gold: '#d4ad4a', trim: '#d4ad4a', field: '#1a1a1a' };
+const preview = { cloth: '#1c1a1e', gold: '#d4ad4a', trim: '#d4ad4a', field: '#0e0e0e' };
 
 module.exports = {
   name: 'squad_mantle', group: 'cosmetic', kind: 'entity', spec,
