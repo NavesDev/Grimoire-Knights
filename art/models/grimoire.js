@@ -207,6 +207,15 @@ const animations = {
     [0.3, () => ({})],
     [0.45, k => ({ back_cover: OPEN * (1 - k), front_cover: -OPEN * (1 - k), flip_page: -OPEN * (1 - k), book: 90 * (1 - k), travel: 1 - k })]
   ]) },
+  // At the altar (synced with the altar's activate, 1.5 s): the code has flown the grimoire to the altar's
+  // book_anchor, turned to the reader; it lies flat, opens, riffles forward, back and forward, then closes.
+  altar: { loop: 'once', length: 1.5, bones: phases([
+    [0.3, k => ({ ...covers(k), book: 90 * k })],
+    [0.3, k => ({ flip_page: OPEN - 2 * OPEN * k })],
+    [0.3, k => ({ flip_page: -OPEN + 2 * OPEN * k })],
+    [0.3, k => ({ flip_page: OPEN - 2 * OPEN * k })],
+    [0.3, k => ({ back_cover: OPEN * (1 - k), front_cover: -OPEN * (1 - k), flip_page: -OPEN * (1 - k), book: 90 * (1 - k) })]
+  ]) },
   choose: { loop: 'once', length: 2, bones: { book: {
     position: [[0, [0, 12, 0], 'catmullrom'], [1.6, [0, -0.6, 0], 'catmullrom'], [2, [0, 0, 0], 'catmullrom']],
     rotation: [[0, [0, 720, 0], 'catmullrom'], [1.6, [0, 0, 0], 'catmullrom']]

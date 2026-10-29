@@ -63,9 +63,12 @@ animations: {
 | `open` / `close` | hold / once | Abre e fecha as capas |
 | `flip` | once | Vira uma página com o livro aberto, ao lançar magia |
 | `draw` | once | Anti-magia: sai da esquerda do jogador para a frente da mão direita, deita, abre e folheia enquanto a espada sai em `sword_anchor` (pega por volta de 1,05 s), depois fecha e volta |
+| `altar` | once | No Altar do Grimório, junto com o `activate` do altar (1,5 s): deita, abre, folheia para a frente, para trás e para a frente, fecha |
 | `choose` | once | Cerimônia: desce girando até o jogador |
 
 A entidade do grimório fica parada em `FLOAT_AT` (`grimoire.js`): à esquerda do jogador, longe da mão da espada, virada para onde ele olha. O `draw` leva o livro dali até a mão pelo osso `book` (posição), sem mexer na entidade; o `float` continua no `root`. A pose do jogador esticando o braço e puxando a espada vai no playerAnimator, sincronizada com o `draw`.
+
+No altar, o código leva o grimório do lado do jogador até o `book_anchor` do altar (voo de ida e volta fica no código, porque a distância varia), virado 90° para quem lê e inclinado como o atril (-15°), e toca `altar` junto com o `activate` do altar.
 
 ### Mago da Ordem e Capitão renegado
 Mesmas animações (`humanoid` no `order_mage.js`); morte e dano ficam com o renderer vanilla (tomba e pinta de vermelho).
