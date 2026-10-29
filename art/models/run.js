@@ -3,7 +3,8 @@
 // Usage: see docs/modelos.md.
 const MODELS = [
   'grimoire', 'fireball', 'order_mage', 'renegade_captain', 'greatsword', 'katana', 'reverse_blade', 'broom',
-  'squad_mantle', 'grimoire_altar', 'magic_torch', 'squad_banner', 'mage_tower_core', 'griffin', 'demon_form'
+  'squad_mantle', 'grimoire_altar', 'magic_torch', 'squad_banner', 'mage_tower_core', 'griffin', 'demon_form',
+  'player_sword'
 ];
 const DENSITY = 2; // texture pixels per model unit, same for every model
 
@@ -21,10 +22,12 @@ function generate(id) {
   Project.geckolib_modid = 'grimoireknights';
   Project.geckolib_model_type = def.kind === 'block' ? 'Block' : 'Entity';
 
+  // kind 'player': a player rig for playerAnimator poses; only the .bbmodel and the animations are written.
+  const rig = def.kind === 'player';
   const layout = K.build(def.spec, DENSITY);
   const texDir = path.join(ASSETS, 'textures', def.kind === 'block' ? 'block' : 'entity', def.group);
   const written = [];
-  Object.entries(def.textures).forEach(([name, painter]) => {
+  if (!rig) Object.entries(def.textures).forEach(([name, painter]) => {
     const file = path.join(texDir, name + '.png');
     K.writePng(K.render(layout, painter), file, fs, path);
     written.push(path.relative(ROOT, file));
@@ -32,13 +35,16 @@ function generate(id) {
   const [firstName, firstPainter] = Object.entries(def.textures)[0];
   K.applyTexture(K.render(layout, def.preview || firstPainter), def.preview ? def.name + '_preview' : firstName);
 
-  const geo = path.join(ASSETS, 'geo', def.group, def.name + '.geo.json');
-  fs.mkdirSync(path.dirname(geo), { recursive: true });
-  fs.writeFileSync(geo, Codecs.bedrock.compile());
-  written.push(path.relative(ROOT, geo));
+  if (!rig) {
+    const geo = path.join(ASSETS, 'geo', def.group, def.name + '.geo.json');
+    fs.mkdirSync(path.dirname(geo), { recursive: true });
+    fs.writeFileSync(geo, Codecs.bedrock.compile());
+    written.push(path.relative(ROOT, geo));
+  }
   if (def.animations) {
     const names = K.animate(def.name, def.animations);
-    const file = path.join(ASSETS, 'animations', def.group, def.name + '.animation.json');
+    const file = rig ? path.join(ASSETS, 'player_animation', def.name + '.json')
+      : path.join(ASSETS, 'animations', def.group, def.name + '.animation.json');
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify(Animator.buildFile(null, names), null, '\t') + '\n');
     written.push(path.relative(ROOT, file));
