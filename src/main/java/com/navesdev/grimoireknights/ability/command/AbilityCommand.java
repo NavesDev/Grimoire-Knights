@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.navesdev.grimoireknights.ability.AbilityService;
 import com.navesdev.grimoireknights.ability.attachment.CombatData;
 import com.navesdev.grimoireknights.core.Ids;
+import java.util.Locale;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -47,7 +48,7 @@ public final class AbilityCommand {
         AbilityService.ensureMana(player);
         CombatData data = AbilityService.data(player);
         context.getSource().sendSuccess(() -> Component.translatable(Ids.key("command", "mana.info"), player.getDisplayName(),
-                data.manaStat(), String.format("%.0f", AbilityService.maxMana(player)), String.format("%.1f", data.mana())), false);
+                data.manaStat(), String.format(Locale.ROOT, "%.0f", AbilityService.maxMana(player)), String.format(Locale.ROOT, "%.1f", data.mana())), false);
         return 1;
     }
 

@@ -63,13 +63,16 @@ public final class AbilityService {
         Optional<Ability> ability = id.flatMap(AbilityRegistries.ABILITIES::getOptional);
         CombatData data = data(player);
         long now = player.serverLevel().getGameTime();
-        CastRules.Result result = CastRules.check(element.isPresent(), ability.isPresent(), data.mana(),
+        CastRules.Result result = CastRules.check(player.isAlive() && !player.isSpectator(), element.isPresent(), ability.isPresent(), data.mana(),
                 id.map(i -> data.cooldownLeft(i, now)).orElse(0L), ability.map(Ability::manaCost).orElse(0.0));
         if (result != CastRules.Result.OK) {
             GrimoireKnights.LOGGER.debug("Cast denied for {} slot {}: {}", player.getGameProfile().getName(), slot, result);
             return result;
         }
-        if (!ability.get().cast(player)) return result;
+        if (!ability.get().cast(player)) {
+            GrimoireKnights.LOGGER.debug("Cast of {} failed for {}", id.get(), player.getGameProfile().getName());
+            return CastRules.Result.FAILED;
+        }
         player.setData(AbilityModule.COMBAT_DATA, data
                 .withMana(data.mana() - ability.get().manaCost())
                 .withCooldown(id.get(), now + ability.get().cooldownTicks()));

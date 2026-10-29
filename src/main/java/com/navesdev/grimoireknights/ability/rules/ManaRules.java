@@ -14,7 +14,7 @@ public final class ManaRules {
         return Math.min(max, current + amount);
     }
 
-    /** Changing the Mana stat changes both: current mana becomes the new maximum. */
+    /** Changing the Mana stat changes both (design: "subir o status aumenta as duas"): current mana becomes the new maximum. */
     public static double currentAfterStatChange(double newMax) {
         return newMax;
     }
