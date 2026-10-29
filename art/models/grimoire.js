@@ -156,6 +156,9 @@ const OPEN = 75;
 // there. draw moves the book by DRAW_AT, across to just in front of the right hand.
 const FLOAT_AT = [12, 14, -3];
 const DRAW_AT = [-18, -8, -7];
+// At the altar the code flies the grimoire to ALTAR_LIFT above the altar's book_anchor, so the closed, upright
+// book (ribbon included) clears the lectern; the altar animation lowers it while it lies down and lifts it before it stands up.
+const ALTAR_LIFT = 6;
 // flip_page turns around the middle of the spine, but the page blocks turn with their covers
 // (pivots at z -1.5 and 1.5). So at angle a the page also moves to lie on the block it rests on,
 // a hair above it: back block for a > 0, front block for a < 0.
@@ -168,9 +171,11 @@ const page = a => {
 // in step without clipping. flip_page also moves (page); book tilts on z; the rest turn on y.
 const STEPS = 6;
 // travel k (0..1) moves book from where it floats to DRAW_AT; it shares book with the tilt, on position.
+// lower a (0..1) drops book by ALTAR_LIFT, from the hover point down onto the lectern; also on position.
 const pose = (bone, a) => bone === 'flip_page' ? page(a) : bone === 'travel' ? { position: DRAW_AT.map(v => Math.round(v * a * 1000) / 1000) }
+  : bone === 'lower' ? { position: [0, Math.round(-ALTAR_LIFT * a * 1000) / 1000, 0] }
   : { rotation: bone === 'book' ? [0, 0, a] : [0, a, 0] };
-const channelBone = bone => bone === 'travel' ? 'book' : bone;
+const channelBone = bone => bone === 'travel' || bone === 'lower' ? 'book' : bone;
 const phases = list => {
   const bones = {};
   let t0 = 0;
@@ -207,14 +212,15 @@ const animations = {
     [0.3, () => ({})],
     [0.45, k => ({ back_cover: OPEN * (1 - k), front_cover: -OPEN * (1 - k), flip_page: -OPEN * (1 - k), book: 90 * (1 - k), travel: 1 - k })]
   ]) },
-  // At the altar (synced with the altar's activate, 1.5 s): the code has flown the grimoire to the altar's
-  // book_anchor, turned to the reader; it lies flat, opens, riffles forward, back and forward, then closes.
+  // At the altar (synced with the altar's activate, 1.5 s): the code has flown the grimoire to ALTAR_LIFT above
+  // the altar's book_anchor, turned to the reader and tilted like the lectern; it lies down onto the lectern
+  // while opening, riffles forward, back and forward, then rises, closes and stands up for the flight back.
   altar: { loop: 'once', length: 1.5, bones: phases([
-    [0.3, k => ({ ...covers(k), book: 90 * k })],
+    [0.3, k => ({ ...covers(k), book: 90 * k, lower: k })],
     [0.3, k => ({ flip_page: OPEN - 2 * OPEN * k })],
     [0.3, k => ({ flip_page: -OPEN + 2 * OPEN * k })],
     [0.3, k => ({ flip_page: OPEN - 2 * OPEN * k })],
-    [0.3, k => ({ back_cover: OPEN * (1 - k), front_cover: -OPEN * (1 - k), flip_page: -OPEN * (1 - k), book: 90 * (1 - k) })]
+    [0.3, k => ({ back_cover: OPEN * (1 - k), front_cover: -OPEN * (1 - k), flip_page: -OPEN * (1 - k), book: 90 * (1 - k), lower: 1 - k })]
   ]) },
   choose: { loop: 'once', length: 2, bones: { book: {
     position: [[0, [0, 12, 0], 'catmullrom'], [1.6, [0, -0.6, 0], 'catmullrom'], [2, [0, 0, 0], 'catmullrom']],
@@ -223,6 +229,6 @@ const animations = {
 };
 
 module.exports = {
-  name: 'grimoire', group: 'grimoire', kind: 'entity', spec, animations, FLOAT_AT,
+  name: 'grimoire', group: 'grimoire', kind: 'entity', spec, animations, FLOAT_AT, ALTAR_LIFT,
   textures: Object.fromEntries(Object.entries(palettes).map(([k, p]) => ['grimoire_' + k, painter(p)]))
 };
