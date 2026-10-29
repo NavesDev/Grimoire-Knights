@@ -70,4 +70,66 @@ const painter = (ctx, r, m) => {
   }
 };
 
-module.exports = { name: 'griffin', group: 'enemy', kind: 'entity', spec, textures: { griffin: painter } };
+// Signs: +x swings a leg's foot forward, pitches the neck back and rears the body (nose up); +z lifts the
+// left wing tip, and the right side mirrors y and z. Wings are modelled spread; idle and walk fold them back along the body.
+const sin = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed}${phase ? ' + ' + phase : ''}) * ${amp}`;
+const mirror = ([x, y, z]) => [x, typeof y === 'string' ? `-(${y})` : -y, typeof z === 'string' ? `-(${z})` : -z];
+const pair = (bone, rot) => ({ ['left_' + bone]: { rotation: rot }, ['right_' + bone]: { rotation: mirror(rot) } });
+const folded = { ...pair('wing', [0, -70, 18]), ...pair('wing_tip', [0, -20, 0]) };
+const tucked = { left_front_leg: { rotation: [-45, 0, 0] }, right_front_leg: { rotation: [-45, 0, 0] },
+  left_back_leg: { rotation: [-60, 0, 0] }, right_back_leg: { rotation: [-60, 0, 0] } };
+const tailSway = speed => ({ tail: { rotation: [sin(speed / 2, 4), sin(speed, 10), 0] }, tail_tuft: { rotation: [0, sin(speed, 14, 60), 0] } });
+// attack rears (+angle, nose up) then drops back while the neck pecks. It turns around the hips (HIP, the
+// back legs' pivot) instead of the body's centre: the body also moves so the hips stay put, and the back legs
+// turn the other way plus their own step keys (push back, then a step under the body), so they don't freeze.
+// keys: [[time, angle]], sampled.
+const BODY = [0, 17, 0], HIP = [0, 15, 8];
+const ease = keys => t => {
+  let i = 1;
+  while (i < keys.length - 1 && t > keys[i][0]) i++;
+  const [t0, a] = keys[i - 1], [t1, b] = keys[i], s = Math.min(1, Math.max(0, (t - t0) / (t1 - t0)));
+  return a + (b - a) * s * s * (3 - 2 * s);
+};
+const rear = (keys, steps) => {
+  const at = ease(keys), step = Object.fromEntries(Object.entries(steps).map(([leg, k]) => [leg, ease(k)]));
+  const r2 = n => Math.round(n * 100) / 100, body = { rotation: [], position: [] }, legs = {};
+  for (let t = 0; t <= keys[keys.length - 1][0] + 1e-6; t += 0.05) {
+    const tt = r2(t), a = at(tt) * Math.PI / 180, dy = HIP[1] - BODY[1], dz = HIP[2] - BODY[2];
+    body.rotation.push([tt, [r2(at(tt)), 0, 0]]);
+    body.position.push([tt, [0, r2(dy - (dy * Math.cos(a) - dz * Math.sin(a))), r2(dz - (dy * Math.sin(a) + dz * Math.cos(a)))]]);
+    Object.entries(step).forEach(([leg, f]) => (legs[leg] ||= []).push([tt, [r2(f(tt) - at(tt)), 0, 0]]));
+  }
+  return { body, ...Object.fromEntries(Object.entries(legs).map(([leg, rot]) => [leg, { rotation: rot }])) };
+};
+const animations = {
+  idle: { loop: 'loop', length: 4, bones: { ...folded, ...tailSway(90),
+    body: { position: [0, sin(90, 0.3), 0] },
+    neck: { rotation: [sin(90, 2), 0, 0] },
+    head: { rotation: [sin(45, 4), sin(90, 12, 30), sin(180, 3)] } } },
+  // Diagonal gait: left front with right back.
+  walk: { loop: 'loop', length: 1, bones: { ...folded, ...tailSway(360),
+    left_front_leg: { rotation: [sin(360, 28), 0, 0] }, right_back_leg: { rotation: [sin(360, 24), 0, 0] },
+    right_front_leg: { rotation: [sin(360, -28), 0, 0] }, left_back_leg: { rotation: [sin(360, -24), 0, 0] },
+    body: { position: [0, `math.abs(${sin(360, 0.6)})`, 0] },
+    neck: { rotation: [sin(720, 4), 0, 0] } } },
+  fly: { loop: 'loop', length: 0.8, bones: { ...tucked, ...tailSway(450),
+    ...pair('wing', [0, 0, sin(450, 40)]), ...pair('wing_tip', [0, 0, sin(450, 25, -60)]),
+    body: { rotation: [-8, 0, 0], position: [0, sin(450, -1.2), 0] },
+    neck: { rotation: [10, 0, 0] } } },
+  glide: { loop: 'loop', length: 2, bones: { ...tucked, ...tailSway(180),
+    ...pair('wing', [0, 0, `8 + ${sin(180, 3)}`]), ...pair('wing_tip', [0, 0, `10 + ${sin(180, 4, -60)}`]),
+    body: { rotation: [-4, 0, sin(180, 4)] },
+    neck: { rotation: [8, 0, 0] } } },
+  attack: { loop: 'once', length: 0.8, bones: { ...folded, ...rear([[0, 0], [0.25, 15], [0.45, 0], [0.8, 0]], {
+      left_back_leg: [[0, 0], [0.12, -10], [0.3, 10], [0.5, 3], [0.8, 0]],
+      right_back_leg: [[0, 0], [0.16, -6], [0.36, 14], [0.58, -3], [0.8, 0]] }),
+    tail: { rotation: [[0, [0, 0, 0]], [0.15, [10, -20, 0], 'catmullrom'], [0.3, [-5, 25, 0], 'catmullrom'], [0.5, [5, -15, 0], 'catmullrom'], [0.8, [0, 0, 0], 'catmullrom']] },
+    tail_tuft: { rotation: [[0, [0, 0, 0]], [0.2, [0, -25, 0], 'catmullrom'], [0.38, [0, 30, 0], 'catmullrom'], [0.58, [0, -15, 0], 'catmullrom'], [0.8, [0, 0, 0], 'catmullrom']] },
+    ...Object.fromEntries(['left', 'right'].map(s => [s + '_wing', { rotation: [[0, [0, -70, 18]], [0.25, [0, -35, 40], 'catmullrom'], [0.5, [0, -60, 22], 'catmullrom'], [0.8, [0, -70, 18], 'catmullrom']].map(([t, r, i]) => [t, s === 'left' ? r : mirror(r), i]) }])),
+    left_front_leg: { rotation: [[0, [0, 0, 0]], [0.25, [75, 0, 0], 'catmullrom'], [0.42, [5, 0, 0], 'catmullrom'], [0.8, [0, 0, 0], 'catmullrom']] },
+    right_front_leg: { rotation: [[0, [0, 0, 0]], [0.25, [35, 0, 0], 'catmullrom'], [0.45, [0, 0, 0], 'catmullrom'], [0.8, [0, 0, 0], 'catmullrom']] },
+    neck: { rotation: [[0, [0, 0, 0]], [0.25, [10, 0, 0], 'catmullrom'], [0.45, [-30, 0, 0], 'catmullrom'], [0.8, [0, 0, 0], 'catmullrom']] },
+    head: { rotation: [[0.25, [0, 0, 0]], [0.45, [-15, 0, 0], 'catmullrom'], [0.8, [0, 0, 0], 'catmullrom']] } } }
+};
+
+module.exports = { name: 'griffin', group: 'enemy', kind: 'entity', spec, animations, textures: { griffin: painter } };
