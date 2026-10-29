@@ -64,18 +64,20 @@ const chestLeft = { name: 'left_chest', from: [0, 12, -2.4], to: [4.4, 24.4, 2.4
 const legRight = { name: 'right_leg_plate', from: [-4.4, -0.25, -2.4], to: [0.1, 12.25, 2.4], mat: 'black' };
 const legLeft = { name: 'left_leg_plate', from: [-0.1, -0.25, -2.4], to: [4.4, 12.25, 2.4], mat: 'black' };
 
+// Stage bones pivot where the anti-magic starts spreading from (see the awaken animation): arms from the
+// hand, tendrils from their shoulder, the union from the shoulders down, legs from the hip.
 const spec = [{ name: 'root', origin: [0, 0, 0], children: [
   { name: 'body', origin: [0, 24, 0], children: [
-    { name: 's1_tendrils', origin: [0, 24, 0], cubes: [
+    { name: 's1_tendrils', origin: [-4.5, 24.5, 0], cubes: [
       { name: 'tendrils_front', from: [-4.5, 14, -2.5], to: [-0.5, 24.5, -2.5], paint: { north: 'tendril' }, hide: ['south'] },
       { name: 'tendrils_back', from: [-4.5, 14, 2.5], to: [-0.5, 24.5, 2.5], paint: { south: 'tendril' }, hide: ['north'] }] },
     wing(-1, 's2_wing_small', 0.45, 3.1),
-    { name: 's3_tendrils', origin: [0, 24, 0], cubes: [
+    { name: 's3_tendrils', origin: [4.5, 24.5, 0], cubes: [
       { name: 'tendrils_left_front', from: [0.5, 14, -2.5], to: [4.5, 24.5, -2.5], paint: { north: 'tendrilLeft' }, hide: ['south'] },
       { name: 'tendrils_left_back', from: [0.5, 14, 2.5], to: [4.5, 24.5, 2.5], paint: { south: 'tendrilLeft' }, hide: ['north'] }] },
     wing(1, 's3_wing_left'),
     wing(-1, 's3_wing_right'),
-    { name: 's4_union', origin: [0, 24, 0], cubes: [chestRight, chestLeft,
+    { name: 's4_union', origin: [0, 24.5, 0], cubes: [chestRight, chestLeft,
       { name: 'chest_mark', from: [-4.5, 12.5, -2.6], to: [4.5, 24.5, -2.5], paint: { north: 'emblem' }, hide: ['east', 'west', 'up', 'down', 'south'], res: 3 }],
       children: [tail] }] },
   { name: 'head', origin: [0, 24, 0], children: [
@@ -87,11 +89,11 @@ const spec = [{ name: 'root', origin: [0, 0, 0], children: [
       { name: 'headband', from: [-4.4, 28.25, -4.4], to: [4.4, 32.25, -4.4], paint: { north: 'headbandFront' }, hide: ['south'], res: 3 },
       { name: 'headband_ring', from: [-4.35, 28.85, -4.3], to: [4.35, 30.65, 4.35], mat: 'headband', hide: ['north', 'up', 'down'] },
       { name: 'face_marks', from: [-4, 24, -4.3], to: [4, 32, -4.3], paint: { north: 'face' }, hide: ['south'] }] }] },
-  { name: 'right_arm', origin: [-5, 22, 0], children: [{ name: 's1_arm_right', origin: [-5, 22, 0], cubes: [arm],
-    children: [{ name: 's4_arm_right_union', origin: [-5, 22, 0], cubes: armUnion }] }] },
-  { name: 'left_arm', origin: [5, 22, 0], children: [{ name: 's3_arm_left', origin: [5, 22, 0],
+  { name: 'right_arm', origin: [-5, 22, 0], children: [{ name: 's1_arm_right', origin: [-6, 11.75, 0], cubes: [arm],
+    children: [{ name: 's4_arm_right_union', origin: [-5, 25, 0], cubes: armUnion }] }] },
+  { name: 'left_arm', origin: [5, 22, 0], children: [{ name: 's3_arm_left', origin: [6, 11.75, 0],
     cubes: [toLeft(arm)],
-    children: [{ name: 's4_arm_left_union', origin: [5, 22, 0], cubes: armUnion.map(toLeft) }] }] },
+    children: [{ name: 's4_arm_left_union', origin: [5, 25, 0], cubes: armUnion.map(toLeft) }] }] },
   { name: 'right_leg', origin: [-2, 12, 0], children: [{ name: 's4_leg_right', origin: [-2, 12, 0],
     cubes: [legRight, marks('right_shin_marks', legRight.from, [legRight.to[0], 6, legRight.to[2]], ['north'])] }] },
   { name: 'left_leg', origin: [2, 12, 0], children: [{ name: 's4_leg_left', origin: [2, 12, 0],
@@ -237,4 +239,150 @@ const painter = (ctx, r, m) => {
   }
 };
 
-module.exports = { name: 'demon_form', group: 'awakening', kind: 'entity', spec, textures: { demon_form: painter } };
+// Body, head, arms and legs follow the player's pose in the renderer; these animate only the extras.
+// Wings rise from the back: turning a wing on y swings its tip back (-y for the left wing, +y for the right).
+// The player's own flight poses are in player_demon.js; each fly_<dir> here is the matching wing beat.
+const sin = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed}${phase ? ' + ' + phase : ''}) * ${amp}`;
+const WINGS = [['s2_wing_small', -1], ['s3_wing_left', 1], ['s3_wing_right', -1]];
+// base: degrees swept back; amp per side (left, right) so a turn can beat the outer wing harder.
+const wings = (speed, base, ampL, ampR = ampL) => Object.assign({}, ...WINGS.map(([w, s]) => {
+  const amp = s > 0 ? ampL : ampR;
+  return { [w]: { rotation: [0, `${-s * base} + ${sin(speed, -s * amp)}`, 0] },
+    [w + '_outer']: { rotation: [0, sin(speed, -s * amp * 0.8, -50), 0] } };
+}));
+const tailSway = (speed, lift, amp = 1) => ({
+  s4_tail: { rotation: [`${lift} + ${sin(speed, 5 * amp)}`, sin(speed, 14 * amp), 0] },
+  tail_mid: { rotation: [sin(speed, 8 * amp, -40), sin(speed, 18 * amp, -40), 0] },
+  tail_end: { rotation: [sin(speed, 10 * amp, -80), sin(speed, 26 * amp, -80), 0] } });
+
+// Anti-magic consuming the player: each stage bone grows from its pivot (see the spec), one after another.
+// [bone, start, end, axes]: axes 'y' stretches only along y (black spreading over a limb or the chest),
+// 'xy' spreads across, 'all' grows a part (horns, crown, tail segments). Times are within the stage.
+const STAGES = {
+  1: [['s1_arm_right', 0, 0.6, 'y'], ['s1_tendrils', 0.4, 1, 'xy']],
+  2: [['s2_horn_right', 0, 0.25, 'all'], ['horn_right_mid', 0.15, 0.4, 'all'], ['horn_right_end', 0.3, 0.55, 'all'],
+    ['horn_right_tip', 0.45, 0.65, 'all'], ['s2_wing_small', 0.2, 0.7, 'all']],
+  3: [['s3_arm_left', 0, 0.6, 'y'], ['s3_tendrils', 0.4, 1, 'xy'], ['s3_wing_left', 0.3, 0.8, 'all'], ['s3_wing_right', 0.3, 0.8, 'all']],
+  4: [['s4_arm_right_union', 0, 0.5, 'y'], ['s4_arm_left_union', 0, 0.5, 'y'], ['s4_union', 0.2, 0.8, 'y'],
+    ['s4_leg_right', 0.5, 1, 'y'], ['s4_leg_left', 0.5, 1, 'y'], ['s4_crown', 0.6, 0.9, 'all'],
+    ['s4_horn_left', 0.7, 0.95, 'all'], ['horn_left_mid', 0.85, 1.1, 'all'], ['horn_left_end', 1, 1.25, 'all'], ['horn_left_tip', 1.15, 1.35, 'all'],
+    ['s4_tail', 0.8, 1.05, 'all'], ['tail_mid', 0.95, 1.2, 'all'], ['tail_end', 1.1, 1.35, 'all']]
+};
+// Wings unfold as they grow: the outer part opens after the inner one.
+const UNFOLD = { s2_wing_small: -1, s3_wing_left: 1, s3_wing_right: -1 };
+const PACE = 1.25; // slows the whole transformation so the spreading reads
+const STAGE_START = { 1: 0, 2: 0.6 * PACE, 3: 1.1 * PACE, 4: 1.7 * PACE };
+const r2 = n => Math.round(n * 100) / 100;
+const dedupe = keys => keys.sort((p, q) => p[0] - q[0]).filter((k, i, all) => i === all.length - 1 || all[i + 1][0] !== k[0]);
+// Growth comes in surges, like something alive taking over: it pushes, falls back a little, pushes again,
+// overshoots and settles. Each piece gets its own small offsets (seeded by its name) so no two move alike,
+// and a limb thickens while the black spreads over it.
+const SURGES = [[0, 0], [0.18, 0.32], [0.3, 0.25], [0.52, 0.62], [0.6, 0.55], [0.82, 1.08], [0.92, 0.97], [1, 1]];
+const seed = name => [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const grow = (axes, g) => {
+  const thick = axes === 'y' ? 1 + 0.12 * Math.sin(Math.PI * Math.min(1, Math.max(0, g))) : 1;
+  return axes === 'y' ? [thick, g, thick] : axes === 'xy' ? [g, g, 1] : [g, g, g];
+};
+// Keys for the given stages, each shifted by t0of(stage); reverse plays them backwards (receding).
+const consume = (stages, t0of, reverse, length) => {
+  const bones = {}, at = t => reverse ? r2(length - t) : r2(t), tiny = 0.01;
+  stages.forEach(n => STAGES[n].forEach(([b, a, z, axes]) => {
+    if (SPREAD[b]) return; // skin pieces spread in the texture instead (see spreadTextures)
+    const t0 = t0of(n) + a * PACE, t1 = t0of(n) + z * PACE, rnd = K.rng(seed(b));
+    // Fully hidden until it starts (a y-only squash would still show a flat sheet).
+    const keys = [[0, [tiny, tiny, tiny]], [Math.max(0, t0 - 0.01), [tiny, tiny, tiny]]];
+    SURGES.forEach(([f, g], i) => {
+      const jf = i && i < SURGES.length - 1 ? (rnd() - 0.5) * 0.08 : 0, jg = i && i < SURGES.length - 1 ? (rnd() - 0.5) * 0.1 : 0;
+      keys.push([t0 + (t1 - t0) * (f + jf), grow(axes, Math.max(tiny, g + jg))]);
+    });
+    keys.push([length, grow(axes, 1)]);
+    bones[b] = { scale: dedupe(keys.map(([t, v]) => [at(t), v.map(r2), 'catmullrom'])) };
+    // Wings burst open past their rest pose and settle back.
+    if (UNFOLD[b]) {
+      const s = UNFOLD[b], fold = [[0, 70], [t1, 70], [t1 + 0.15, -18], [t1 + 0.3, 6], [t1 + 0.42, 0], [length, 0]];
+      bones[b + '_outer'] = { rotation: dedupe(fold.map(([t, a]) => [at(t), [0, r2(-s * a), 0], 'catmullrom'])) };
+    }
+  }));
+  return bones;
+};
+const stageEnd = n => Math.max(...STAGES[n].map(([, , z]) => z)) * PACE + 0.3;
+const ALL = [1, 2, 3, 4], AWAKEN = STAGE_START[4] + stageEnd(4);
+
+// Skin pieces (plates, tendrils, marks) don't scale: the black spreads over them in the texture. Every texel
+// gets the time it turns, from its distance to where the piece starts (hand, shoulders, hip) plus blotchy
+// noise and a few early specks of pigment; it shows blood red first, darkens, then takes its own colour.
+// SPREAD: bone -> [direction, start y, length]. The renderer swaps demon_form_spread/<anim>_<frame> at FPS.
+const SPREAD = {
+  s1_arm_right: ['up', 11.75, 12.5], s3_arm_left: ['up', 11.75, 12.5],
+  s1_tendrils: ['down', 24.5, 10.5], s3_tendrils: ['down', 24.5, 10.5],
+  s4_union: ['down', 24.5, 12.5], s4_arm_right_union: ['down', 25, 13.5], s4_arm_left_union: ['down', 25, 13.5],
+  s4_leg_right: ['down', 12.25, 12.5], s4_leg_left: ['down', 12.25, 12.5]
+};
+const FPS = 8;
+const boneOf = {};
+const index = (g, bone) => { (g.cubes || []).forEach(c => { boneOf[c.name] = bone; }); (g.children || []).forEach(ch => index(ch, ch.name)); };
+spec.forEach(g => index(g, g.name));
+// Smooth value noise over texture coordinates (blobs about CELL texels wide), and a per-texel hash.
+const CELL = 4, speck = hash;
+const noise = (x, y) => {
+  const gx = Math.floor(x / CELL), gy = Math.floor(y / CELL), fx = x / CELL - gx, fy = y / CELL - gy;
+  const s = v => v * v * (3 - 2 * v), a = speck(gx, gy), b = speck(gx + 1, gy), c = speck(gx, gy + 1), d = speck(gx + 1, gy + 1);
+  return a + (b - a) * s(fx) + (c - a) * s(fy) + (a - b - c + d) * s(fx) * s(fy);
+};
+const texelY = (r, j) => {
+  const { from, to } = r.spec;
+  return r.face === 'up' ? to[1] : r.face === 'down' ? from[1] : to[1] - (j + 0.5) / r.h * (to[1] - from[1]);
+};
+// window(bone) -> [t0, t1] when that bone spreads in the animation, or null if it is already whole.
+const spreadPainter = (T, window) => (ctx, r, m) => {
+  painter(ctx, r, m);
+  const bone = boneOf[r.spec.name], rule = SPREAD[bone], win = rule && window(bone);
+  if (!win) return;
+  const [dir, y0, len] = rule, [t0, t1] = win, img = ctx.getImageData(r.u, r.v, r.w, r.h), d = img.data;
+  for (let i = 0; i < r.w; i++) for (let j = 0; j < r.h; j++) {
+    const k = (j * r.w + i) * 4;
+    if (!d[k + 3]) continue;
+    const p = Math.min(1, Math.max(0, (dir === 'up' ? texelY(r, j) - y0 : y0 - texelY(r, j)) / len));
+    let f = 0.8 * p + 0.45 * (noise(r.u + i, r.v + j) - 0.5);
+    if (speck(r.u + i + 0.5, r.v + j + 0.5) < 0.05) f -= 0.35;
+    const age = T - (t0 + (t1 - t0) * Math.min(1, Math.max(0, f)));
+    if (age < 0) d[k + 3] = 0;
+    else if (age < 0.12) [d[k], d[k + 1], d[k + 2]] = [122, 13, 24];
+    else if (age < 0.25) [d[k], d[k + 1], d[k + 2]] = [42, 5, 8];
+  }
+  ctx.putImageData(img, r.u, r.v);
+};
+const r1 = n => Math.round(n * 1000) / 1000;
+const frames = (name, length, window) => Object.fromEntries([...Array(Math.ceil(length * FPS) + 1)].map((_, f) =>
+  [`demon_form_spread/${name}_${String(f).padStart(2, '0')}`, spreadPainter(r1(f / FPS), window)]));
+const windowIn = (stages, t0of) => bone => {
+  for (const n of stages) {
+    const e = STAGES[n].find(([b]) => b === bone);
+    if (e) return [t0of(n) + e[1] * PACE, t0of(n) + e[2] * PACE];
+  }
+  return null;
+};
+// revert plays the awaken frames backwards; transform_2 has no skin pieces.
+const spreadTextures = {
+  ...frames('awaken', r2(AWAKEN), windowIn(ALL, n => STAGE_START[n])),
+  ...Object.assign({}, ...[1, 3, 4].map(n => frames('transform_' + n, r2(stageEnd(n)), windowIn([n], () => 0))))
+};
+const animations = {
+  // idle only rotates, so it can run under awaken/revert/transform, which only scale.
+  idle: { loop: 'loop', length: 3, bones: { ...wings(120, 0, 5), ...tailSway(120, 0, 1.6) } },
+  // Awakening on (V): every stage the player has reaches over them in order; stages above theirs are hidden.
+  awaken: { loop: 'once', length: r2(AWAKEN), bones: consume(ALL, n => STAGE_START[n], false, r2(AWAKEN)) },
+  // Awakening over: the same, in reverse, the last stage receding first.
+  revert: { loop: 'once', length: r2(AWAKEN), bones: consume(ALL, n => STAGE_START[n], true, r2(AWAKEN)) },
+  // Reaching a new stage (after a demon quest): only that stage spreads.
+  ...Object.fromEntries(ALL.map(n => ['transform_' + n, { loop: 'once', length: r2(stageEnd(n)), bones: consume([n], () => 0, false, r2(stageEnd(n))) }])),
+  // Flight (from stage 2), matching the player's poses. dash is the fast low pass: wings swept back, quick flutter.
+  fly_hover: { loop: 'loop', length: 1, bones: { ...wings(720, 0, 30), ...tailSway(360, -10) } },
+  fly_forward: { loop: 'loop', length: 0.8, bones: { ...wings(450, 20, 25), ...tailSway(450, -30, 0.7) } },
+  fly_backward: { loop: 'loop', length: 1, bones: { ...wings(720, -10, 30), ...tailSway(360, 10) } },
+  fly_left: { loop: 'loop', length: 0.8, bones: { ...wings(450, 15, 15, 35), ...tailSway(450, -25, 0.7) } },
+  fly_right: { loop: 'loop', length: 0.8, bones: { ...wings(450, 15, 35, 15), ...tailSway(450, -25, 0.7) } },
+  fly_dash: { loop: 'loop', length: 0.4, bones: { ...wings(900, 60, 6), ...tailSway(900, -45, 0.3) } }
+};
+
+module.exports = { name: 'demon_form', group: 'awakening', kind: 'entity', spec, animations, STAGES, FPS, textures: { demon_form: painter, ...spreadTextures } };

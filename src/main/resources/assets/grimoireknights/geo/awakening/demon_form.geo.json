@@ -23,7 +23,7 @@
 				{
 					"name": "s1_tendrils",
 					"parent": "body",
-					"pivot": [0, 24, 0],
+					"pivot": [4.5, 24.5, 0],
 					"cubes": [
 						{
 							"origin": [0.5, 14, -2.5],
@@ -76,7 +76,7 @@
 				{
 					"name": "s3_tendrils",
 					"parent": "body",
-					"pivot": [0, 24, 0],
+					"pivot": [-4.5, 24.5, 0],
 					"cubes": [
 						{
 							"origin": [-4.5, 14, -2.5],
@@ -161,7 +161,7 @@
 				{
 					"name": "s4_union",
 					"parent": "body",
-					"pivot": [0, 24, 0],
+					"pivot": [0, 24.5, 0],
 					"cubes": [
 						{
 							"origin": [0, 12, -2.4],
@@ -467,7 +467,7 @@
 				{
 					"name": "s1_arm_right",
 					"parent": "right_arm",
-					"pivot": [5, 22, 0],
+					"pivot": [6, 11.75, 0],
 					"cubes": [
 						{
 							"origin": [3.75, 11.75, -2.25],
@@ -486,7 +486,7 @@
 				{
 					"name": "s4_arm_right_union",
 					"parent": "s1_arm_right",
-					"pivot": [5, 22, 0],
+					"pivot": [5, 25, 0],
 					"cubes": [
 						{
 							"origin": [3.69, 11.69, -2.31],
@@ -626,7 +626,7 @@
 				{
 					"name": "s3_arm_left",
 					"parent": "left_arm",
-					"pivot": [-5, 22, 0],
+					"pivot": [-6, 11.75, 0],
 					"cubes": [
 						{
 							"origin": [-8.25, 11.75, -2.25],
@@ -645,7 +645,7 @@
 				{
 					"name": "s4_arm_left_union",
 					"parent": "s3_arm_left",
-					"pivot": [-5, 22, 0],
+					"pivot": [-5, 25, 0],
 					"cubes": [
 						{
 							"origin": [-8.31, 11.69, -2.31],
