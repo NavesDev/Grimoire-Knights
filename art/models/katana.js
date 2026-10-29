@@ -13,13 +13,13 @@ const tip = { name: 'kissaki', origin: [0, 31, 0], rotation: [0, 0, -4], cubes: 
 
 const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'sword', origin: [0, 0, 0], cubes: [
   { name: 'tsuka', from: [-0.75, -8, -0.75], to: [0.75, 2, 0.75], mat: 'tsuka' },
-  { name: 'kashira', from: [-1, -9, -1], to: [1, -8, 1], mat: 'metal' },
-  { name: 'tsuba_a', from: [-2.25, 2, -1.5], to: [2.25, 2.75, 1.5], mat: 'metal' },
-  { name: 'tsuba_b', from: [-1.5, 2, -2.25], to: [1.5, 2.75, 2.25], mat: 'metal' },
-  { name: 'habaki', from: [-1, 2.75, -0.5], to: [1.25, 4, 0.5], mat: 'metal' }
+  { name: 'kashira', from: [-1, -9, -1], to: [1, -8, 1], mat: 'bronze' },
+  { name: 'tsuba_a', from: [-2.25, 2, -1.5], to: [2.25, 2.75, 1.5], mat: 'bronze' },
+  { name: 'tsuba_b', from: [-1.5, 2, -2.25], to: [1.5, 2.75, 2.25], mat: 'bronze' },
+  { name: 'habaki', from: [-1, 2.75, -0.5], to: [1.25, 4, 0.5], mat: 'bronze' }
 ], children: [segment(1, 4, 7, segment(2, 11, 7, segment(3, 18, 7, segment(4, 25, 6, tip))))] }] }];
 
-const P = { ...S.anti, blade: '#18181d', edge: '#3a3a43', grip: '#1a1616', gripDark: '#3d1717', chip: 0.25 };
+const P = { ...S.anti, blade: '#18181d', edge: '#3a3a43', bronze: '#463818', grip: '#1a120c', gripDark: '#3a2819', chip: 0.25 };
 
 // Single-edged blade: only the outer column (cutting edge) is light and chipped.
 const painter = (ctx, r, m) => {

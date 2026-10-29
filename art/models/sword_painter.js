@@ -37,7 +37,11 @@ const painter = P => (ctx, r, m) => {
       px(i, j, K.shade(P.bronze, grain * grime * rub));
     }
     else if (m === 'grip') px(i, j, ((j + i) % 4 < 2) ? P.grip : P.gripDark);
-    else if (m === 'tsuka') px(i, j, (Math.abs((j % 4) - 1.5) + Math.abs(i - (w - 1) / 2) * 0.8 < 1.6) ? P.gripDark : P.grip);
+    else if (m === 'tsuka') {
+      // Stacked diamonds (gripDark) between the dark wrap: widths 1, 3, 1, gap per 4 rows.
+      const half = [0, 1, 0, -1][j % 4];
+      px(i, j, Math.abs(i - (w - 1) / 2) <= half + 0.01 ? P.gripDark : P.grip);
+    }
     else px(i, j, '#ff00ff');
   }
 };
