@@ -40,6 +40,10 @@ public final class GrimoireService {
         return weights;
     }
 
+    public static Component elementName(ResourceLocation element) {
+        return Component.translatable("element." + element.getNamespace() + "." + element.getPath());
+    }
+
     public static Optional<ResourceLocation> drawElement(RandomSource random) {
         return ElementLottery.draw(lotteryWeights(), random::nextInt);
     }

@@ -43,5 +43,9 @@
   "command.grimoireknights.mana.info": "%s: status Mana %s, mana máxima %s, mana atual %s",
   "command.grimoireknights.cooldown.reset": "Recargas zeradas para %s",
   "command.grimoireknights.tower.placed": "Torre dos Grimórios colocada em %s %s %s",
-  "command.grimoireknights.tower.missing": "Template da Torre dos Grimórios não encontrado"
+  "command.grimoireknights.tower.missing": "Template da Torre dos Grimórios não encontrado",
+  "command.grimoireknights.grimoire.no_magic": "sem magia",
+  "command.grimoireknights.grimoire.none": "nenhum",
+  "command.grimoireknights.ceremony.failed": "Cerimônia falhou para %s; veja o log",
+  "message.grimoireknights.ceremony.failed": "A cerimônia não pôde terminar. Peça a um operador para ver o log do servidor."
 }

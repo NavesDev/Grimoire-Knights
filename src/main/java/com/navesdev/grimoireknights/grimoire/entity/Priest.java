@@ -1,6 +1,8 @@
 package com.navesdev.grimoireknights.grimoire.entity;
 
 import com.navesdev.grimoireknights.grimoire.CeremonyService;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
@@ -19,12 +21,33 @@ import net.minecraft.world.level.Level;
  * A cleric that does not trade; it cannot be hurt (only /kill), so the ceremony is never lost.
  */
 public class Priest extends Villager {
+    private static final String HOME = "GkHome";
+    /** Where the priest was placed (the tower or the church); the ceremony looks for the altar around it. */
+    private BlockPos home;
+
     public Priest(EntityType<? extends Priest> type, Level level) {
         super(type, level);
         setVillagerData(getVillagerData().setProfession(VillagerProfession.CLERIC).setLevel(5));
         // Experience keeps the profession without a job site.
         setVillagerXp(1);
         setPersistenceRequired();
+    }
+
+    public BlockPos home() {
+        if (home == null) home = blockPosition();
+        return home;
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putLong(HOME, home().asLong());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains(HOME)) home = BlockPos.of(tag.getLong(HOME));
     }
 
     @Override

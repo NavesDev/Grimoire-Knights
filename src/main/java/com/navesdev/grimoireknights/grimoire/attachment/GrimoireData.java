@@ -22,12 +22,12 @@ public record GrimoireData(Optional<ResourceLocation> element, int leaves, boole
             Codec.DOUBLE.optionalFieldOf("calling", 0.0).forGetter(GrimoireData::calling)
     ).apply(instance, GrimoireData::new));
 
+    /** Synced to everyone who sees the player; the calling bar is hidden, so clients always read 0. */
     public static final StreamCodec<RegistryFriendlyByteBuf, GrimoireData> STREAM_CODEC = StreamCodec.composite(
             ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs::optional), GrimoireData::element,
             ByteBufCodecs.VAR_INT, GrimoireData::leaves,
             ByteBufCodecs.BOOL, GrimoireData::ceremonyDone,
-            ByteBufCodecs.DOUBLE, GrimoireData::calling,
-            GrimoireData::new);
+            (element, leaves, done) -> new GrimoireData(element, leaves, done, 0));
 
     public boolean hasGrimoire() {
         return element.isPresent();

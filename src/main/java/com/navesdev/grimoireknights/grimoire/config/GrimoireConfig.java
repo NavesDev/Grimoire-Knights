@@ -15,7 +15,7 @@ public final class GrimoireConfig {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         builder.push("lottery");
         ELEMENTAL_WEIGHT = builder.comment("Lottery weight of each elemental grimoire; chance = weight / sum of weights.")
-                .defineInRange("elementalWeight", 100, 0, 100_000);
+                .defineInRange("elementalWeight", 100, 1, 100_000);
         NO_MAGIC_WEIGHT = builder.comment("Lottery weight of having no magic (the forgotten grimoire quest).")
                 .defineInRange("noMagicWeight", 20, 0, 100_000);
         builder.pop().push("calling");

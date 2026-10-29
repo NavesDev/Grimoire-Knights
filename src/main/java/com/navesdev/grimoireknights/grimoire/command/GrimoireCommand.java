@@ -11,17 +11,19 @@ import com.navesdev.grimoireknights.grimoire.CeremonyService;
 import com.navesdev.grimoireknights.grimoire.GrimoireRegistries;
 import com.navesdev.grimoireknights.grimoire.GrimoireService;
 import com.navesdev.grimoireknights.grimoire.attachment.GrimoireData;
+import com.navesdev.grimoireknights.grimoire.rules.ElementLottery;
 import com.navesdev.grimoireknights.grimoire.network.PlayerAnimationPayload;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Locale;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -72,7 +74,7 @@ public final class GrimoireCommand {
 
     private static int info(CommandContext<CommandSourceStack> context, ServerPlayer player) {
         GrimoireData data = GrimoireService.data(player);
-        Component element = data.element().map(GrimoireCommand::elementName).orElse(Component.literal("-"));
+        Component element = data.element().map(GrimoireService::elementName).orElse(Component.translatable(Ids.key("command", "grimoire.none")));
         context.getSource().sendSuccess(() -> Component.translatable(Ids.key("command", "grimoire.info"),
                 player.getDisplayName(), element, data.leaves(), data.ceremonyDone()), false);
         return 1;
@@ -87,7 +89,7 @@ public final class GrimoireCommand {
         }
         GrimoireService.give(player, element, leaves);
         context.getSource().sendSuccess(() -> Component.translatable(Ids.key("command", "grimoire.set"),
-                player.getDisplayName(), elementName(element), leaves), true);
+                player.getDisplayName(), GrimoireService.elementName(element), leaves), true);
         return 1;
     }
 
@@ -101,15 +103,16 @@ public final class GrimoireCommand {
     private static int lottery(CommandContext<CommandSourceStack> context) {
         int times = IntegerArgumentType.getInteger(context, "times");
         RandomSource random = context.getSource().getLevel().getRandom();
+        Map<Optional<ResourceLocation>, Integer> weights = GrimoireService.lotteryWeights();
         Map<Optional<ResourceLocation>, Integer> counts = new LinkedHashMap<>();
-        GrimoireService.lotteryWeights().keySet().forEach(key -> counts.put(key, 0));
+        weights.keySet().forEach(key -> counts.put(key, 0));
         for (int i = 0; i < times; i++) {
-            counts.merge(GrimoireService.drawElement(random), 1, Integer::sum);
+            counts.merge(ElementLottery.draw(weights, random::nextInt), 1, Integer::sum);
         }
-        String result = counts.entrySet().stream()
-                .map(entry -> entry.getKey().map(ResourceLocation::toString).orElse("no_magic")
-                        + " " + entry.getValue() + String.format(" (%.1f%%)", 100.0 * entry.getValue() / times))
-                .collect(Collectors.joining(", "));
+        MutableComponent result = Component.empty();
+        counts.forEach((key, count) -> result
+                .append(key.map(GrimoireService::elementName).orElse(Component.translatable(Ids.key("command", "grimoire.no_magic"))))
+                .append(String.format(Locale.ROOT, " %d (%.1f%%)  ", count, 100.0 * count / times)));
         context.getSource().sendSuccess(() -> Component.translatable(Ids.key("command", "grimoire.lottery"), times, result), false);
         return 1;
     }
@@ -125,7 +128,7 @@ public final class GrimoireCommand {
     private static int callingInfo(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = EntityArgument.getPlayer(context, "player");
         context.getSource().sendSuccess(() -> Component.translatable(Ids.key("command", "calling.info"), player.getDisplayName(),
-                String.format("%.1f", GrimoireService.data(player).calling()), String.format("%.0f", GrimoireService.callingMax())), false);
+                String.format(Locale.ROOT, "%.1f", GrimoireService.data(player).calling()), String.format(Locale.ROOT, "%.0f", GrimoireService.callingMax())), false);
         return 1;
     }
 
@@ -141,9 +144,5 @@ public final class GrimoireCommand {
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new PlayerAnimationPayload(player.getId(), animation));
         context.getSource().sendSuccess(() -> Component.translatable(Ids.key("command", "anim.played"), animation.toString(), player.getDisplayName()), false);
         return 1;
-    }
-
-    public static Component elementName(ResourceLocation element) {
-        return Component.translatable("element." + element.getNamespace() + "." + element.getPath());
     }
 }

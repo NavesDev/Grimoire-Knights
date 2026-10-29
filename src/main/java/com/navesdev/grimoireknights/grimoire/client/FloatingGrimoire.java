@@ -1,5 +1,6 @@
 package com.navesdev.grimoireknights.grimoire.client;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.animatable.GeoAnimatable;
@@ -113,6 +114,7 @@ public class FloatingGrimoire implements GeoAnimatable {
 
     @Override
     public double getTick(Object object) {
-        return tick;
+        // not an entity: GeckoLib takes this as the animation time, so it needs the partial tick to run smooth
+        return tick + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
     }
 }

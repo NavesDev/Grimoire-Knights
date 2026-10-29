@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
+import com.navesdev.grimoireknights.grimoire.GrimoireService;
 import com.navesdev.grimoireknights.grimoire.attachment.GrimoireData;
-import com.navesdev.grimoireknights.grimoire.command.GrimoireCommand;
 import com.navesdev.grimoireknights.grimoire.network.CeremonyPayload;
 import com.navesdev.grimoireknights.grimoire.network.GrimoireActivityPayload;
 import java.util.HashMap;
@@ -97,7 +97,7 @@ final class GrimoireClient {
 
     private static void reveal(FloatingGrimoire.Ceremony ceremony) {
         Minecraft minecraft = Minecraft.getInstance();
-        Component element = GrimoireCommand.elementName(ceremony.element());
+        Component element = GrimoireService.elementName(ceremony.element());
         minecraft.gui.setTitle(Component.translatable(Ids.key("title", "ceremony.chosen")));
         minecraft.gui.setSubtitle(Component.translatable(Ids.key("title", "ceremony.element"), element));
     }

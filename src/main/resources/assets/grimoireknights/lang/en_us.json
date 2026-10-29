@@ -43,5 +43,9 @@
   "command.grimoireknights.mana.info": "%s: Mana stat %s, max mana %s, current mana %s",
   "command.grimoireknights.cooldown.reset": "Cooldowns reset for %s",
   "command.grimoireknights.tower.placed": "Grimoire Tower placed at %s %s %s",
-  "command.grimoireknights.tower.missing": "Grimoire Tower template not found"
+  "command.grimoireknights.tower.missing": "Grimoire Tower template not found",
+  "command.grimoireknights.grimoire.no_magic": "no magic",
+  "command.grimoireknights.grimoire.none": "none",
+  "command.grimoireknights.ceremony.failed": "Ceremony failed for %s; see the log",
+  "message.grimoireknights.ceremony.failed": "The ceremony could not finish. Tell an operator to check the server log."
 }

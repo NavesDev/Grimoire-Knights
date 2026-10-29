@@ -30,7 +30,7 @@ public final class CeremonyService {
     /** The grimoire comes down from this high above the altar (the tower's shelves). */
     private static final int SHELF_HEIGHT = 8;
 
-    public enum Result { GRIMOIRE, NO_MAGIC, CHOOSING, ALREADY_DONE }
+    public enum Result { GRIMOIRE, NO_MAGIC, CHOOSING, ALREADY_DONE, FAILED }
 
     /** Free choice waiting for the player's pick: player to altar (null when held without an altar). */
     private static final Map<UUID, Optional<BlockPos>> PENDING_CHOICE = new HashMap<>();
@@ -44,7 +44,8 @@ public final class CeremonyService {
         } else if (!GrimoireService.callingFull(player)) {
             say(player, "priest.calling");
         } else {
-            Optional<BlockPos> altar = findAltar(player.serverLevel(), priest.blockPosition(), GrimoireConfig.PRIEST_ALTAR_RADIUS.get());
+            Optional<BlockPos> altar = findAltar(player.serverLevel(), priest.home(), GrimoireConfig.PRIEST_ALTAR_RADIUS.get())
+                    .or(() -> findAltar(player.serverLevel(), priest.blockPosition(), GrimoireConfig.PRIEST_ALTAR_RADIUS.get()));
             if (altar.isEmpty()) {
                 say(player, "priest.go_to_tower");
             } else {
@@ -87,12 +88,15 @@ public final class CeremonyService {
             altarEntity.activate();
         }
         if (element.isEmpty()) {
+            // Quest first: without it, a player with no magic would be stuck forever.
+            QuestService.GiveResult quest = QuestService.give(player, FORGOTTEN_GRIMOIRE_QUEST);
+            if (quest != QuestService.GiveResult.OK && quest != QuestService.GiveResult.ALREADY_ACTIVE) {
+                GrimoireKnights.LOGGER.error("Forgotten grimoire quest not given to {}: {}", player.getGameProfile().getName(), quest);
+                say(player, "ceremony.failed");
+                return Result.FAILED;
+            }
             player.setData(GrimoireModule.GRIMOIRE_DATA, GrimoireService.data(player).withoutMagic());
             say(player, "ceremony.no_magic");
-            QuestService.GiveResult quest = QuestService.give(player, FORGOTTEN_GRIMOIRE_QUEST);
-            if (quest != QuestService.GiveResult.OK) {
-                GrimoireKnights.LOGGER.error("Forgotten grimoire quest not given to {}: {}", player.getGameProfile().getName(), quest);
-            }
             return Result.NO_MAGIC;
         }
         GrimoireService.give(player, element.get(), GrimoireService.CEREMONY_LEAVES);

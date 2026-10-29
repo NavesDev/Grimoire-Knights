@@ -6,6 +6,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
@@ -13,10 +15,18 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 public final class GrimoireEvents {
     private GrimoireEvents() {}
 
+    /** Health before the hit, so an overkill counts only the health actually taken. */
+    private static final Map<LivingEntity, Float> HEALTH_BEFORE = new WeakHashMap<>();
+
+    public static void onDamagePre(LivingDamageEvent.Pre event) {
+        HEALTH_BEFORE.put(event.getEntity(), event.getEntity().getHealth());
+    }
+
     public static void onDamage(LivingDamageEvent.Post event) {
-        float damage = event.getNewDamage();
-        if (damage <= 0) return;
         LivingEntity victim = event.getEntity();
+        Float before = HEALTH_BEFORE.remove(victim);
+        float damage = Math.min(event.getNewDamage(), before != null ? before : victim.getHealth() + event.getNewDamage());
+        if (damage <= 0) return;
         Entity attacker = event.getSource().getEntity();
         // Only hostile mobs count: no fall, fire, drowning, PvP or passive mobs (no attacker, or not an Enemy).
         if (attacker instanceof ServerPlayer player && victim instanceof Enemy) {

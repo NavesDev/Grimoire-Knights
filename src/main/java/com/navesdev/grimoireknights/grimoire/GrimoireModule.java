@@ -90,6 +90,7 @@ public final class GrimoireModule {
             if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) event.accept(ALTAR_ITEM);
         });
 
+        NeoForge.EVENT_BUS.addListener(LivingDamageEvent.Pre.class, GrimoireEvents::onDamagePre);
         NeoForge.EVENT_BUS.addListener(LivingDamageEvent.Post.class, GrimoireEvents::onDamage);
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedInEvent.class, GrimoireEvents::onLogin);
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedOutEvent.class, event -> {
