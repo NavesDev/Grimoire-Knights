@@ -1,11 +1,66 @@
 // Floating grimoire. Cover variants per element and clover leaves (design: Folhas do trevo).
 const K = load('./lib.js');
 
-const LEAVES = {
-  3: ['...XX...', '..XXXX..', '..XXXX..', 'XX.XX.XX', 'XXXXXXXX', '.XX..XX.', '....X...', '.....X..'],
-  4: ['.XX..XX.', 'XXX..XXX', 'XXXXXXXX', '...XX...', 'XXXXXXXX', 'XXX..XXX', '.XX..XX.', '........'],
-  5: ['...XX...', 'X..XX..X', 'XX.XX.XX', '.XXXXXX.', '..XXXX..', '.XX..XX.', 'XX....XX', '........']
+// Clover drawn as a shape on the emblem face: heart-shaped leaves around the centre and a stem.
+// Leaf count sets the layout: 3 (top, then sides), 4 (diagonals), 5 (evenly from the top).
+const CLOVER = {
+  3: { start: -90, len: 7.4, r: 3.4 },
+  4: { start: -45, len: 7.6, r: 3 },
+  5: { start: -90, len: 8, r: 2.5 }
 };
+
+const leafAxes = n => [...Array(n)].map((_, k) => {
+  const a = (CLOVER[n].start + k * 360 / n) * Math.PI / 180;
+  return [Math.cos(a), Math.sin(a)];
+});
+
+const cloverMask = (n, cx, cy) => {
+  const { len, r } = CLOVER[n], off = r * 0.75;
+  const leaves = leafAxes(n).map(([dx, dy]) => {
+    const mid = [cx + dx * len, cy + dy * len], tip = [cx, cy], notch = [cx + dx * (len + r * 0.95), cy + dy * (len + r * 0.95)];
+    const lobes = [-1, 1].map(sd => [mid[0] - dy * off * sd, mid[1] + dx * off * sd]);
+    const base = [-1, 1].map(sd => [mid[0] - dy * (off + r * 0.7) * sd - dx * r * 0.5, mid[1] + dx * (off + r * 0.7) * sd - dy * r * 0.5]);
+    return { lobes, tip, base, notch };
+  });
+  const side = (a, b, p) => (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+  const inTri = (p, a, b, c) => { const s1 = side(a, b, p), s2 = side(b, c, p), s3 = side(c, a, p); return (s1 >= 0 && s2 >= 0 && s3 >= 0) || (s1 <= 0 && s2 <= 0 && s3 <= 0); };
+  // Returns the leaf index under (x, y), n for the hub where the leaves meet, or -1.
+  return (x, y) => {
+    const p = [x + 0.5, y + 0.5];
+    if ((p[0] - cx) ** 2 + (p[1] - cy) ** 2 <= 2.6) return n;
+    for (let k = 0; k < n; k++) {
+      const { lobes, tip, base, notch } = leaves[k];
+      if ((p[0] - notch[0]) ** 2 + (p[1] - notch[1]) ** 2 <= (r * 0.5) ** 2) continue;
+      if (lobes.some(([lx, ly]) => (p[0] - lx) ** 2 + (p[1] - ly) ** 2 <= r * r)) return k;
+      if (inTri(p, tip, base[0], base[1]) || inTri(p, base[0], base[1], lobes[0]) || inTri(p, base[1], lobes[0], lobes[1])) return k;
+    }
+    return -1;
+  };
+};
+
+const paintClover = (px, w, h, P) => {
+  const n = P.leaves, cx = w / 2, cy = h / 2 - 2, leafAt = cloverMask(n, cx, cy);
+  const { len } = CLOVER[n];
+  // Stem: curves from the centre down to the lower right, under the leaves.
+  for (let t = 0; t <= 1; t += 0.02) {
+    const x = Math.round(cx + 1 + t * 5 + Math.sin(t * Math.PI) * 1.5), y = Math.round(cy + 2 + t * 13);
+    [[0, 0], [1, 0]].forEach(([ox, oy]) => { if (leafAt(x + ox, y + oy) < 0) px(x + ox, y + oy, ox ? P.leafDark : P.leaf); });
+  }
+  const axes = leafAxes(n);
+  for (let x = 0; x < w; x++) for (let y = 0; y < h; y++) {
+    const k = leafAt(x, y);
+    if (k < 0) continue;
+    const edge = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([ox, oy]) => leafAt(x + ox, y + oy) !== k);
+    if (k === n) { px(x, y, P.core || P.leafDark); continue; }
+    const [dx, dy] = axes[k], rx = x + 0.5 - cx, ry = y + 0.5 - cy, along = rx * dx + ry * dy, across = -rx * dy + ry * dx;
+    let c = P.leaf;
+    if (edge) c = P.leafEdge;
+    else if (Math.abs(across) < 0.5 && along > 2 && along < len) c = P.leafDark;
+    else if (rx + ry < -(along * 0.6)) c = P.leafLight;
+    px(x, y, c);
+  }
+};
+
 
 const cover = (z1, z2, front) => {
   const zo = front ? [z2, z2 + 0.25] : [z1 - 0.25, z1];
@@ -28,7 +83,7 @@ const spec = [{ name: 'root', origin: [0, 0, 0], children: [{ name: 'book', orig
     { name: 'pages_back', from: [0, 3, -1], to: [7.5, 13, 0], paint: { south: 'page', all: 'page_edge' } },
     { name: 'ribbon', from: [3, 0.5, -0.5], to: [3.5, 3, -0.5], mat: 'ribbon' }] },
   { name: 'front_cover', origin: [0, 8, 1.5], cubes: [...cover(1, 2, true),
-    { name: 'emblem', from: [2, 5.5, 2], to: [6, 10.5, 2.5], paint: { south: 'emblem', all: 'metal' } },
+    { name: 'emblem', from: [2, 5.5, 2], to: [6, 10.5, 2.5], paint: { south: 'emblem', all: 'metal' }, hide: ['north'], res: 4 },
     { name: 'pages_front', from: [0, 3, 0], to: [7.5, 13, 1], paint: { north: 'page', all: 'page_edge' } }] },
   { name: 'flip_page', origin: [0, 8, 0], cubes: [{ name: 'page', from: [0, 3, 0], to: [7.5, 13, 0], mat: 'page' }] }
 ] }] }];
@@ -57,10 +112,11 @@ const painter = P => (ctx, r, m) => {
   else if (m === 'metal') { fill(P.frame, 0.2); px(0, 0, K.shade(P.frame, 1.35)); if (w > 1 && h > 1) px(w - 1, h - 1, K.shade(P.frame, 0.6)); }
   else if (m === 'emblem') {
     fill(P.emblemBg, 0.08);
-    for (let i = 1; i < w - 1; i++) { px(i, 0, P.frame); px(i, h - 1, P.frame); }
-    for (let j = 1; j < h - 1; j++) { px(0, j, P.frame); px(w - 1, j, P.frame); }
-    const pat = LEAVES[P.leaves], ox = Math.floor((w - 8) / 2), oy = Math.floor((h - 8) / 2) + (P.leaves === 3 ? 0 : 1);
-    pat.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === 'X') px(ox + i, oy + j, (j < 2 || i < 2) ? K.shade(P.leaf, 1.2) : P.leaf); }));
+    for (let i = 0; i < w; i++) { px(i, 0, P.frame); px(i, 1, P.frame); px(i, h - 2, P.frame); px(i, h - 1, P.frame); }
+    for (let j = 0; j < h; j++) { px(0, j, P.frame); px(1, j, P.frame); px(w - 2, j, P.frame); px(w - 1, j, P.frame); }
+    for (let i = 2; i < w - 2; i++) { px(i, 2, K.shade(P.emblemBg, 0.7)); px(i, h - 3, K.shade(P.emblemBg, 0.7)); }
+    for (let j = 2; j < h - 2; j++) { px(2, j, K.shade(P.emblemBg, 0.7)); px(w - 3, j, K.shade(P.emblemBg, 0.7)); }
+    paintClover(px, w, h, P);
   } else if (m === 'page') {
     K.noiseFill(ctx, r, P.page, 0.05, 7);
     const rnd = K.rng(11 + u + v);
@@ -78,14 +134,15 @@ const painter = P => (ctx, r, m) => {
   else fill('#ff00ff', 0);
 };
 
+const leaf = c => ({ leaf: c, leafEdge: K.shade(c, 0.55), leafDark: K.shade(c, 0.75), leafLight: K.shade(c, 1.2) });
 const pages = { page: '#e9dcb6', pageShade: '#c8b78c' };
 const goldPages = { page: '#efe3bd', pageShade: '#cdb98a' };
 const palettes = {
-  fire_3: { cover: '#7a1f1a', edge: '#3f0f0c', frame: '#a87a3c', emblemBg: '#561510', leaf: '#c99a4a', ...pages, ribbon: '#c23a22', leaves: 3 },
-  wind_3: { cover: '#2e6a4e', edge: '#163626', frame: '#a87a3c', emblemBg: '#1f4a36', leaf: '#c99a4a', ...pages, ribbon: '#4fae7a', leaves: 3 },
-  fire_4: { cover: '#7a1f1a', edge: '#3f0f0c', frame: '#e8c049', emblemBg: '#561510', leaf: '#ffe27a', ...goldPages, ribbon: '#e8c049', leaves: 4 },
-  wind_4: { cover: '#2e6a4e', edge: '#163626', frame: '#e8c049', emblemBg: '#1f4a36', leaf: '#ffe27a', ...goldPages, ribbon: '#e8c049', leaves: 4 },
-  anti_5: { cover: '#1d1b1b', edge: '#0b0a0a', frame: '#48403b', emblemBg: '#121010', leaf: '#5a2424', page: '#cfc3a0', pageShade: '#a8996f', ribbon: '#5a1414', leaves: 5, wear: 0.3, scratch: 14 }
+  fire_3: { cover: '#7a1f1a', edge: '#3f0f0c', frame: '#a87a3c', emblemBg: '#561510', ...leaf('#c99a4a'), ...pages, ribbon: '#c23a22', leaves: 3 },
+  wind_3: { cover: '#2e6a4e', edge: '#163626', frame: '#a87a3c', emblemBg: '#1f4a36', ...leaf('#c99a4a'), ...pages, ribbon: '#4fae7a', leaves: 3 },
+  fire_4: { cover: '#7a1f1a', edge: '#3f0f0c', frame: '#e8c049', emblemBg: '#561510', ...leaf('#ffe27a'), ...goldPages, ribbon: '#e8c049', leaves: 4 },
+  wind_4: { cover: '#2e6a4e', edge: '#163626', frame: '#e8c049', emblemBg: '#1f4a36', ...leaf('#ffe27a'), ...goldPages, ribbon: '#e8c049', leaves: 4 },
+  anti_5: { cover: '#1d1b1b', edge: '#0b0a0a', frame: '#48403b', emblemBg: '#3a1212', leaf: '#141111', leafEdge: '#a3261c', leafDark: '#4a1512', leafLight: '#2e2828', core: '#c0302a', page: '#cfc3a0', pageShade: '#a8996f', ribbon: '#5a1414', leaves: 5, wear: 0.3, scratch: 14 }
 };
 
 module.exports = {
