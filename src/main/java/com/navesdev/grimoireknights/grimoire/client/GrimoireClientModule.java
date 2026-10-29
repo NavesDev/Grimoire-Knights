@@ -4,6 +4,7 @@ import com.navesdev.grimoireknights.core.client.FixedGeoModel;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
 import com.navesdev.grimoireknights.grimoire.block.GrimoireAltarBlockEntity;
 import com.navesdev.grimoireknights.grimoire.network.CeremonyPayload;
+import com.navesdev.grimoireknights.grimoire.network.ElementChoicePayload;
 import com.navesdev.grimoireknights.grimoire.network.GrimoireActivityPayload;
 import com.navesdev.grimoireknights.grimoire.network.PlayerAnimationPayload;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -26,6 +27,7 @@ public final class GrimoireClientModule {
         GrimoireActivityPayload.CLIENT.set(GrimoireClient::onActivity);
         CeremonyPayload.CLIENT.set(GrimoireClient::onCeremony);
         PlayerAnimationPayload.CLIENT.set(PlayerPoses::onPlay);
+        ElementChoicePayload.CLIENT.set(ElementChoiceScreen::open);
 
         modBus.addListener(FMLClientSetupEvent.class, event -> event.enqueueWork(PlayerPoses::init));
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class, event -> {

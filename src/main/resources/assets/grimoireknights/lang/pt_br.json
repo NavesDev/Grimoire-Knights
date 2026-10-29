@@ -47,5 +47,7 @@
   "command.grimoireknights.grimoire.no_magic": "sem magia",
   "command.grimoireknights.grimoire.none": "nenhum",
   "command.grimoireknights.ceremony.failed": "Cerimônia falhou para %s; veja o log",
-  "message.grimoireknights.ceremony.failed": "A cerimônia não pôde terminar. Peça a um operador para ver o log do servidor."
+  "message.grimoireknights.ceremony.failed": "A cerimônia não pôde terminar. Peça a um operador para ver o log do servidor.",
+  "screen.grimoireknights.element_choice.title": "Escolha seu elemento",
+  "screen.grimoireknights.element_choice.hint": "Clique num elemento para receber o grimório"
 }

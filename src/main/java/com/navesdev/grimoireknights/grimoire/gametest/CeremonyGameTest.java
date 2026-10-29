@@ -2,17 +2,21 @@ package com.navesdev.grimoireknights.grimoire.gametest;
 
 import com.navesdev.grimoireknights.GrimoireKnights;
 import com.navesdev.grimoireknights.core.gametest.TestPlayers;
+import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.grimoire.CeremonyService;
+import com.navesdev.grimoireknights.grimoire.GrimoireGameRules;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
 import com.navesdev.grimoireknights.grimoire.GrimoireService;
 import com.navesdev.grimoireknights.grimoire.attachment.GrimoireData;
 import com.navesdev.grimoireknights.grimoire.entity.Priest;
 import com.navesdev.grimoireknights.quest.QuestService;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.animal.Pig;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -81,6 +85,24 @@ public class CeremonyGameTest {
         zombie.hurt(player.damageSources().playerAttack(player), 30);
         double calling = GrimoireService.data(player).calling();
         helper.assertTrue(Math.abs(calling - 1.0) < 1e-6, "overkill counts only the 2 health left = 1 point, got " + calling);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void freeChoiceGivesThePickedElementOnce(GameTestHelper helper) {
+        ServerPlayer player = TestPlayers.create(helper);
+        GameRules.BooleanValue rule = helper.getLevel().getGameRules().getRule(GrimoireGameRules.FREE_ELEMENT_CHOICE);
+        rule.set(true, helper.getLevel().getServer());
+        try {
+            helper.assertFalse(CeremonyService.choose(player, Ids.id("fire")), "no choice before the ceremony");
+            helper.assertTrue(CeremonyService.start(player, null) == CeremonyService.Result.CHOOSING, "free choice waits for the pick");
+            helper.assertFalse(CeremonyService.choose(player, Ids.id("missing")), "unknown element denied");
+            helper.assertTrue(CeremonyService.choose(player, Ids.id("fire")), "fire picked");
+            helper.assertTrue(GrimoireService.data(player).element().equals(Optional.of(Ids.id("fire"))), "fire grimoire given");
+            helper.assertFalse(CeremonyService.choose(player, Ids.id("fire")), "only once");
+        } finally {
+            rule.set(false, helper.getLevel().getServer());
+        }
         helper.succeed();
     }
 }
