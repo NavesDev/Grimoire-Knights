@@ -3,6 +3,7 @@
 Mod de Minecraft (NeoForge 1.21.1) de grimórios no estilo Black Clover, feito para jogar em dupla.
 
 - Design do mod: [Grimoire Knights — Documento de design do mod](https://claude.ai/artifact/TrcT8PC62YBtGZVcwWHpJx)
+- Arquitetura: [`docs/arquitetura.md`](docs/arquitetura.md)
 - Decisões técnicas: [`docs/adr/`](docs/adr/)
 - Ferramentas e ambiente: [`docs/ambiente.md`](docs/ambiente.md)
 
