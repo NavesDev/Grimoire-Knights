@@ -24,6 +24,8 @@ import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.minecraft.world.effect.MobEffects;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -94,6 +96,14 @@ public final class WorldEvents {
     public static void onPhantoms(PlayerSpawnPhantomsEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && inStarterVillage(player.serverLevel(), player.blockPosition())) {
             event.setResult(PlayerSpawnPhantomsEvent.Result.DENY);
+        }
+    }
+
+    /** No raids in the safe zone: Bad Omen turns into Raid Omen only outside the starter village. */
+    public static void onEffectApplicable(MobEffectEvent.Applicable event) {
+        if (event.getEffectInstance().is(MobEffects.RAID_OMEN) && event.getEntity() instanceof ServerPlayer player
+                && inStarterVillage(player.serverLevel(), player.blockPosition())) {
+            event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
         }
     }
 

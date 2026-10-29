@@ -18,6 +18,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -44,6 +45,7 @@ public final class WorldModule {
         NeoForge.EVENT_BUS.addListener(MobSpawnEvent.PositionCheck.class, WorldEvents::onSpawnCheck);
         NeoForge.EVENT_BUS.addListener(FinalizeSpawnEvent.class, WorldEvents::onFinalizeSpawn);
         NeoForge.EVENT_BUS.addListener(PlayerSpawnPhantomsEvent.class, WorldEvents::onPhantoms);
+        NeoForge.EVENT_BUS.addListener(MobEffectEvent.Applicable.class, WorldEvents::onEffectApplicable);
         NeoForge.EVENT_BUS.addListener(GrimoireCalledEvent.class, WorldEvents::onCalled);
         NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, event -> GkCommands.register(event.getDispatcher(), TowerCommand.branch()));
     }
