@@ -22,4 +22,4 @@ Gerar (da raiz do repo): `python3 -I art/structures/run.py`. A saída é determi
 - Estrutura `grimoireknights:starter_village` (jigsaw, `size` 6): começa na praça da torre; ruas e casas vêm dos pools vanilla de planície.
 - `structure_set` em anéis concêntricos com `distance` 0 e `count` 1: uma só, no chunk 0,0 (ou no bioma de vilarejo mais perto, até 112 blocos). `/locate structure grimoireknights:starter_village` acha.
 - Ao criar o mundo, o `world` põe o spawn ao lado da torre.
-- Zona segura: mobs hostis não nascem naturalmente dentro das peças do vilarejo.
+- Zona segura: mobs hostis não nascem dentro das peças do vilarejo (spawn natural, patrulhas e phantoms) e raides não começam ali: o Mau Presságio de quem entra é gasto sem virar raide.
