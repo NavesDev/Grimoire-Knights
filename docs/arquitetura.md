@@ -104,7 +104,7 @@ sequenceDiagram
   C->>S: CastAbilityPayload(slot)
   S->>S: valida grimório, patente, recarga, recurso
   S->>S: Ability.cast (entidades, dano, partículas)
-  S-->>C: CombatSyncPayload(mana, recargas)
+  S-->>C: setData(CombatData) → sync do attachment (mana, recargas)
   C->>C: atualiza HUD e animação
 ```
 
