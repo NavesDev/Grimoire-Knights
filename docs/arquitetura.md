@@ -73,7 +73,7 @@ Cada funcionalidade tem um `<Nome>Module` com `register(IEventBus)`: cria seus `
 - `Element` guarda as habilidades por id (`ResourceLocation`), não por objeto: `grimoire` fica abaixo de `ability` e não importa `Ability`.
 - Classes de habilidade em `ability/spell/` (magias) e, depois, `ability/sword/` (espadas).
 - Novo elemento = registrar entradas; sorteio e HUD não mudam.
-- HUD (só com grimório): barra de mana em pé à esquerda da hotbar, depois do slot da mão secundária, com o slot Z embaixo; o ícone do slot é `textures/gui/ability/<habilidade>.png` e escurece de baixo para cima durante a recarga. Ícones de elemento em `textures/gui/element/<elemento>.png`. Ícones gerados por `art/icons/run.py`.
+- HUD (só com grimório): barra de mana em pé à esquerda da hotbar, depois do slot da mão secundária, com o slot Z embaixo; o ícone do slot é `textures/gui/ability/<habilidade>.png` e escurece de baixo para cima durante a recarga. Ícones de elemento em `textures/gui/element/<elemento>.png`. Ícones gerados por `art/icons/run.py`. Escolha livre na cerimônia: tela com um cartão por elemento registrado (ícone grande e nome); clicar escolhe, fechar adia (fala de novo com o sacerdote).
 
 ## Missões
 Um motor só para toda tarefa: história (grimório esquecido, quests do demônio), quadro de missões, o que vier depois. Missão especial é missão comum com mais comportamento pendurado nos eventos dela.
