@@ -7,7 +7,7 @@
     "gui": {
       "rotation": [
         15,
-        160,
+        -20,
         0
       ],
       "translation": [
@@ -41,7 +41,7 @@
     "fixed": {
       "rotation": [
         0,
-        180,
+        0,
         0
       ],
       "translation": [
