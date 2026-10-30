@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * One Bedrock particle effect (Snowstorm format, made in Blockbench), parsed into what {@link VfxEmitter} plays.
- * Only the components the mod's effects use are supported; any other one fails the load (docs/adr/0004-particulas-bedrock.md).
+ * Only the components the mod's effects use are supported; any other one fails the load (docs/adr/0004-bedrock-particles.md).
  */
 record VfxEffect(
         ResourceLocation id, ResourceLocation texture, Material material, boolean lighting,

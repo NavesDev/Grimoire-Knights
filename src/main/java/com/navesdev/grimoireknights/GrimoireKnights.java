@@ -18,7 +18,7 @@ public class GrimoireKnights {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public GrimoireKnights(IEventBus modBus, ModContainer container) {
-        // Bottom-up, in dependency order (docs/arquitetura.md).
+        // Bottom-up, in dependency order (docs/architecture.md).
         CoreTabs.register(modBus);
         Vfx.register(modBus);
         QuestModule.register(modBus, container);

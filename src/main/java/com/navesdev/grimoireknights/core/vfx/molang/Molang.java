@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * The slice of Bedrock's Molang the mod's effects use (docs/adr/0004-particulas-bedrock.md): numbers, arithmetic,
+ * The slice of Bedrock's Molang the mod's effects use (docs/adr/0004-bedrock-particles.md): numbers, arithmetic,
  * comparison, {@code && || !}, {@code ?:}, common {@code math.*} (angles in degrees) and {@code variable.*} /
  * {@code query.*} read from a {@link Scope}. Anything else fails at parse, so a bad effect breaks on load.
  */

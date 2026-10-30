@@ -6,7 +6,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 /**
  * Payload registration. Each feature listens to {@link RegisterPayloadHandlersEvent} and takes its registrar here.
- * Player data syncs through the attachment's own sync (see docs/arquitetura.md); payloads are for intents and one-off events.
+ * Player data syncs through the attachment's own sync (see docs/architecture.md); payloads are for intents and one-off events.
  */
 public final class Network {
     public static final String VERSION = "1";

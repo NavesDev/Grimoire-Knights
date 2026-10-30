@@ -1,4 +1,4 @@
-// Shared helpers for model scripts. Runs inside Blockbench (see docs/modelos.md).
+// Shared helpers for model scripts. Runs inside Blockbench (see docs/models.md).
 const FACES = ['north', 'east', 'south', 'west', 'up', 'down'];
 
 const faceSize = (c, f) => {

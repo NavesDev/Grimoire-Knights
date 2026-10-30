@@ -10,7 +10,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 /**
- * Visual effects made in Blockbench (docs/adr/0004-particulas-bedrock.md). The server only asks: an effect is a
+ * Visual effects made in Blockbench (docs/adr/0004-bedrock-particles.md). The server only asks: an effect is a
  * sequence in {@code assets/<ns>/vfx/animations/vfx.animation.json}; the client plays it.
  */
 public final class Vfx {

@@ -1,4 +1,4 @@
-"""Generates the mod's structure templates (.nbt). The script is the source; see docs/estruturas.md.
+"""Generates the mod's structure templates (.nbt). The script is the source; see docs/structures.md.
 
 Run from the repo root: python3 -I art/structures/run.py
 """
