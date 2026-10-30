@@ -5,6 +5,7 @@ import com.navesdev.grimoireknights.core.command.GkCommands;
 import com.navesdev.grimoireknights.core.config.Configs;
 import com.navesdev.grimoireknights.core.network.Network;
 import com.navesdev.grimoireknights.core.registry.CoreRegistries;
+import com.navesdev.grimoireknights.core.registry.CoreTabs;
 import com.navesdev.grimoireknights.grimoire.attachment.GrimoireData;
 import com.navesdev.grimoireknights.grimoire.block.GrimoireAltarBlock;
 import com.navesdev.grimoireknights.grimoire.block.GrimoireAltarBlockEntity;
@@ -27,7 +28,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -43,6 +43,7 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -81,6 +82,9 @@ public final class GrimoireModule {
     public static final Supplier<EntityType<Priest>> PRIEST = ENTITIES.register("priest", () -> EntityType.Builder
             .<Priest>of(Priest::new, MobCategory.MISC).sized(0.6f, 1.95f).clientTrackingRange(10).build("priest"));
 
+    public static final DeferredItem<DeferredSpawnEggItem> PRIEST_SPAWN_EGG = ITEMS.register("priest_spawn_egg",
+            () -> new DeferredSpawnEggItem(PRIEST, 0x1B1A20, 0x5B2A7A, new Item.Properties()));
+
     private GrimoireModule() {}
 
     public static void register(IEventBus modBus, ModContainer container) {
@@ -98,7 +102,10 @@ public final class GrimoireModule {
         modBus.addListener(RegisterPayloadHandlersEvent.class, GrimoireModule::registerPayloads);
         modBus.addListener(EntityAttributeCreationEvent.class, event -> event.put(PRIEST.get(), Priest.createAttributes().build()));
         modBus.addListener(BuildCreativeModeTabContentsEvent.class, event -> {
-            if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) event.accept(ALTAR_ITEM);
+            if (event.getTabKey() == CoreTabs.MAIN) {
+                event.accept(ALTAR_ITEM);
+                event.accept(PRIEST_SPAWN_EGG);
+            }
         });
 
         NeoForge.EVENT_BUS.addListener(LivingDamageEvent.Pre.class, GrimoireEvents::onDamagePre);

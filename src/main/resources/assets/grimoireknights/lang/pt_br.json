@@ -53,5 +53,7 @@
   "advancement.grimoireknights.grimoire.chosen.title": "Um grimório escolheu você",
   "advancement.grimoireknights.grimoire.chosen_fire.description": "Grimório de fogo, 3 folhas",
   "advancement.grimoireknights.grimoire.chosen_wind.description": "Grimório de vento, 3 folhas",
-  "item.grimoireknights.grimoire": "Grimório"
+  "item.grimoireknights.grimoire": "Grimório",
+  "itemGroup.grimoireknights.main": "Grimoire Knights",
+  "item.grimoireknights.priest_spawn_egg": "Ovo gerador de Sacerdote"
 }

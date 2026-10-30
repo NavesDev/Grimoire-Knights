@@ -2,6 +2,7 @@ package com.navesdev.grimoireknights;
 
 import com.mojang.logging.LogUtils;
 import com.navesdev.grimoireknights.ability.AbilityModule;
+import com.navesdev.grimoireknights.core.registry.CoreTabs;
 import com.navesdev.grimoireknights.core.vfx.Vfx;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
 import com.navesdev.grimoireknights.quest.QuestModule;
@@ -18,6 +19,7 @@ public class GrimoireKnights {
 
     public GrimoireKnights(IEventBus modBus, ModContainer container) {
         // Bottom-up, in dependency order (docs/arquitetura.md).
+        CoreTabs.register(modBus);
         Vfx.register(modBus);
         QuestModule.register(modBus, container);
         GrimoireModule.register(modBus, container);

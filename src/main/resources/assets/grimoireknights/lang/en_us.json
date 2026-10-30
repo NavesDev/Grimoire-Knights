@@ -53,5 +53,7 @@
   "advancement.grimoireknights.grimoire.chosen.title": "A grimoire chose you",
   "advancement.grimoireknights.grimoire.chosen_fire.description": "Fire grimoire, 3 leaves",
   "advancement.grimoireknights.grimoire.chosen_wind.description": "Wind grimoire, 3 leaves",
-  "item.grimoireknights.grimoire": "Grimoire"
+  "item.grimoireknights.grimoire": "Grimoire",
+  "itemGroup.grimoireknights.main": "Grimoire Knights",
+  "item.grimoireknights.priest_spawn_egg": "Priest Spawn Egg"
 }
