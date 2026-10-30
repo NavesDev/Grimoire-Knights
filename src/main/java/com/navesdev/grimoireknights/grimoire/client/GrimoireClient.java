@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.core.client.vfx.VfxClient;
+import com.navesdev.grimoireknights.grimoire.CeremonyService;
 import com.navesdev.grimoireknights.grimoire.Element;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
 import com.navesdev.grimoireknights.grimoire.GrimoireRegistries;
@@ -29,7 +30,7 @@ import software.bernie.geckolib.renderer.GeoObjectRenderer;
 
 /**
  * Floating grimoires of the players around: state from the server's activity and ceremony payloads, drawn in the world.
- * Your own stays out of first person (it would cover the view), except while it flies to you at the ceremony.
+ * Your own stays out of first person (it would cover the view), except at the ceremony until it vanishes.
  */
 final class GrimoireClient {
     /** Where the grimoire floats, in model units from the player's feet: +x is the player's left, -z forward (grimoire.js FLOAT_AT). */
@@ -92,7 +93,7 @@ final class GrimoireClient {
             FloatingGrimoire.Ceremony ceremony = grimoire.ceremony();
             if (ceremony != null) {
                 grimoire.texture = FloatingGrimoireModel.texture(ceremony.element(), ceremony.leaves());
-                if (now - ceremony.start() >= FloatingGrimoire.CEREMONY_FLIGHT_TICKS + FloatingGrimoire.CEREMONY_CHOOSE_TICKS) {
+                if (now - ceremony.start() >= CeremonyService.REVEAL_TICKS) {
                     grimoire.endCeremony();
                 }
             } else {
@@ -102,7 +103,7 @@ final class GrimoireClient {
                     continue;
                 }
             }
-            if (grimoire.takeSparkle() && grimoire.texture != null && (!firstPerson(player) || grimoire.inFlight())) {
+            if (grimoire.takeSparkle() && grimoire.texture != null && (!firstPerson(player) || grimoire.fromCeremony())) {
                 sparkle(player, grimoire, ceremony != null ? ceremony.element() : data.element().orElse(null));
             }
         }
@@ -121,7 +122,7 @@ final class GrimoireClient {
         for (FloatingGrimoire grimoire : GRIMOIRES.values()) {
             if (!grimoire.visible() || grimoire.texture == null) continue;
             if (!(level.getEntity(grimoire.entityId) instanceof Player player) || player.isInvisible() || player.isSpectator()) continue;
-            if (firstPerson(player) && !grimoire.inFlight()) continue;
+            if (firstPerson(player) && !grimoire.fromCeremony()) continue;
             float yaw = Mth.rotLerp(partial, player.yBodyRotO, player.yBodyRot);
             Vec3 spot = floatSpot(player.getPosition(partial), yaw);
             Vec3 at = spot;
@@ -129,7 +130,8 @@ final class GrimoireClient {
             if (ceremony != null && grimoire.inFlight()) {
                 Vec3 from = Vec3.atCenterOf(ceremony.from());
                 Vec3 to = spot.add(0, CHOOSE_START, 0);
-                double t = Mth.clamp((grimoire.now() - ceremony.start() + partial) / FloatingGrimoire.CEREMONY_FLIGHT_TICKS, 0, 1);
+                double t = Mth.clamp((grimoire.now() - ceremony.start() - FloatingGrimoire.CEREMONY_SUMMON_TICKS + partial)
+                        / FloatingGrimoire.CEREMONY_FLIGHT_TICKS, 0, 1);
                 at = from.lerp(to, t * t * (3 - 2 * t));
             }
             pose.pushPose();

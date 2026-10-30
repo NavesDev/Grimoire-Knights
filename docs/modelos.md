@@ -64,7 +64,8 @@ animations: {
 | `flip` | once | Vira uma página com o livro aberto, ao lançar magia |
 | `draw` | once | Anti-magia: sai da esquerda do jogador para a frente da mão direita, deita, abre e folheia enquanto a espada sai em `sword_anchor` (pega por volta de 1,05 s), depois fecha e volta |
 | `altar` | once | No Altar do Grimório, junto com o `activate` do altar (1,5 s): desce até o atril enquanto deita e abre, folheia para a frente, para trás e para a frente, sobe e fecha |
-| `choose` | once | Cerimônia: desce girando até o jogador |
+| `summon` | hold | Cerimônia: cresce devagar nas estantes (1 s, código segura 20 ticks) antes de voar até o jogador (80 ticks) |
+| `choose` | once | Cerimônia: desce girando até o jogador; depois fecha e some com `vanish` (o HUD mostra o grimório dali em diante) |
 
 A entidade do grimório fica parada em `FLOAT_AT` (`grimoire.js`): à esquerda do jogador, longe da mão da espada, virada para onde ele olha. O `draw` leva o livro dali até a mão pelo osso `book` (posição), sem mexer na entidade; o `float` continua no `root`. A pose do jogador esticando o braço e puxando a espada vai no playerAnimator, sincronizada com o `draw`.
 

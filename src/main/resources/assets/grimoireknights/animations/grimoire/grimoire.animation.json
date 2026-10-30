@@ -2217,6 +2217,50 @@
 				}
 			}
 		},
+		"animation.grimoire.summon": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 1,
+			"bones": {
+				"book": {
+					"scale": {
+						"0.0": {
+							"vector": [
+								0,
+								0,
+								0
+							]
+						},
+						"0.7083": {
+							"pre": {
+								"vector": [
+									1.2,
+									1.2,
+									1.2
+								]
+							},
+							"post": {
+								"vector": [
+									1.2,
+									1.2,
+									1.2
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": {
+								"vector": [
+									1,
+									1,
+									1
+								]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				}
+			}
+		},
 		"animation.grimoire.choose": {
 			"animation_length": 2,
 			"bones": {

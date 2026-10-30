@@ -31,7 +31,7 @@ public final class CeremonyService {
     /** The grimoire comes down from this high above the altar (the tower's shelves). */
     private static final int SHELF_HEIGHT = 8;
     /** The grimoire reaches the player this long after the ceremony (flight and {@code choose} on the client); the achievement waits for it. */
-    public static final int REVEAL_TICKS = 80;
+    public static final int REVEAL_TICKS = 140;
 
     public enum Result { GRIMOIRE, NO_MAGIC, CHOOSING, ALREADY_DONE, FAILED }
 

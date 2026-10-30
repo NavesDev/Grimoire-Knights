@@ -21,8 +21,10 @@ public class FloatingGrimoire implements GeoAnimatable {
     static final int VISIBLE_TICKS = 200;
     static final int CLOSE_TICKS = 10;
     static final int VANISH_TICKS = 8;
-    static final int CEREMONY_FLIGHT_TICKS = 40;
-    static final int CEREMONY_CHOOSE_TICKS = CeremonyService.REVEAL_TICKS - CEREMONY_FLIGHT_TICKS;
+    /** Ceremony: grows at the shelves ({@code summon}), flies slowly to the player, then {@code choose} and vanishes. */
+    static final int CEREMONY_SUMMON_TICKS = 20;
+    static final int CEREMONY_FLIGHT_TICKS = 80;
+    static final int CEREMONY_CHOOSE_TICKS = CeremonyService.REVEAL_TICKS - CEREMONY_SUMMON_TICKS - CEREMONY_FLIGHT_TICKS;
 
     private static final RawAnimation FLOAT = RawAnimation.begin().thenLoop("animation.grimoire.float");
     private static final RawAnimation OPEN = RawAnimation.begin().thenPlayAndHold("animation.grimoire.open");
@@ -32,6 +34,7 @@ public class FloatingGrimoire implements GeoAnimatable {
     private static final RawAnimation CHOOSE = RawAnimation.begin().thenPlay("animation.grimoire.choose");
     private static final RawAnimation APPEAR = RawAnimation.begin().thenPlayAndHold("animation.grimoire.appear");
     private static final RawAnimation VANISH = RawAnimation.begin().thenPlayAndHold("animation.grimoire.vanish");
+    private static final RawAnimation SUMMON = RawAnimation.begin().thenPlayAndHold("animation.grimoire.summon");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     final int entityId;
@@ -43,6 +46,8 @@ public class FloatingGrimoire implements GeoAnimatable {
     private boolean sparkle;
     private boolean vanishSparkled;
     private Ceremony ceremony;
+    /** Came out of the shelves at the ceremony: grows with {@code summon}, not {@code appear}. */
+    private boolean summoned;
 
     /** Ceremony descent: from the shelves to the player, then {@code choose}. */
     record Ceremony(BlockPos from, long start, ResourceLocation element, int leaves) {}
@@ -83,7 +88,9 @@ public class FloatingGrimoire implements GeoAnimatable {
 
     void startCeremony(Ceremony ceremony) {
         this.ceremony = ceremony;
-        showFor(CEREMONY_FLIGHT_TICKS + CEREMONY_CHOOSE_TICKS + VISIBLE_TICKS);
+        summoned = true;
+        // reaches the player and vanishes, the HUD shows it from then on
+        showFor(CeremonyService.REVEAL_TICKS);
     }
 
     Ceremony ceremony() {
@@ -94,8 +101,14 @@ public class FloatingGrimoire implements GeoAnimatable {
         ceremony = null;
     }
 
+    /** At the shelves or on the way to the player. */
     boolean inFlight() {
-        return ceremony != null && tick - ceremony.start() < CEREMONY_FLIGHT_TICKS;
+        return ceremony != null && tick - ceremony.start() < CEREMONY_SUMMON_TICKS + CEREMONY_FLIGHT_TICKS;
+    }
+
+    /** Ceremony grimoire, drawn even in first person until it has vanished. */
+    boolean fromCeremony() {
+        return summoned && visible();
     }
 
     boolean open() {
@@ -118,7 +131,7 @@ public class FloatingGrimoire implements GeoAnimatable {
         controllers.add(new AnimationController<>(this, "book", 2, this::book));
         controllers.add(new AnimationController<>(this, "ceremony", 0,
                 state -> ceremony != null && !inFlight() ? state.setAndContinue(CHOOSE) : PlayState.STOP));
-        controllers.add(new AnimationController<>(this, "presence", 0, state -> state.setAndContinue(vanishing() ? VANISH : APPEAR)));
+        controllers.add(new AnimationController<>(this, "presence", 0, state -> state.setAndContinue(vanishing() ? VANISH : summoned ? SUMMON : APPEAR)));
     }
 
     private PlayState book(AnimationState<FloatingGrimoire> state) {
