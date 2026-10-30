@@ -68,7 +68,7 @@ public final class WorldEvents {
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
         BlockPos spawn = new BlockPos(x, y, z);
         event.getSettings().setSpawn(spawn, 0f);
-        // Spread players over the plaza only: the tower wall is 6 blocks away, out of this radius (vanilla 10 reaches its roof).
+        // Spread players over the plaza only: the tower's overhanging top room starts 6 blocks away, out of this radius.
         level.getGameRules().getRule(GameRules.RULE_SPAWN_RADIUS).set(SPAWN_RADIUS, level.getServer());
         // Cancelling skips vanilla's bonus chest, so place it here when the world asked for one.
         if (level.getServer().getWorldData().worldGenOptions().generateBonusChest()) {

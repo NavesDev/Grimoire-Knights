@@ -93,149 +93,125 @@ def parse_state(state):
 
 
 # --- Grimoire Tower -------------------------------------------------------------------------------------------
-TOWER_R = 5            # wall radius; footprint 11x11
-TOWER_WALL_TOP = 21    # last wall layer
-SHELF_TOP = 17         # tall shelves
-DOOR = (5, 10)         # door column (x, z), on the south wall
+SOURCE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'source')
+SHAFT_TOP = 44         # last layer of the stone shaft; the observation room floor sits on top
+SHELF_TOP = 40         # tall shelves lining the shaft
+SHELF_BANDS = 8        # every 8 layers a band of planks with a light
+GRIMOIRES = range(6, 39, 3)
 
 
-def dist(x, z, c=TOWER_R):
-    return math.hypot(x - c, z - c)
+def load(name):
+    """Template from a downloaded build (art/structures/source), states as strings."""
+    root = nbt.read(os.path.join(SOURCE, name + '.nbt'))
+    t = Template(*root['size'], fill=None)
+    palette = [p['Name'] + ('[' + ','.join(f'{k}={v}' for k, v in p['Properties'].items()) + ']'
+                            if p.get('Properties') else '') for p in root['palette']]
+    for b in root['blocks']:
+        t.set(*b['pos'], palette[b['state']], b.get('nbt'))
+    return t
+
+
+def is_air(state):
+    return state is None or state == 'minecraft:air'
+
+
+def shaft_inside(t):
+    """Floor cells inside the shaft's wall ring: flood from the middle on a layer, through air, stairs and the stair column."""
+    sx, _, sz = t.size
+    c = sx // 2
+    inside, todo = set(), [(c, c)]
+    while todo:
+        x, z = todo.pop()
+        state = t.blocks.get((x, 2, z))
+        column = state and 'log' in state and math.hypot(x - c, z - c) < 4
+        if (x, z) in inside or not (is_air(state) or column or 'slab' in state):
+            continue
+        inside.add((x, z))
+        todo += [(x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)]
+    return inside
 
 
 def grimoire_tower():
-    size = 2 * TOWER_R + 1
-    t = Template(size, TOWER_WALL_TOP + 8, size)
-    c = TOWER_R
-    for x in range(size):
-        for z in range(size):
-            d = dist(x, z)
-            if d > TOWER_R + 0.5:
-                # outside the round wall: leave the terrain as it is
-                for y in range(t.size[1]):
+    """Observation Tower by maik12490 (Bloxelizer), its shaft turned into the grimoire library."""
+    t = load('observation_tower')
+    sx, sy, sz = t.size
+    c = sx // 2
+    inside = shaft_inside(t)
+    shaft = {(x, z) for x in range(sx) for z in range(sz) if not is_air(t.blocks.get((x, 2, z)))} | inside
+    wall_next = {(x, z) for x, z in inside if any((x + dx, z + dz) not in inside for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))}
+    dz = max(z for x, z in inside if x == c) + 1  # south wall, facing the church
+    door = [(x, dz - 1) for x in (c - 1, c, c + 1)]  # gap in the shelves behind the door
+    for y in range(sy):
+        for x in range(sx):
+            for z in range(sz):
+                if (x, z) in inside and y <= SHAFT_TOP + 1:
+                    continue
+                # outside the shaft and the whole sky part keep the terrain, like the old tower
+                if is_air(t.blocks.get((x, y, z))) and ((x, z) not in shaft or y > SHAFT_TOP):
                     t.set(x, y, z, 'minecraft:structure_void')
-                continue
-            t.set(x, 0, z, 'minecraft:polished_andesite' if (x + z) % 2 else 'minecraft:stone_bricks')
-            if d > TOWER_R - 0.5:
-                for y in range(1, TOWER_WALL_TOP + 1):
-                    window = y % 6 == 3 and (x == c or z == c) and (x, z) != DOOR
-                    t.set(x, y, z, 'minecraft:glass_pane' if window else
-                          ('minecraft:mossy_stone_bricks' if (x * 7 + y * 3 + z) % 11 == 0 else 'minecraft:stone_bricks'))
-            elif d > TOWER_R - 1.5:
-                # tall shelves lining the wall, with a gap at the door
-                for y in range(1, SHELF_TOP + 1):
-                    if abs(x - DOOR[0]) <= 1 and z > c and y <= 3:
-                        continue
-                    t.set(x, y, z, 'minecraft:bookshelf')
-            # upper floor slab ring under the roof, open in the middle so the shelves show from below
-            if d <= TOWER_R - 0.5 and d > 2.5:
-                t.set(x, SHELF_TOP + 1, z, 'minecraft:dark_oak_slab[type=bottom,waterlogged=false]')
-    # door
-    dx, dz = DOOR
-    t.set(dx, 1, dz, 'minecraft:oak_door[facing=north,half=lower,hinge=left,open=false,powered=false]')
-    t.set(dx, 2, dz, 'minecraft:oak_door[facing=north,half=upper,hinge=left,open=false,powered=false]')
-    # roof: stepped cone
-    for layer in range(7):
-        r = TOWER_R + 0.5 - layer * 0.85
-        y = TOWER_WALL_TOP + 1 + layer
-        for x in range(size):
-            for z in range(size):
-                d = dist(x, z)
-                if r - 1.2 < d <= r:
-                    t.set(x, y, z, 'minecraft:deepslate_tiles')
-    t.set(c, TOWER_WALL_TOP + 7, c, 'minecraft:deepslate_tile_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]')
-    # Grimoire Altar in the middle, priest beside it
+    for x, z in inside:
+        t.set(x, 0, z, 'minecraft:polished_andesite' if (x + z) % 2 else 'minecraft:stone_bricks')
+        for y in range(1, SHAFT_TOP + 1):
+            behind = [(x + dx, y, z + dz) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)) if (x + dx, z + dz) not in inside]
+            window = any(t.blocks.get(p, '').startswith('minecraft:glass_pane') for p in behind)
+            shelf = (x, z) in wall_next and y <= SHELF_TOP and not window and not ((x, z) in door and y <= 3)
+            if shelf and y % SHELF_BANDS == 0:
+                t.set(x, y, z, 'minecraft:glowstone' if (x == c or z == c) else 'minecraft:dark_oak_planks')
+            else:
+                t.set(x, y, z, 'minecraft:bookshelf' if shelf else 'minecraft:air')
+        # close the stairwell into the observation room: the room is only seen from outside
+        if is_air(t.blocks.get((x, SHAFT_TOP + 1, z))) or 'log' in t.blocks[(x, SHAFT_TOP + 1, z)]:
+            t.set(x, SHAFT_TOP + 1, z, 'minecraft:dark_oak_planks')
+    # door in the middle of the south wall
+    t.set(c, 1, dz, 'minecraft:oak_door[facing=north,half=lower,hinge=left,open=false,powered=false]')
+    t.set(c, 2, dz, 'minecraft:oak_door[facing=north,half=upper,hinge=left,open=false,powered=false]')
+    # Grimoire Altar in the middle, priest beside it, grimoires circling above
     t.set(c, 1, c, 'grimoireknights:grimoire_altar[facing=south]')
     t.entity('grimoireknights:priest', c + 2, 1, c + 1)
-    # floating grimoires between the shelves
-    spots = [(2, 5, 3), (8, 7, 4), (3, 9, 7), (7, 11, 2), (2, 13, 5), (8, 14, 7), (4, 16, 2), (6, 6, 8)]
-    for x, y, z in spots:
-        t.set(x, y, z, 'grimoireknights:floating_grimoire')
-    # light
-    for x, z in [(2, 2), (8, 2), (2, 8), (8, 8)]:
+    for y in GRIMOIRES:
+        t.set(c, y, c, 'grimoireknights:floating_grimoire')
+    for x, z in [(c - 3, c - 3), (c + 3, c - 3), (c - 3, c + 3), (c + 3, c + 3)]:
         t.set(x, 1, z, 'minecraft:lantern[hanging=false,waterlogged=false]')
-    for x, z in [(c, 3), (c, 7), (3, c), (7, c)]:
-        t.set(x, TOWER_WALL_TOP, z, 'minecraft:glowstone')
     return t
 
 
 # --- Church -----------------------------------------------------------------------------------------------------
 def church():
-    sx, sy, sz = 9, 10, 14
+    """Church by teylo (Bloxelizer). The pews are beds, so it is also the optional respawn point."""
+    src = load('church')
+    sx, sy, sz = src.size
     t = Template(sx, sy, sz)
-    # porch row z=0: path and the entrance jigsaw (faces north, back to the plaza)
-    for x in range(sx):
-        t.set(x, 0, 0, 'minecraft:dirt_path')
-    t.jigsaw(4, 1, 0, 'north_up', 'grimoireknights:church', 'minecraft:empty', 'minecraft:empty', 'minecraft:air')
-    for x in range(sx):
-        for z in range(1, sz):
-            t.set(x, 0, z, 'minecraft:cobblestone' if x in (0, sx - 1) or z in (1, sz - 1) else 'minecraft:spruce_planks')
-            wall = x in (0, sx - 1) or z in (1, sz - 1)
-            for y in range(1, 6):
-                if wall:
-                    window = y in (2, 3) and (z in (4, 7, 10) and x in (0, sx - 1))
-                    t.set(x, y, z, 'minecraft:white_stained_glass_pane' if window else
-                          ('minecraft:cobblestone' if y == 1 else 'minecraft:white_terracotta'))
-    # roof
-    for layer in range(5):
-        y = 6 + layer
-        for z in range(1, sz):
-            for x in (layer, sx - 1 - layer):
-                if y < sy:
-                    facing = 'east' if x == layer else 'west'
-                    t.set(x, y, z, f'minecraft:spruce_stairs[facing={facing},half=bottom,shape=straight,waterlogged=false]')
-            if layer == 4 and y < sy:
-                t.set(4, y, z, 'minecraft:spruce_slab[type=bottom,waterlogged=false]')
-        for x in range(layer + 1, sx - 1 - layer):
-            if y < sy:
-                for z in (1, sz - 1):
-                    t.set(x, y, z, 'minecraft:white_terracotta')
-    # door
-    t.set(4, 1, 1, 'minecraft:spruce_door[facing=south,half=lower,hinge=left,open=false,powered=false]')
-    t.set(4, 2, 1, 'minecraft:spruce_door[facing=south,half=upper,hinge=left,open=false,powered=false]')
-    # pews
-    for z in (4, 6, 8):
-        for x in (2, 3, 5, 6):
-            t.set(x, 1, z, 'minecraft:spruce_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]')
-    # altar end: carpet, candles, bell
-    for x in range(2, 7):
-        t.set(x, 1, 11, 'minecraft:red_carpet')
-    t.set(3, 1, 12, 'minecraft:chiseled_stone_bricks')
-    t.set(5, 1, 12, 'minecraft:chiseled_stone_bricks')
-    t.set(3, 2, 12, 'minecraft:candle[candles=3,lit=true,waterlogged=false]')
-    t.set(5, 2, 12, 'minecraft:candle[candles=3,lit=true,waterlogged=false]')
-    t.set(4, 1, 12, 'minecraft:lectern[facing=north,has_book=false,powered=false]')
-    # optional respawn: a bed by the side wall
-    t.set(1, 1, 3, 'minecraft:white_bed[facing=north,occupied=false,part=foot]')
-    t.set(1, 1, 2, 'minecraft:white_bed[facing=north,occupied=false,part=head]')
-    for x, z in [(1, 6), (7, 6), (1, 10), (7, 10)]:
-        t.set(x, 4, z, 'minecraft:lantern[hanging=false,waterlogged=false]')
-    t.entity('grimoireknights:priest', 4, 1, 10)
+    t.paste(src, 0, 0, 0)
+    # entrance jigsaw past the porch steps, south of the door; the plaza turns the church to face the tower
+    t.jigsaw(6, 1, sz - 1, 'south_up', 'grimoireknights:church', 'minecraft:empty', 'minecraft:empty', 'minecraft:air')
+    t.entity('grimoireknights:priest', 6, 3, 8)
     return t
 
 
 # --- Starter village center: plaza with the tower -------------------------------------------------------------
 def village_center():
-    size = 23
     tower = grimoire_tower()
+    # the observation room overhangs the shaft; 7 blocks of plaza around it keep the spawn square out from under it
+    off = 7
+    size = tower.size[0] + 2 * off
+    m = size // 2
     t = Template(size, tower.size[1], size)
     for x in range(size):
         for z in range(size):
             edge = min(x, z, size - 1 - x, size - 1 - z)
-            t.set(x, 0, z, 'minecraft:dirt_path' if edge < 2 or (abs(x - 11) <= 1 and z > 15)
+            t.set(x, 0, z, 'minecraft:dirt_path' if edge < 2 or (abs(x - m) <= 1 and z > m)
                   else ('minecraft:cobblestone' if (x + z) % 3 == 0 else 'minecraft:stone_bricks'))
-    off = (size - tower.size[0]) // 2
     t.paste(tower, off, 0, off)
     # streets leave the plaza west, north and east (vanilla plains streets); the church faces the tower door
-    t.jigsaw(0, 1, 11, 'west_up', 'minecraft:street', 'minecraft:street', 'minecraft:village/plains/streets',
+    t.jigsaw(0, 1, m, 'west_up', 'minecraft:street', 'minecraft:street', 'minecraft:village/plains/streets',
              'minecraft:structure_void')
-    t.jigsaw(11, 1, 0, 'north_up', 'minecraft:street', 'minecraft:street', 'minecraft:village/plains/streets',
+    t.jigsaw(m, 1, 0, 'north_up', 'minecraft:street', 'minecraft:street', 'minecraft:village/plains/streets',
              'minecraft:structure_void')
-    t.jigsaw(size - 1, 1, 11, 'east_up', 'minecraft:street', 'minecraft:street', 'minecraft:village/plains/streets',
+    t.jigsaw(size - 1, 1, m, 'east_up', 'minecraft:street', 'minecraft:street', 'minecraft:village/plains/streets',
              'minecraft:structure_void')
-    t.jigsaw(11, 1, size - 1, 'south_up', 'grimoireknights:church_door', 'grimoireknights:church',
+    t.jigsaw(m, 1, size - 1, 'south_up', 'grimoireknights:church_door', 'grimoireknights:church',
              'grimoireknights:starter_village/church', 'minecraft:air')
-    for x, z in [(3, 3), (19, 3), (3, 19), (19, 19)]:
+    for x, z in [(3, 3), (size - 4, 3), (3, size - 4), (size - 4, size - 4)]:
         t.set(x, 1, z, 'minecraft:oak_fence[east=false,north=false,south=false,waterlogged=false,west=false]')
         t.set(x, 2, z, 'minecraft:lantern[hanging=false,waterlogged=false]')
     return t
