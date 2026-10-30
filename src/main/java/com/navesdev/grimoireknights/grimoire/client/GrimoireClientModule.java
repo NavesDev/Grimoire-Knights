@@ -1,5 +1,6 @@
 package com.navesdev.grimoireknights.grimoire.client;
 
+import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.core.client.FixedGeoModel;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
 import com.navesdev.grimoireknights.grimoire.block.GrimoireAltarBlockEntity;
@@ -14,7 +15,9 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -55,6 +58,8 @@ public final class GrimoireClientModule {
                 return renderer;
             }
         }, GrimoireModule.GRIMOIRE_ICON.get()));
+
+        modBus.addListener(RegisterGuiLayersEvent.class, event -> event.registerAbove(VanillaGuiLayers.HOTBAR, Ids.id("grimoire"), GrimoireHud::render));
 
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, GrimoireClient::tick);
         NeoForge.EVENT_BUS.addListener(RenderLevelStageEvent.class, GrimoireClient::render);
