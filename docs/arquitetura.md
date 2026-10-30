@@ -35,7 +35,7 @@ com.navesdev.grimoireknights
 ## Funcionalidades
 Da base para o topo; cada uma só depende das que estão acima dela na lista.
 
-- **core:** registro da rede (`RegisterPayloadHandlersEvent`), registros próprios, utilitários. Não conhece nenhuma funcionalidade.
+- **core:** registro da rede (`RegisterPayloadHandlersEvent`), registros próprios, utilitários, runtime de VFX (`core/vfx`, `core/client/vfx`; ver `docs/vfx.md`). Não conhece nenhuma funcionalidade.
 - **quest:** motor genérico de missões (ver [Missões](#missões)). Não conhece nenhuma missão específica.
 - **grimoire:** elemento, folhas do trevo, sorteio por pesos, chamado, cerimônia (sacerdote e Altar do Grimório), troca de grimório, grimório flutuante. O Altar mora aqui porque a cerimônia depende dele; `building` usa o mesmo bloco depois.
 - **progression:** XP, nível, status, árvore, patentes, maestria do anti-magia.
