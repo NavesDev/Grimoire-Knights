@@ -9,13 +9,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
 
 /** Draws a tower grimoire circling its block's column, so a column of them in the middle of the tower makes a slow whirl. */
 public class FloatingGrimoireRenderer extends GeoBlockRenderer<FloatingGrimoireBlockEntity> {
-    /** Covers the tower's grimoires show, picked by position. */
-    private static final String[] COVERS = {"fire_3", "wind_3", "fire_4", "wind_3", "fire_3", "wind_4", "anti_5"};
+    /** Covers the tower's grimoires show, scrambled by position. The five-leaf grimoire is special: never on the shelves. */
+    private static final String[] COVERS = {"fire_3", "wind_3", "fire_4", "wind_4"};
     static final double RADIUS = 3.5;
     private static final float DEGREES_PER_TICK = 0.6f;
     private static final float GOLDEN_ANGLE = 137.5f;
@@ -24,7 +25,7 @@ public class FloatingGrimoireRenderer extends GeoBlockRenderer<FloatingGrimoireB
         super(new FixedGeoModel<>("grimoire", "grimoire", "textures/entity/grimoire/grimoire_fire_3.png") {
             @Override
             public ResourceLocation getTextureResource(FloatingGrimoireBlockEntity grimoire) {
-                int index = Math.floorMod(grimoire.getBlockPos().hashCode(), COVERS.length);
+                int index = (int) Math.floorMod(Mth.getSeed(grimoire.getBlockPos()) >>> 16, COVERS.length);
                 return Ids.id("textures/entity/grimoire/grimoire_" + COVERS[index] + ".png");
             }
         });
