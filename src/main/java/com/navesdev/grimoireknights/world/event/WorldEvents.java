@@ -129,8 +129,24 @@ public final class WorldEvents {
     /** The calling: a trail of particles from the player toward the nearest Grimoire Tower, kept until they get there. */
     public static void onCalled(GrimoireCalledEvent event) {
         ServerPlayer player = event.getPlayer();
-        BlockPos tower = player.serverLevel().findNearestMapStructure(WorldStructures.GRIMOIRE_TOWERS, player.blockPosition(), TOWER_SEARCH_CHUNKS, false);
-        if (tower != null) GUIDES.put(player.getUUID(), new Guide(player.serverLevel().dimension(), tower, player.serverLevel().getGameTime() + GUIDE_TICKS));
+        ServerLevel level = player.serverLevel();
+        BlockPos found = level.findNearestMapStructure(WorldStructures.GRIMOIRE_TOWERS, player.blockPosition(), TOWER_SEARCH_CHUNKS, false);
+        if (found != null) GUIDES.put(player.getUUID(), new Guide(level.dimension(), towerCenter(level, found), level.getGameTime() + GUIDE_TICKS));
+    }
+
+    /**
+     * The search gives the structure's start chunk, not the tower; the first piece is the plaza with the tower in its middle
+     * (art/structures/run.py village_center).
+     */
+    private static BlockPos towerCenter(ServerLevel level, BlockPos found) {
+        var structures = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        return level.getChunk(found.getX() >> 4, found.getZ() >> 4, ChunkStatus.STRUCTURE_STARTS).getAllStarts().entrySet().stream()
+                .filter(entry -> structures.wrapAsHolder(entry.getKey()).is(WorldStructures.GRIMOIRE_TOWERS))
+                .map(entry -> entry.getValue())
+                .filter(start -> start.isValid() && !start.getPieces().isEmpty())
+                .findFirst()
+                .map(start -> start.getPieces().getFirst().getBoundingBox().getCenter())
+                .orElse(found);
     }
 
     /** Redraws the trail from where the player is now, so it can be followed; ends at the tower, on timeout or in another dimension. */
