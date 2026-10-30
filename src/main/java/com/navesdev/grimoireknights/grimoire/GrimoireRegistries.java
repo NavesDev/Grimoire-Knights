@@ -15,7 +15,7 @@ public final class GrimoireRegistries {
 
     static final DeferredRegister<Element> ELEMENT_ENTRIES = DeferredRegister.create(ELEMENT, GrimoireKnights.MODID);
 
-    public static final Supplier<Element> FIRE = ELEMENT_ENTRIES.register("fire", () -> new Element(List.of(Ids.id("fireball"))));
+    public static final Supplier<Element> FIRE = ELEMENT_ENTRIES.register("fire", () -> new Element(0xFF7A12, List.of(Ids.id("fireball"))));
 
     private GrimoireRegistries() {}
 }

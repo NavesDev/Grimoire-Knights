@@ -12,10 +12,14 @@ import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-/** Client-only grimoire floating beside one player: shows in combat or on cast, turns a page on cast, chooses at the ceremony. */
+/**
+ * Client-only grimoire floating beside one player: shows in combat or on cast, turns a page on cast, chooses at the ceremony.
+ * Pops in ({@code appear}) and, after closing, shrinks away ({@code vanish}), with a sparkle each time.
+ */
 public class FloatingGrimoire implements GeoAnimatable {
     static final int VISIBLE_TICKS = 200;
     static final int CLOSE_TICKS = 10;
+    static final int VANISH_TICKS = 8;
     static final int CEREMONY_FLIGHT_TICKS = 40;
     static final int CEREMONY_CHOOSE_TICKS = 40;
 
@@ -25,6 +29,8 @@ public class FloatingGrimoire implements GeoAnimatable {
     // flip ends open, so holding its last frame keeps the book open without replaying open
     private static final RawAnimation FLIP = RawAnimation.begin().thenPlayAndHold("animation.grimoire.flip");
     private static final RawAnimation CHOOSE = RawAnimation.begin().thenPlay("animation.grimoire.choose");
+    private static final RawAnimation APPEAR = RawAnimation.begin().thenPlayAndHold("animation.grimoire.appear");
+    private static final RawAnimation VANISH = RawAnimation.begin().thenPlayAndHold("animation.grimoire.vanish");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     final int entityId;
@@ -33,6 +39,8 @@ public class FloatingGrimoire implements GeoAnimatable {
     private long visibleUntil = Long.MIN_VALUE;
     private boolean flipRequested;
     private boolean flipped;
+    private boolean sparkle;
+    private boolean vanishSparkled;
     private Ceremony ceremony;
 
     /** Ceremony descent: from the shelves to the player, then {@code choose}. */
@@ -44,6 +52,10 @@ public class FloatingGrimoire implements GeoAnimatable {
 
     void tick(long now) {
         tick = now;
+        if (!vanishSparkled && vanishing()) {
+            vanishSparkled = true;
+            sparkle = true;
+        }
     }
 
     long now() {
@@ -51,7 +63,16 @@ public class FloatingGrimoire implements GeoAnimatable {
     }
 
     void showFor(int ticks) {
+        if (!visible() || vanishing()) sparkle = true;
         visibleUntil = Math.max(visibleUntil, tick + ticks);
+        vanishSparkled = false;
+    }
+
+    /** True once per appear or vanish, for the sparkle. */
+    boolean takeSparkle() {
+        boolean was = sparkle;
+        sparkle = false;
+        return was;
     }
 
     void flip() {
@@ -80,9 +101,14 @@ public class FloatingGrimoire implements GeoAnimatable {
         return tick < visibleUntil && !inFlight();
     }
 
-    /** Still drawn while it closes. */
+    /** Closed and shrinking away. */
+    boolean vanishing() {
+        return visibleUntil != Long.MIN_VALUE && tick >= visibleUntil + CLOSE_TICKS;
+    }
+
+    /** Still drawn while it closes and shrinks away. */
     boolean visible() {
-        return tick < visibleUntil + CLOSE_TICKS;
+        return tick < visibleUntil + CLOSE_TICKS + VANISH_TICKS;
     }
 
     @Override
@@ -91,6 +117,7 @@ public class FloatingGrimoire implements GeoAnimatable {
         controllers.add(new AnimationController<>(this, "book", 2, this::book));
         controllers.add(new AnimationController<>(this, "ceremony", 0,
                 state -> ceremony != null && !inFlight() ? state.setAndContinue(CHOOSE) : PlayState.STOP));
+        controllers.add(new AnimationController<>(this, "presence", 0, state -> state.setAndContinue(vanishing() ? VANISH : APPEAR)));
     }
 
     private PlayState book(AnimationState<FloatingGrimoire> state) {
