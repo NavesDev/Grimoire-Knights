@@ -3,12 +3,12 @@ package com.navesdev.grimoireknights.grimoire.client;
 import com.navesdev.grimoireknights.core.client.FixedGeoModel;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
 import com.navesdev.grimoireknights.grimoire.block.GrimoireAltarBlockEntity;
+import com.navesdev.grimoireknights.grimoire.entity.Priest;
 import com.navesdev.grimoireknights.grimoire.network.CeremonyPayload;
 import com.navesdev.grimoireknights.grimoire.network.ElementChoicePayload;
 import com.navesdev.grimoireknights.grimoire.network.GrimoireActivityPayload;
 import com.navesdev.grimoireknights.grimoire.network.PlayerAnimationPayload;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.entity.VillagerRenderer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
@@ -19,6 +19,7 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import software.bernie.geckolib.renderer.GeoBlockRenderer;
+import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 public final class GrimoireClientModule {
     private GrimoireClientModule() {}
@@ -33,7 +34,8 @@ public final class GrimoireClientModule {
         modBus.addListener(EntityRenderersEvent.RegisterRenderers.class, event -> {
             event.registerBlockEntityRenderer(GrimoireModule.ALTAR_BLOCK_ENTITY.get(), context -> new GeoBlockRenderer<GrimoireAltarBlockEntity>(
                     new FixedGeoModel<>("building", "grimoire_altar", "textures/block/building/grimoire_altar.png")));
-            event.registerEntityRenderer(GrimoireModule.PRIEST.get(), VillagerRenderer::new);
+            event.registerEntityRenderer(GrimoireModule.PRIEST.get(), context -> new GeoEntityRenderer<Priest>(context,
+                    new FixedGeoModel<>("npc", "priest", "textures/entity/npc/priest.png")));
         });
         modBus.addListener(RegisterClientExtensionsEvent.class, event -> event.registerItem(new IClientItemExtensions() {
             private AltarItemRenderer renderer;

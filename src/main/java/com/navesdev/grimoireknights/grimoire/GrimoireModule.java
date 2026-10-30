@@ -22,7 +22,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -85,7 +84,7 @@ public final class GrimoireModule {
         Configs.registerServer(container, "grimoire", GrimoireConfig.SPEC);
 
         modBus.addListener(RegisterPayloadHandlersEvent.class, GrimoireModule::registerPayloads);
-        modBus.addListener(EntityAttributeCreationEvent.class, event -> event.put(PRIEST.get(), Villager.createAttributes().build()));
+        modBus.addListener(EntityAttributeCreationEvent.class, event -> event.put(PRIEST.get(), Priest.createAttributes().build()));
         modBus.addListener(BuildCreativeModeTabContentsEvent.class, event -> {
             if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) event.accept(ALTAR_ITEM);
         });

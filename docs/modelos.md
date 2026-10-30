@@ -82,6 +82,9 @@ Mesmas animações (`humanoid` no `order_mage.js`); morte e dano ficam com o ren
 
 O Capitão também balança a capa (`cape`) em todas.
 
+### Sacerdote
+Mesmo `humanoid` do mago (`idle`, `walk`) mais `bless` (1,4 s, ao clicar nele: ergue a mão direita, abençoa e desce). O `pendant` balança no `idle`.
+
 ### Bola de fogo
 | Animação | Loop | Uso |
 |---|---|---|

@@ -4,7 +4,7 @@
 const MODELS = [
   'grimoire', 'fireball', 'order_mage', 'renegade_captain', 'greatsword', 'katana', 'reverse_blade', 'broom',
   'squad_mantle', 'grimoire_altar', 'magic_torch', 'squad_banner', 'mage_tower_core', 'griffin', 'demon_form',
-  'player_sword', 'player_demon', 'player_ride'
+  'player_sword', 'player_demon', 'player_ride', 'priest'
 ];
 const DENSITY = 2; // texture pixels per model unit, same for every model
 
