@@ -1,8 +1,10 @@
 # Changelog
 
-Mudanças do mod, da mais nova para a mais antiga. Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
+Mudanças do mod, da mais nova para a mais antiga. Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versões em [SemVer](https://semver.org/lang/pt-BR/). Versões 0.x são desenvolvimento; a 1.0.0 sai quando o mod tiver o mínimo jogável.
 
 ## [Não lançado]
+
+## [0.1.0] - 2026-10-30
 
 ### Adicionado
 - **Etapa 1: cerimônia, grimório de fogo e barra de mana** (#2).
@@ -29,3 +31,6 @@ Mudanças do mod, da mais nova para a mais antiga. Formato baseado em [Keep a Ch
 ### Documentação
 - ADRs da arquitetura da etapa 1, partículas do Blockbench com runtime próprio (0004) e construções baseadas em builds da comunidade (0005).
 - HUD de mana, ícones de GUI, tela de escolha de elemento e sincronização de attachments no fluxo de magia.
+
+[Não lançado]: https://github.com/NavesDev/Grimoire-Knights/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/NavesDev/Grimoire-Knights/tree/v0.1.0
