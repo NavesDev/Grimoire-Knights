@@ -1,0 +1,42 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.vfx.fireball_explosion": {
+			"animation_length": 1.6,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "fireball_explosion_flash",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "fireball_explosion_flames",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "fireball_explosion_embers",
+						"bind_to_actor": false
+					}
+				],
+				"0.0417": {
+					"effect": "fireball_explosion_shockwave",
+					"bind_to_actor": false
+				},
+				"0.0833": {
+					"effect": "fireball_explosion_smoke",
+					"bind_to_actor": false
+				}
+			}
+		},
+		"animation.vfx.grimoire_sparkle": {
+			"animation_length": 0.8,
+			"particle_effects": {
+				"0.0": {
+					"effect": "grimoire_sparkle",
+					"bind_to_actor": false
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}
