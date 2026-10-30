@@ -22,6 +22,9 @@ import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -47,6 +50,10 @@ public final class WorldModule {
         NeoForge.EVENT_BUS.addListener(PlayerSpawnPhantomsEvent.class, WorldEvents::onPhantoms);
         NeoForge.EVENT_BUS.addListener(MobEffectEvent.Applicable.class, WorldEvents::onEffectApplicable);
         NeoForge.EVENT_BUS.addListener(GrimoireCalledEvent.class, WorldEvents::onCalled);
+        NeoForge.EVENT_BUS.addListener(PlayerTickEvent.Post.class, WorldEvents::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedOutEvent.class, event -> {
+            if (event.getEntity() instanceof ServerPlayer player) WorldEvents.forget(player);
+        });
         NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, event -> GkCommands.register(event.getDispatcher(), TowerCommand.branch()));
     }
 }

@@ -3,8 +3,12 @@ package com.navesdev.grimoireknights.world.event;
 import com.navesdev.grimoireknights.GrimoireKnights;
 import com.navesdev.grimoireknights.grimoire.event.GrimoireCalledEvent;
 import com.navesdev.grimoireknights.world.WorldStructures;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.Set;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -30,11 +34,17 @@ import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 public final class WorldEvents {
     /** Natural spawns blocked in the safe zone; commands, eggs and spawners still work. */
     private static final Set<MobSpawnType> NATURAL = Set.of(MobSpawnType.NATURAL, MobSpawnType.CHUNK_GENERATION);
-    private static final int TRAIL_LENGTH = 10;
+    private static final int TRAIL_LENGTH = 12;
+    /** The calling's trail lasts up to 5 minutes, or until the player is this close to the tower. */
+    private static final long GUIDE_TICKS = 5 * 60 * 20;
+    private static final int ARRIVED = 12;
+    private static final int TRAIL_EVERY = 10;
+    private static final Map<UUID, Guide> GUIDES = new HashMap<>();
     private static final int SPAWN_RADIUS = 4;
     private static final int TOWER_SEARCH_CHUNKS = 100;
 
@@ -116,20 +126,39 @@ public final class WorldEvents {
         return village != null && level.structureManager().getStructureWithPieceAt(pos, village).isValid();
     }
 
-    /** The calling: a trail of particles from the player toward the nearest Grimoire Tower. */
+    /** The calling: a trail of particles from the player toward the nearest Grimoire Tower, kept until they get there. */
     public static void onCalled(GrimoireCalledEvent event) {
         ServerPlayer player = event.getPlayer();
+        BlockPos tower = player.serverLevel().findNearestMapStructure(WorldStructures.GRIMOIRE_TOWERS, player.blockPosition(), TOWER_SEARCH_CHUNKS, false);
+        if (tower != null) GUIDES.put(player.getUUID(), new Guide(player.serverLevel().dimension(), tower, player.serverLevel().getGameTime() + GUIDE_TICKS));
+    }
+
+    /** Redraws the trail from where the player is now, so it can be followed; ends at the tower, on timeout or in another dimension. */
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        Guide guide = GUIDES.get(player.getUUID());
+        if (guide == null) return;
         ServerLevel level = player.serverLevel();
-        BlockPos tower = level.findNearestMapStructure(WorldStructures.GRIMOIRE_TOWERS, player.blockPosition(), TOWER_SEARCH_CHUNKS, false);
-        if (tower == null) return;
+        long now = level.getGameTime();
         Vec3 from = player.getEyePosition();
-        Vec3 dir = new Vec3(tower.getX() + 0.5 - from.x, 0, tower.getZ() + 0.5 - from.z);
-        if (dir.lengthSqr() < 1) return;
+        Vec3 dir = new Vec3(guide.tower().getX() + 0.5 - from.x, 0, guide.tower().getZ() + 0.5 - from.z);
+        if (now > guide.until() || level.dimension() != guide.dimension() || dir.lengthSqr() < ARRIVED * ARRIVED) {
+            GUIDES.remove(player.getUUID());
+            return;
+        }
+        if (now % TRAIL_EVERY != 0) return;
         dir = dir.normalize();
         for (int i = 1; i <= TRAIL_LENGTH; i++) {
-            Vec3 at = from.add(dir.scale(i));
-            level.sendParticles(player, ParticleTypes.ENCHANT, true, at.x, at.y - 0.3, at.z, 8, 0.15, 0.15, 0.15, 0.2);
-            level.sendParticles(player, ParticleTypes.END_ROD, true, at.x, at.y - 0.3, at.z, 1, 0, 0, 0, 0);
+            Vec3 at = from.add(dir.scale(i * 1.5));
+            level.sendParticles(player, ParticleTypes.ENCHANT, true, at.x, at.y - 0.3, at.z, 4, 0.15, 0.15, 0.15, 0.2);
+            // count 0: the offset is the speed, so the sparks flow toward the tower
+            level.sendParticles(player, ParticleTypes.END_ROD, true, at.x, at.y - 0.3, at.z, 0, dir.x, 0, dir.z, 0.08);
         }
     }
+
+    public static void forget(ServerPlayer player) {
+        GUIDES.remove(player.getUUID());
+    }
+
+    private record Guide(ResourceKey<Level> dimension, BlockPos tower, long until) {}
 }
