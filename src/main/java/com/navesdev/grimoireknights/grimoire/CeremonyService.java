@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -29,11 +30,15 @@ public final class CeremonyService {
     public static final ResourceLocation FORGOTTEN_GRIMOIRE_QUEST = Ids.id("forgotten_grimoire");
     /** The grimoire comes down from this high above the altar (the tower's shelves). */
     private static final int SHELF_HEIGHT = 8;
+    /** The grimoire reaches the player this long after the ceremony (flight and {@code choose} on the client); the achievement waits for it. */
+    public static final int REVEAL_TICKS = 80;
 
     public enum Result { GRIMOIRE, NO_MAGIC, CHOOSING, ALREADY_DONE, FAILED }
 
     /** Free choice waiting for the player's pick: player to altar (null when held without an altar). */
     private static final Map<UUID, Optional<BlockPos>> PENDING_CHOICE = new HashMap<>();
+    /** Game time when the player's grimoire achievement is due. */
+    private static final Map<UUID, Long> PENDING_REVEAL = new HashMap<>();
 
     private CeremonyService() {}
 
@@ -100,10 +105,34 @@ public final class CeremonyService {
             return Result.NO_MAGIC;
         }
         GrimoireService.give(player, element.get(), GrimoireService.CEREMONY_LEAVES);
+        PENDING_REVEAL.put(player.getUUID(), player.serverLevel().getGameTime() + REVEAL_TICKS);
         BlockPos from = (altar != null ? altar : player.blockPosition()).above(SHELF_HEIGHT);
         PacketDistributor.sendToPlayersTrackingEntityAndSelf(player,
                 new CeremonyPayload(player.getId(), from, element.get(), GrimoireService.CEREMONY_LEAVES));
         return Result.GRIMOIRE;
+    }
+
+    public static void tickReveal(ServerPlayer player) {
+        Long due = PENDING_REVEAL.get(player.getUUID());
+        if (due != null && player.serverLevel().getGameTime() >= due) revealNow(player);
+    }
+
+    /** Grants the achievement of the player's grimoire (a toast with its picture); leaving early still grants it. */
+    public static void revealNow(ServerPlayer player) {
+        if (PENDING_REVEAL.remove(player.getUUID()) == null) return;
+        GrimoireService.data(player).element().ifPresent(element -> {
+            award(player, Ids.id("grimoire/root"));
+            award(player, Ids.id("grimoire/chosen_" + element.getPath()));
+        });
+    }
+
+    private static void award(ServerPlayer player, ResourceLocation id) {
+        AdvancementHolder advancement = player.server.getAdvancements().get(id);
+        if (advancement == null) {
+            GrimoireKnights.LOGGER.warn("Advancement {} missing; no toast for {}", id, player.getGameProfile().getName());
+            return;
+        }
+        advancement.value().criteria().keySet().forEach(criterion -> player.getAdvancements().award(advancement, criterion));
     }
 
     private static Optional<BlockPos> findAltar(ServerLevel level, BlockPos center, int radius) {

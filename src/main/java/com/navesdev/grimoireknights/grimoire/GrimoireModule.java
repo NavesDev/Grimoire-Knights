@@ -17,7 +17,11 @@ import com.navesdev.grimoireknights.grimoire.network.ChooseElementPayload;
 import com.navesdev.grimoireknights.grimoire.network.ElementChoicePayload;
 import com.navesdev.grimoireknights.grimoire.network.GrimoireActivityPayload;
 import com.navesdev.grimoireknights.grimoire.network.PlayerAnimationPayload;
+import com.mojang.serialization.Codec;
 import java.util.function.Supplier;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -50,6 +54,7 @@ public final class GrimoireModule {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(GrimoireKnights.MODID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(GrimoireKnights.MODID);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, GrimoireKnights.MODID);
+    private static final DeferredRegister.DataComponents COMPONENTS = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, GrimoireKnights.MODID);
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, GrimoireKnights.MODID);
 
     public static final Supplier<AttachmentType<GrimoireData>> GRIMOIRE_DATA = ATTACHMENTS.register("grimoire", () -> AttachmentType
@@ -67,6 +72,12 @@ public final class GrimoireModule {
     public static final Supplier<BlockEntityType<GrimoireAltarBlockEntity>> ALTAR_BLOCK_ENTITY = BLOCK_ENTITIES.register("grimoire_altar",
             () -> BlockEntityType.Builder.of(GrimoireAltarBlockEntity::new, ALTAR.get()).build(null));
 
+    /** Which grimoire an icon shows, as {@code <element>_<leaves>} (the cover texture's suffix). */
+    public static final Supplier<DataComponentType<String>> GRIMOIRE_COVER = COMPONENTS.registerComponentType("grimoire_cover",
+            builder -> builder.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));
+    /** Icon only (advancements, HUD): drawn with the grimoire model, not obtainable. */
+    public static final DeferredItem<Item> GRIMOIRE_ICON = ITEMS.registerSimpleItem("grimoire", new Item.Properties().stacksTo(1));
+
     public static final Supplier<EntityType<Priest>> PRIEST = ENTITIES.register("priest", () -> EntityType.Builder
             .<Priest>of(Priest::new, MobCategory.MISC).sized(0.6f, 1.95f).clientTrackingRange(10).build("priest"));
 
@@ -78,6 +89,7 @@ public final class GrimoireModule {
         ATTACHMENTS.register(modBus);
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
+        COMPONENTS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         ENTITIES.register(modBus);
         GrimoireGameRules.init();
@@ -92,10 +104,14 @@ public final class GrimoireModule {
         NeoForge.EVENT_BUS.addListener(LivingDamageEvent.Pre.class, GrimoireEvents::onDamagePre);
         NeoForge.EVENT_BUS.addListener(LivingDamageEvent.Post.class, GrimoireEvents::onDamage);
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedInEvent.class, GrimoireEvents::onLogin);
+        NeoForge.EVENT_BUS.addListener(PlayerTickEvent.Post.class, event -> {
+            if (event.getEntity() instanceof ServerPlayer player) CeremonyService.tickReveal(player);
+        });
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedOutEvent.class, event -> {
             if (event.getEntity() instanceof ServerPlayer player) {
                 GrimoireActivity.forget(player);
                 CeremonyService.forget(player);
+                CeremonyService.revealNow(player);
             }
         });
         NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, event -> {

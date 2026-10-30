@@ -1,5 +1,6 @@
 package com.navesdev.grimoireknights.grimoire.client;
 
+import com.navesdev.grimoireknights.grimoire.CeremonyService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -21,7 +22,7 @@ public class FloatingGrimoire implements GeoAnimatable {
     static final int CLOSE_TICKS = 10;
     static final int VANISH_TICKS = 8;
     static final int CEREMONY_FLIGHT_TICKS = 40;
-    static final int CEREMONY_CHOOSE_TICKS = 40;
+    static final int CEREMONY_CHOOSE_TICKS = CeremonyService.REVEAL_TICKS - CEREMONY_FLIGHT_TICKS;
 
     private static final RawAnimation FLOAT = RawAnimation.begin().thenLoop("animation.grimoire.float");
     private static final RawAnimation OPEN = RawAnimation.begin().thenPlayAndHold("animation.grimoire.open");

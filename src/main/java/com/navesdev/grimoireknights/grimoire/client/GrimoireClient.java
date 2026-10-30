@@ -7,7 +7,6 @@ import com.navesdev.grimoireknights.core.client.vfx.VfxClient;
 import com.navesdev.grimoireknights.grimoire.Element;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
 import com.navesdev.grimoireknights.grimoire.GrimoireRegistries;
-import com.navesdev.grimoireknights.grimoire.GrimoireService;
 import com.navesdev.grimoireknights.grimoire.attachment.GrimoireData;
 import com.navesdev.grimoireknights.grimoire.network.CeremonyPayload;
 import com.navesdev.grimoireknights.grimoire.network.GrimoireActivityPayload;
@@ -19,7 +18,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -96,7 +94,6 @@ final class GrimoireClient {
                 grimoire.texture = FloatingGrimoireModel.texture(ceremony.element(), ceremony.leaves());
                 if (now - ceremony.start() >= FloatingGrimoire.CEREMONY_FLIGHT_TICKS + FloatingGrimoire.CEREMONY_CHOOSE_TICKS) {
                     grimoire.endCeremony();
-                    if (player == Minecraft.getInstance().player) reveal(ceremony);
                 }
             } else {
                 grimoire.texture = data.element().map(element -> FloatingGrimoireModel.texture(element, data.leaves())).orElse(null);
@@ -109,13 +106,6 @@ final class GrimoireClient {
                 sparkle(player, grimoire, ceremony != null ? ceremony.element() : data.element().orElse(null));
             }
         }
-    }
-
-    private static void reveal(FloatingGrimoire.Ceremony ceremony) {
-        Minecraft minecraft = Minecraft.getInstance();
-        Component element = GrimoireService.elementName(ceremony.element());
-        minecraft.gui.setTitle(Component.translatable(Ids.key("title", "ceremony.chosen")));
-        minecraft.gui.setSubtitle(Component.translatable(Ids.key("title", "ceremony.element"), element));
     }
 
     static void render(RenderLevelStageEvent event) {

@@ -46,6 +46,15 @@ public final class GrimoireClientModule {
                 return renderer;
             }
         }, GrimoireModule.ALTAR_ITEM.get()));
+        modBus.addListener(RegisterClientExtensionsEvent.class, event -> event.registerItem(new IClientItemExtensions() {
+            private GrimoireItemRenderer renderer;
+
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                if (renderer == null) renderer = new GrimoireItemRenderer();
+                return renderer;
+            }
+        }, GrimoireModule.GRIMOIRE_ICON.get()));
 
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, GrimoireClient::tick);
         NeoForge.EVENT_BUS.addListener(RenderLevelStageEvent.class, GrimoireClient::render);

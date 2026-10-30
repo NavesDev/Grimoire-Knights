@@ -19,8 +19,6 @@
   "message.grimoireknights.priest.done": "Sacerdote: Você já fez sua cerimônia. Siga com seu grimório.",
   "message.grimoireknights.ceremony.no_magic": "Nenhum grimório desceu... O sacerdote franze a testa: há uma velha história de um grimório esquecido.",
   "message.grimoireknights.anim.unknown": "Animação de jogador desconhecida %s. Conhecidas: %s",
-  "title.grimoireknights.ceremony.chosen": "Um grimório escolheu você",
-  "title.grimoireknights.ceremony.element": "Elemento: %s",
   "command.grimoireknights.quest.info": "Missões de %s: ativas [%s], concluídas [%s]",
   "command.grimoireknights.quest.given": "Missão %s dada a %s",
   "command.grimoireknights.quest.give.unknown_quest": "Missão desconhecida %s",
@@ -49,5 +47,11 @@
   "command.grimoireknights.ceremony.failed": "Cerimônia falhou para %s; veja o log",
   "message.grimoireknights.ceremony.failed": "A cerimônia não pôde terminar. Peça a um operador para ver o log do servidor.",
   "screen.grimoireknights.element_choice.title": "Escolha seu elemento",
-  "screen.grimoireknights.element_choice.hint": "Clique num elemento para receber o grimório"
+  "screen.grimoireknights.element_choice.hint": "Clique num elemento para receber o grimório",
+  "advancement.grimoireknights.grimoire.root.title": "Grimoire Knights",
+  "advancement.grimoireknights.grimoire.root.description": "O caminho de um mago começa com um grimório",
+  "advancement.grimoireknights.grimoire.chosen.title": "Um grimório escolheu você",
+  "advancement.grimoireknights.grimoire.chosen_fire.description": "Grimório de fogo, 3 folhas",
+  "advancement.grimoireknights.grimoire.chosen_wind.description": "Grimório de vento, 3 folhas",
+  "item.grimoireknights.grimoire": "Grimório"
 }
