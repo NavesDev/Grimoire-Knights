@@ -1,0 +1,24 @@
+{
+  "display": {
+    "icon": {
+      "id": "grimoireknights:grimoire",
+      "components": {
+        "grimoireknights:grimoire_cover": "fire_3"
+      }
+    },
+    "title": {
+      "translate": "advancement.grimoireknights.grimoire.root.title"
+    },
+    "description": {
+      "translate": "advancement.grimoireknights.grimoire.root.description"
+    },
+    "background": "minecraft:textures/block/bookshelf.png",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "chosen": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

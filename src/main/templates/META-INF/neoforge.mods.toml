@@ -46,7 +46,7 @@ authors="NavesDev"
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-Grimórios no estilo Black Clover: magias, patentes, bosses e construções com função.
+Black Clover-style grimoires: spells, ranks, bosses and buildings with a purpose.
 '''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.

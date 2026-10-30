@@ -1,0 +1,26 @@
+{
+  "parent": "grimoireknights:grimoire/root",
+  "display": {
+    "icon": {
+      "id": "grimoireknights:grimoire",
+      "components": {
+        "grimoireknights:grimoire_cover": "fire_3"
+      }
+    },
+    "title": {
+      "translate": "advancement.grimoireknights.grimoire.chosen.title"
+    },
+    "description": {
+      "translate": "advancement.grimoireknights.grimoire.chosen_fire.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "chosen": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

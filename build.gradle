@@ -60,6 +60,14 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        // Second player for multiplayer tests over LAN: its own name and game directory.
+        client2 {
+            client()
+            programArguments.addAll '--username', 'Dev2'
+            gameDirectory = project.file('run-client2')
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
         server {
             server()
             programArgument '--nogui'

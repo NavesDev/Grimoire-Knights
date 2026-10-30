@@ -1,9 +1,9 @@
 # Grimoire Knights
 
-Mod NeoForge 1.21.1 (Java 21). Design: https://claude.ai/artifact/TrcT8PC62YBtGZVcwWHpJx (ler pelo conector Claude Docs). Arquitetura: `docs/arquitetura.md`. Decisões: `docs/adr/`. Ambiente: `docs/ambiente.md`. Modelos: `docs/modelos.md`.
+NeoForge 1.21.1 mod (Java 21). Design: https://claude.ai/artifact/TrcT8PC62YBtGZVcwWHpJx (read it through the Claude Docs connector). Architecture: `docs/architecture.md`. Decisions: `docs/adr/`. Environment: `docs/environment.md`. Models: `docs/models.md`.
 
-- Código, identificadores e commits em inglês (conventional commits); docs em pt-BR.
-- Textos de jogo em `assets/grimoireknights/lang/` (`en_us.json` e `pt_br.json`), nunca literal no código.
-- Preferir eventos e data attachments do NeoForge a mixins.
-- Ler a doc do NeoForge 1.21.1 (https://docs.neoforged.net/docs/1.21.1/) antes de usar uma API; não de memória.
-- `./gradlew build` antes de pedir revisão; `./gradlew runClient` para ver no jogo.
+- Everything in the repo in English: code, identifiers, commits (conventional commits), docs, changelog, issues and PRs. The only exception is the game translation in `pt_br.json`.
+- Game texts in `assets/grimoireknights/lang/` (`en_us.json` and `pt_br.json`), never as literals in code.
+- Prefer NeoForge events and data attachments over mixins.
+- Read the NeoForge 1.21.1 docs (https://docs.neoforged.net/docs/1.21.1/) before using an API; not from memory.
+- `./gradlew build` before asking for review; `./gradlew runClient` to see it in game.

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "grimoireknights:block/floating_grimoire"
+    }
+  }
+}

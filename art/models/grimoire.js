@@ -222,6 +222,18 @@ const animations = {
     [0.3, k => ({ flip_page: OPEN - 2 * OPEN * k })],
     [0.3, k => ({ back_cover: OPEN * (1 - k), front_cover: -OPEN * (1 - k), flip_page: -OPEN * (1 - k), book: 90 * (1 - k), lower: 1 - k })]
   ]) },
+  // Pops in with a small overshoot; vanish swells a little and shrinks away after close (the code times both).
+  // Scale only, on book (centered on the spine), so they stack with float and the cover animations.
+  appear: { loop: 'hold', length: 0.4, bones: { book: {
+    scale: [[0, [0, 0, 0]], [0.28, [1.15, 1.15, 1.15], 'catmullrom'], [0.4, [1, 1, 1], 'catmullrom']]
+  } } },
+  vanish: { loop: 'hold', length: 0.4, bones: { book: {
+    scale: [[0, [1, 1, 1]], [0.12, [1.1, 1.1, 1.1], 'catmullrom'], [0.4, [0, 0, 0], 'catmullrom']]
+  } } },
+  // Ceremony: the chosen grimoire grows slowly out of the shelves before flying to the player (scale only, like appear).
+  summon: { loop: 'hold', length: 1, bones: { book: {
+    scale: [[0, [0, 0, 0]], [0.7, [1.2, 1.2, 1.2], 'catmullrom'], [1, [1, 1, 1], 'catmullrom']]
+  } } },
   choose: { loop: 'once', length: 2, bones: { book: {
     position: [[0, [0, 12, 0], 'catmullrom'], [1.6, [0, -0.6, 0], 'catmullrom'], [2, [0, 0, 0], 'catmullrom']],
     rotation: [[0, [0, 720, 0], 'catmullrom'], [1.6, [0, 0, 0], 'catmullrom']]

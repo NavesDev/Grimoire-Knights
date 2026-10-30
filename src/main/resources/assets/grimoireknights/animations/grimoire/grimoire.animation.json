@@ -2129,6 +2129,138 @@
 				}
 			}
 		},
+		"animation.grimoire.appear": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.4,
+			"bones": {
+				"book": {
+					"scale": {
+						"0.0": {
+							"vector": [
+								0,
+								0,
+								0
+							]
+						},
+						"0.2917": {
+							"pre": {
+								"vector": [
+									1.15,
+									1.15,
+									1.15
+								]
+							},
+							"post": {
+								"vector": [
+									1.15,
+									1.15,
+									1.15
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"0.4167": {
+							"post": {
+								"vector": [
+									1,
+									1,
+									1
+								]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				}
+			}
+		},
+		"animation.grimoire.vanish": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.4,
+			"bones": {
+				"book": {
+					"scale": {
+						"0.0": {
+							"vector": [
+								1,
+								1,
+								1
+							]
+						},
+						"0.125": {
+							"pre": {
+								"vector": [
+									1.1,
+									1.1,
+									1.1
+								]
+							},
+							"post": {
+								"vector": [
+									1.1,
+									1.1,
+									1.1
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"0.4167": {
+							"post": {
+								"vector": [
+									0,
+									0,
+									0
+								]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				}
+			}
+		},
+		"animation.grimoire.summon": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 1,
+			"bones": {
+				"book": {
+					"scale": {
+						"0.0": {
+							"vector": [
+								0,
+								0,
+								0
+							]
+						},
+						"0.7083": {
+							"pre": {
+								"vector": [
+									1.2,
+									1.2,
+									1.2
+								]
+							},
+							"post": {
+								"vector": [
+									1.2,
+									1.2,
+									1.2
+								]
+							},
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": {
+								"vector": [
+									1,
+									1,
+									1
+								]
+							},
+							"lerp_mode": "catmullrom"
+						}
+					}
+				}
+			}
+		},
 		"animation.grimoire.choose": {
 			"animation_length": 2,
 			"bones": {

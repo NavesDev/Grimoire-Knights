@@ -1,13 +1,13 @@
-# 0001 NeoForge 1.21.1 com Java 21
+# 0001 NeoForge 1.21.1 with Java 21
 
-**Status:** aceita (2026-10-28)
+**Status:** accepted (2026-10-28)
 
-**Contexto:** o mod será jogado junto com Create, L_Ender's Cataclysm e Twilight Forest. Mods de loaders diferentes não carregam juntos.
+**Context:** the mod will be played alongside Create, L_Ender's Cataclysm and Twilight Forest. Mods for different loaders don't load together.
 
-**Decisão:** NeoForge 1.21.1, Java 21, ModDevGradle, a partir do MDK oficial (`NeoForgeMDKs/MDK-1.21.1-ModDevGradle`). Pacote `com.navesdev.grimoireknights`, mod id `grimoireknights`.
+**Decision:** NeoForge 1.21.1, Java 21, ModDevGradle, starting from the official MDK (`NeoForgeMDKs/MDK-1.21.1-ModDevGradle`). Package `com.navesdev.grimoireknights`, mod id `grimoireknights`.
 
-**Alternativas descartadas:**
-- Fabric: o modpack desejado vive no NeoForge.
-- NeoForge 26.1: ecossistema do modpack ainda não migrou.
+**Rejected alternatives:**
+- Fabric: the target modpack lives on NeoForge.
+- NeoForge 26.1: the modpack's ecosystem hasn't migrated yet.
 
-**Consequência:** dados do jogador (mana, nível, status, árvore, grimório) usam data attachments; rede e config vêm do NeoForge; mixins só quando não houver evento. Portar para 26.1 quando o modpack migrar.
+**Consequence:** player data (mana, level, stats, tree, grimoire) uses data attachments; networking and config come from NeoForge; mixins only when there is no event. Port to 26.1 when the modpack migrates.
