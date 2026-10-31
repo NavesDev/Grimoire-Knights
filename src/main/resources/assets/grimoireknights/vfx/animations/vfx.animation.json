@@ -36,6 +36,201 @@
 					"bind_to_actor": false
 				}
 			}
+		},
+		"animation.vfx.fireball_ground_fire": {
+			"animation_length": 3.2,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "fireball_ground_fire_flames",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "fireball_ground_fire_embers",
+						"bind_to_actor": false
+					}
+				]
+			}
+		},
+		"animation.vfx.flame_fist_explosion": {
+			"animation_length": 1.6,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "fireball_explosion_flash",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "fireball_explosion_flames",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "fireball_explosion_embers",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "flame_fist_knockback_ring",
+						"bind_to_actor": false
+					}
+				],
+				"0.0417": {
+					"effect": "fireball_explosion_shockwave",
+					"bind_to_actor": false
+				},
+				"0.0833": {
+					"effect": "fireball_explosion_smoke",
+					"bind_to_actor": false
+				}
+			}
+		},
+		"animation.vfx.ember_burst_target": {
+			"animation_length": 1.0,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "ember_burst_flash",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "ember_burst_flare",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "ember_burst_sparks",
+						"bind_to_actor": false
+					}
+				]
+			}
+		},
+		"animation.vfx.ember_burst_caster": {
+			"animation_length": 1.2,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "ember_burst_flash",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "ember_burst_wave",
+						"bind_to_actor": false
+					}
+				],
+				"0.0417": {
+					"effect": "fireball_explosion_shockwave",
+					"bind_to_actor": false
+				}
+			}
+		},
+		"animation.vfx.burn": {
+			"animation_length": 1.0,
+			"particle_effects": {
+				"0.0": {
+					"effect": "burn_flames",
+					"bind_to_actor": false
+				}
+			}
+		},
+		"animation.vfx.phoenix_revive": {
+			"animation_length": 2.2,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "phoenix_flash",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "phoenix_wing_left",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "phoenix_wing_right",
+						"bind_to_actor": false
+					}
+				],
+				"0.25": {
+					"effect": "phoenix_embers",
+					"bind_to_actor": false
+				},
+				"0.0417": {
+					"effect": "fireball_explosion_shockwave",
+					"bind_to_actor": false
+				}
+			}
+		},
+		"animation.vfx.wind_trail": {
+			"animation_length": 0.5,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "wind_trail_streak",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "wind_trail_wisp",
+						"bind_to_actor": false
+					}
+				]
+			}
+		},
+		"animation.vfx.wind_hit": {
+			"animation_length": 0.5,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "wind_hit_ring",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "wind_hit_streaks",
+						"bind_to_actor": false
+					}
+				]
+			}
+		},
+		"animation.vfx.tailwind_aura": {
+			"animation_length": 1.5,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "tailwind_rings",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "tailwind_wisps",
+						"bind_to_actor": false
+					}
+				]
+			}
+		},
+		"animation.vfx.dash": {
+			"animation_length": 0.5,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "dash_ring",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "dash_gust",
+						"bind_to_actor": false
+					}
+				]
+			}
+		},
+		"animation.vfx.tornado_gust": {
+			"animation_length": 0.5,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "tornado_gust_wisps",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "tornado_gust_streaks",
+						"bind_to_actor": false
+					}
+				]
+			}
 		}
 	},
 	"geckolib_format_version": 2

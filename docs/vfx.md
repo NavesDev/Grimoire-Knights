@@ -21,6 +21,25 @@ Everything lives in `vfx/` (not `particles/`) because Minecraft Java reads `asse
 
 Playing in game: the server calls `Vfx.play(level, Ids.id("<effect>"), position, variables)`; client code calls `VfxClient.play`. Variables become `variable.<name>` in Molang (e.g. `radius` on the explosion, `tint_r/g/b` on the grimoire sparkles). In Blockbench they are 0, so the effect uses `variable.x > 0 ? variable.x : default`.
 
+## Effects
+| Effect | Variables | How code plays it |
+|---|---|---|
+| `fireball_explosion` | `radius` | Fireball hit |
+| `fireball_ground_fire` | `radius` | Fireball upgrade: once at the explosion; burns 3 s on the ground |
+| `flame_fist_explosion` | `radius` | Flame arm slam (or hit on a block); reuses the fireball explosion plus a knockback ring |
+| `ember_burst_target` | - | Ember burst: once on each burning target |
+| `ember_burst_caster` | `radius` | Ember burst: once around the caster |
+| `burn` | `height` | 1 s of flames on the body; replayed every second while the burn lasts (one state, no stacks) |
+| `phoenix_revive` | - | Phoenix passive: fire wings open around the player |
+| `tornado_gust` | - | Every 2 ticks at the tornado while it lives |
+| `wind_trail` | - | Every tick behind crescent blades, wind arrows and the dashing player |
+| `wind_hit` | `bonus` | Wind hit; grows with the distance bonus (0 to 0.6) |
+| `tailwind_aura` | `stacks` | Tailwind passive: replayed every second while there are stacks; more rings per stack (1 to 5) |
+| `dash` | - | Once where the dash starts |
+| `grimoire_sparkle` | `tint_r/g/b` | Floating grimoire grows or shrinks |
+
+Fire is additive (`particles_add`); wind is white with alpha (`particles_blend`).
+
 ## What the runtime supports
 - Emitter: `emitter_rate_instant`, `emitter_rate_steady`, `emitter_lifetime_once`, shapes `point`, `sphere`, `disc`, `box` (direction `outwards`, `inwards` or a vector).
 - Particle: `particle_lifetime_expression`, `particle_initial_speed`, `particle_initial_spin`, `particle_motion_dynamic` (acceleration and drag), `particle_appearance_billboard` (size, fixed UV or flipbook, facing `lookat_xyz`, `lookat_y`, `lookat_direction`, `emitter_transform_xy/xz/yz`), `particle_appearance_tinting` (gradient or RGBA), `particle_appearance_lighting`.

@@ -6,26 +6,8 @@ const K = load('./lib.js');
 const D = load('./demon_form.js');
 const { sin } = Math;
 
-// Key poses [time, {bone: [x, y, z]}] eased between, plus a tremor (degrees) whose strength follows
-// shake(t): the body fighting the anti-magic. Sampled every 0.05 s.
-const acted = (length, poses, shake, seedNo) => {
-  const rnd = K.rng(seedNo), bones = {}, r2 = n => Math.round(n * 100) / 100;
-  const names = [...new Set(poses.flatMap(([, p]) => Object.keys(p)))];
-  for (let t = 0; t <= length + 1e-6; t += 0.05) {
-    const tt = r2(Math.min(t, length));
-    names.forEach(b => {
-      const ks = poses.filter(([, p]) => p[b]);
-      let i = ks.findIndex(([kt]) => kt >= tt);
-      if (i < 0) i = ks.length - 1;
-      const [ta, pa] = ks[Math.max(0, i - 1)], [tb, pb] = ks[i];
-      const s = tb > ta ? Math.min(1, Math.max(0, (tt - ta) / (tb - ta))) : 1, e = s * s * (3 - 2 * s), q = shake(tt);
-      const v = pa[b].map((x, j) => r2(x + (pb[b][j] - x) * e + (b === 'body' && j === 1 ? 0 : (rnd() - 0.5) * 2 * q)));
-      ((bones[b] ||= {}).rotation ||= []).push([tt, v]);
-    });
-  }
-  return { loop: 'once', length, bones };
-};
 const zero = [0, 0, 0];
+const acted = P.acted; // its tremor is the body fighting the anti-magic
 const STAND = { body: zero, head: zero, right_arm: zero, left_arm: zero, right_leg: zero, left_leg: zero };
 const L = D.animations.awaken.length;
 // Poses below are timed on a 3.35 s take; stretch them to the demon form's awaken length.

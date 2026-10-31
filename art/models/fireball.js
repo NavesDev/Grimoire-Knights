@@ -62,4 +62,4 @@ const animations = { spin: { loop: 'loop', length: 1, bones: {
   embers: { rotation: [wave(360, 10), wave(360, 10, 90), 'query.anim_time * 720'] }
 } } };
 
-module.exports = { name: 'fireball', group: 'ability', kind: 'entity', spec, animations, textures: { fireball: painter } };
+module.exports = { name: 'fireball', group: 'ability', kind: 'entity', spec, animations, textures: { fireball: painter }, painter, wave };
