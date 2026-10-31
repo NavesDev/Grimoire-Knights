@@ -44,6 +44,7 @@ public final class AbilityClientModule {
             event.registerEntityRenderer(AbilityModule.BROOM.get(), context -> new SpellRenderer<>(context, "broom", false, 1.0f));
         });
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, event -> {
+            BroomPoses.tick();
             for (int slot = 0; slot < ABILITIES.length; slot++) {
                 while (ABILITIES[slot].consumeClick()) {
                     if (Minecraft.getInstance().player != null) PacketDistributor.sendToServer(new CastAbilityPayload(slot));

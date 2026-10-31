@@ -193,5 +193,6 @@
   "entity.grimoireknights.broom": "Vassoura",
   "message.grimoireknights.broom.no_grimoire": "Só a mana de um grimório levanta uma vassoura",
   "message.grimoireknights.broom.no_mana_control": "Voar exige Controle de mana III",
-  "message.grimoireknights.broom.no_mana": "Mana insuficiente para voar"
+  "message.grimoireknights.broom.no_mana": "Mana insuficiente para voar",
+  "hud.grimoireknights.broom": "Vassoura %s mana/s"
 }

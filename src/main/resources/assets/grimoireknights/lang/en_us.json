@@ -193,5 +193,6 @@
   "entity.grimoireknights.broom": "Broom",
   "message.grimoireknights.broom.no_grimoire": "Only a grimoire's mana can lift a broom",
   "message.grimoireknights.broom.no_mana_control": "Flying needs Mana Control III",
-  "message.grimoireknights.broom.no_mana": "Not enough mana to fly"
+  "message.grimoireknights.broom.no_mana": "Not enough mana to fly",
+  "hud.grimoireknights.broom": "Broom %s mana/s"
 }
