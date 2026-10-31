@@ -85,12 +85,21 @@ Each feature has a `<Name>Module` with `register(IEventBus)`: it creates its `De
 - **Ranks** (`RankData`): Recruit, Knight, Elite Knight, Captain, Magic King. The rank sets the grimoire mastery ceiling and unlocks slots: X at Knight, C at Elite Knight.
 - **Dash**: `DashPayload` with the movement direction; the server checks the node and the cooldown, pushes the player over a few ticks and makes them invulnerable for a moment.
 
+## Spells
+- Fire burn (`BurnService`): a fire hit sets a fixed burn (damage over a duration, credited to the caster); a new hit refreshes it. Ember burst deals what is left at once.
+- Wind hits go through `WindService`: strength of distance (`WindRules`) and a Tailwind stack.
+- Held targets (`HeldService`: flame arm grab, tornado) can't move, attack or cast until released.
+- Spell projectiles extend `SpellProjectile` (no gravity, range, synced upgrade level and scale; never saved). Upgrades and passives come from `SkillTreeService`.
+- Broom (`BroomEntity`, `BroomService`): the rider's client moves it (vanilla vehicle rule); the server charges mana every second and makes it glide when it runs out.
+
 ## Quests
 A single engine for every task: story (forgotten grimoire, demon quests), quest board, whatever comes next. A special quest is a regular quest with more behavior hooked on its events.
 
 - **Quest** (`Quest`): JSON in the `grimoireknights:quest` datapack registry; since the key isn't vanilla, NeoForge prefixes the namespace and the file lives at `data/<namespace>/grimoireknights/quest/<id>.json`. Fields: objectives, rewards, prerequisites, whether it repeats, where it shows up (story, board).
-- **Objective** (`ObjectiveType`) and **reward** (`RewardType`): one class per type, in their own registries. `quest` brings the generic ones (kill entity by tag, go to a place, hand in an item; give an item). Each feature registers its own in its module: `grimoire` registers the `grant_grimoire` reward, `progression` registers `rank_up` and `mastery`.
-- **Progress** in the player's `QuestData`; the engine updates objectives and pays rewards on the server.
+- **Objective** (`ObjectiveType`) and **reward** (`RewardType`): one class per type, in their own registries. `quest` brings the generic ones (`defeat` an entity type or tag, `reach` a structure or position, `talk` to an NPC type; `item` reward). Each feature registers its own in its module: `grimoire` registers the `grant_grimoire` reward, `progression` registers `rank_up` and `mastery`.
+- **Progress** in the player's `QuestData`; the engine updates objectives from kills, a once-a-second place check and NPC talks, and completes the quest (paying its rewards) when every objective is done.
+- **NPCs:** a quest with `giver` (an entity type) is offered by that NPC in the dialogue screen (`DialoguePayload`); only the quest offered last can be accepted. The registry is synced for the dialogue, the journal (J) and the HUD tracker. Texts: `quest.<ns>.<path>.title|offer`.
+- **Rank trials** (`trial/*`): defeat the boss tag `grimoireknights:trial/<boss>` (empty until the bosses exist), reward `rank_up`; each needs the previous one.
 - **Special behavior:** the engine fires `QuestStartedEvent`, `QuestFailedEvent` and `QuestCompletedEvent` with the quest id. The owning feature listens and acts: in the forgotten grimoire quest, `enemy` makes the mage attack the village and shows the grimoire below 25% health.
 - New regular quest = JSON only. New objective or reward type = one class.
 

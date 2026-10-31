@@ -5,7 +5,19 @@ Mod changes, newest first. Format based on [Keep a Changelog](https://keepachang
 ## [Unreleased]
 
 ### Added
+- **Stage 2: mastery, skill tree, ranks, full fire and wind, quests and broom flight** (#6).
+  - Masteries per element, Body and Mana, trained by fighting, dashing and spending mana; weak enemies give almost nothing and bosses can grant several levels (data map). Each level gives a point to its branch.
+  - Skill tree (K) as a graph: dash, max mana, regeneration, Mana Control I-III, two upgrades per spell and the element passive. Nodes are datapack JSON.
+  - Dash on R. Ranks from Recruit to Magic King set the grimoire mastery ceiling and unlock X (Knight) and C (Elite Knight).
+  - Fire: fireball (bigger, ground fire), flame arm that grabs and slams, ember burst and the Phoenix revive. Wind element: crescent blade, tornado fang that holds its target, white gale bow and Tailwind; wind hits harder from afar.
+  - Quest engine with defeat, reach and talk objectives and rank, mastery and item rewards; NPC dialogue screen, quest journal (J), HUD tracker and the four rank trials.
+  - Mana dust (creative tab) and a craftable broom flown with Mana Control III.
+  - Commands: `/gk mastery`, `/gk tree`, `/gk rank`, `/gk quest complete`, `/gk mana`.
 - **Stage 2 models, animations and VFX** (#5): flame fist that grabs and slams, wind blade, tornado, wind bow and arrow made of tangled gusts; cast poses for Z, X and C and the dash pose; ground fire, flame fist explosion, ember burst, burn, phoenix revive, wind trail, wind hit, tailwind and dash effects; mana dust and broom icons.
+
+### Changed
+- Burn refreshes instead of stacking (#6).
+- Max mana comes from the base plus the Mana branch; the Mana stat and `/gk status mana` are gone (#6).
 
 ## [0.1.0] - 2026-10-30
 
