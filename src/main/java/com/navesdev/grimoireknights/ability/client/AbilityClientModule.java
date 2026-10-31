@@ -41,6 +41,7 @@ public final class AbilityClientModule {
             event.registerEntityRenderer(AbilityModule.TORNADO.get(), context -> new SpellRenderer<>(context, "tornado", true, 1.0f, "blades", "stones"));
             event.registerEntityRenderer(AbilityModule.WIND_ARROW.get(), context -> new SpellRenderer<>(context, "wind_arrow", true, 1.0f));
             event.registerEntityRenderer(AbilityModule.WIND_BOW.get(), context -> new SpellRenderer<>(context, "wind_bow", true, 1.0f));
+            event.registerEntityRenderer(AbilityModule.BROOM.get(), context -> new SpellRenderer<>(context, "broom", false, 1.0f));
         });
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, event -> {
             for (int slot = 0; slot < ABILITIES.length; slot++) {

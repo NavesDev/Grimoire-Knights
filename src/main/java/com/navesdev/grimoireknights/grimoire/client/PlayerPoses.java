@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /** playerAnimator poses on players: one layer per player, played by id from {@code assets/<ns>/player_animation/}. */
-final class PlayerPoses {
+public final class PlayerPoses {
     private static final ResourceLocation LAYER = Ids.id("pose");
     private static final int PRIORITY = 1000;
 
@@ -27,18 +27,30 @@ final class PlayerPoses {
         PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(LAYER, PRIORITY, player -> new ModifierLayer<IAnimation>());
     }
 
-    @SuppressWarnings("unchecked")
     static void onPlay(PlayerAnimationPayload payload) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || !(minecraft.level.getEntity(payload.entityId()) instanceof AbstractClientPlayer player)) return;
-        Optional<IPlayable> animation = resolve(payload.animation());
+        if (minecraft.level != null && minecraft.level.getEntity(payload.entityId()) instanceof AbstractClientPlayer player) play(player, payload.animation());
+    }
+
+    /** Stops whatever pose the player is in (back to the vanilla pose). */
+    @SuppressWarnings("unchecked")
+    public static void stop(AbstractClientPlayer player) {
+        if (PlayerAnimationAccess.getPlayerAssociatedData(player).get(LAYER) instanceof ModifierLayer<?> layer) {
+            ((ModifierLayer<IAnimation>) layer).setAnimation(null);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void play(AbstractClientPlayer player, ResourceLocation id) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Optional<IPlayable> animation = resolve(id);
         if (animation.isEmpty()) {
             String known = PlayerAnimationRegistry.getAnimations().keySet().stream()
-                    .filter(id -> id.getNamespace().equals(GrimoireKnights.MODID)).map(ResourceLocation::toString).sorted()
+                    .filter(key -> key.getNamespace().equals(GrimoireKnights.MODID)).map(ResourceLocation::toString).sorted()
                     .collect(Collectors.joining(", "));
-            GrimoireKnights.LOGGER.warn("Unknown player animation {}; known: {}", payload.animation(), known);
+            GrimoireKnights.LOGGER.warn("Unknown player animation {}; known: {}", id, known);
             if (player == minecraft.player) {
-                player.displayClientMessage(Component.translatable(Ids.key("message", "anim.unknown"), payload.animation().toString(), known), false);
+                player.displayClientMessage(Component.translatable(Ids.key("message", "anim.unknown"), id.toString(), known), false);
             }
             return;
         }

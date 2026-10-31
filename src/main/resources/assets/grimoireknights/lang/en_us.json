@@ -187,5 +187,11 @@
   "quest.grimoireknights.trial.host.target": "the Host",
   "quest.grimoireknights.trial.demon_lord.title": "Trial: Demon Lord",
   "quest.grimoireknights.trial.demon_lord.offer": "The last gate is open. Only a Magic King can close it.",
-  "quest.grimoireknights.trial.demon_lord.target": "the Demon Lord"
+  "quest.grimoireknights.trial.demon_lord.target": "the Demon Lord",
+  "item.grimoireknights.broom": "Broom",
+  "item.grimoireknights.mana_dust": "Mana dust",
+  "entity.grimoireknights.broom": "Broom",
+  "message.grimoireknights.broom.no_grimoire": "Only a grimoire's mana can lift a broom",
+  "message.grimoireknights.broom.no_mana_control": "Flying needs Mana Control III",
+  "message.grimoireknights.broom.no_mana": "Not enough mana to fly"
 }

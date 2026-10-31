@@ -5,7 +5,13 @@ import com.navesdev.grimoireknights.ability.attachment.BurnData;
 import com.navesdev.grimoireknights.ability.attachment.CombatData;
 import com.navesdev.grimoireknights.ability.command.AbilityCommand;
 import com.navesdev.grimoireknights.ability.config.AbilityConfig;
+import com.navesdev.grimoireknights.ability.entity.BroomEntity;
 import com.navesdev.grimoireknights.ability.entity.FireballProjectile;
+import com.navesdev.grimoireknights.ability.item.BroomItem;
+import com.navesdev.grimoireknights.core.registry.CoreTabs;
+import net.minecraft.world.item.Item;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.registries.DeferredItem;
 import com.navesdev.grimoireknights.ability.entity.FlameFistEntity;
 import com.navesdev.grimoireknights.ability.entity.TornadoEntity;
 import com.navesdev.grimoireknights.ability.entity.WindArrowEntity;
@@ -45,6 +51,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 /** Abilities on Z/X/C, mana, cooldowns, the fire burn, held targets and the passives. */
 public final class AbilityModule {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, GrimoireKnights.MODID);
+    private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(GrimoireKnights.MODID);
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, GrimoireKnights.MODID);
 
     public static final ResourceKey<DamageType> FIREBALL_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Ids.id("fireball"));
@@ -79,6 +86,13 @@ public final class AbilityModule {
             .<WindBowEntity>of(WindBowEntity::new, MobCategory.MISC).sized(0.5f, 0.5f)
             .clientTrackingRange(8).updateInterval(1).build("wind_bow"));
 
+    public static final Supplier<EntityType<BroomEntity>> BROOM = ENTITIES.register("broom", () -> EntityType.Builder
+            .<BroomEntity>of(BroomEntity::new, MobCategory.MISC).sized(0.8f, 0.3f)
+            .clientTrackingRange(10).updateInterval(1).build("broom"));
+
+    public static final DeferredItem<Item> MANA_DUST = ITEMS.registerSimpleItem("mana_dust", new Item.Properties());
+    public static final DeferredItem<BroomItem> BROOM_ITEM = ITEMS.registerItem("broom", BroomItem::new, new Item.Properties().stacksTo(1));
+
     private AbilityModule() {}
 
     public static void register(IEventBus modBus, ModContainer container) {
@@ -86,6 +100,13 @@ public final class AbilityModule {
         AbilityRegistries.ABILITY_ENTRIES.register(modBus);
         ATTACHMENTS.register(modBus);
         ENTITIES.register(modBus);
+        ITEMS.register(modBus);
+        modBus.addListener(BuildCreativeModeTabContentsEvent.class, event -> {
+            if (event.getTabKey() == CoreTabs.MAIN) {
+                event.accept(MANA_DUST);
+                event.accept(BROOM_ITEM);
+            }
+        });
         Configs.registerServer(container, "ability", AbilityConfig.SPEC);
 
         modBus.addListener(RegisterPayloadHandlersEvent.class, event -> Network.registrar(event)

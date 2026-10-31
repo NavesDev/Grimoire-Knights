@@ -187,5 +187,11 @@
   "quest.grimoireknights.trial.host.target": "o Hospedeiro",
   "quest.grimoireknights.trial.demon_lord.title": "Prova: Senhor dos Demônios",
   "quest.grimoireknights.trial.demon_lord.offer": "O último portão se abriu. Só um Rei Mago pode fechá-lo.",
-  "quest.grimoireknights.trial.demon_lord.target": "o Senhor dos Demônios"
+  "quest.grimoireknights.trial.demon_lord.target": "o Senhor dos Demônios",
+  "item.grimoireknights.broom": "Vassoura",
+  "item.grimoireknights.mana_dust": "Pó de mana",
+  "entity.grimoireknights.broom": "Vassoura",
+  "message.grimoireknights.broom.no_grimoire": "Só a mana de um grimório levanta uma vassoura",
+  "message.grimoireknights.broom.no_mana_control": "Voar exige Controle de mana III",
+  "message.grimoireknights.broom.no_mana": "Mana insuficiente para voar"
 }

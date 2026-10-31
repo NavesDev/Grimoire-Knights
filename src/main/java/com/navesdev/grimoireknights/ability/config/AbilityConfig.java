@@ -66,6 +66,10 @@ public final class AbilityConfig {
     public static final ModConfigSpec.IntValue TAILWIND_DURATION_TICKS;
     public static final ModConfigSpec.DoubleValue TAILWIND_SPEED_PER_STACK;
     public static final ModConfigSpec.DoubleValue TAILWIND_COOLDOWN_CUT;
+    public static final ModConfigSpec.DoubleValue BROOM_SPEED;
+    public static final ModConfigSpec.DoubleValue BROOM_MANA_PER_SECOND;
+    public static final ModConfigSpec.DoubleValue BROOM_GLIDE_FALL;
+    public static final ModConfigSpec.IntValue BROOM_MANA_CONTROL;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -141,6 +145,11 @@ public final class AbilityConfig {
         TAILWIND_DURATION_TICKS = builder.comment("Stacks drop this long after the last wind hit.").defineInRange("durationTicks", 80, 1, 72_000);
         TAILWIND_SPEED_PER_STACK = builder.comment("Movement speed added per stack (fraction of base).").defineInRange("speedPerStack", 0.04, 0.0, 1.0);
         TAILWIND_COOLDOWN_CUT = builder.comment("Wind spell cooldown cut per stack.").defineInRange("cooldownCut", 0.06, 0.0, 0.2);
+        builder.pop().push("broom");
+        BROOM_SPEED = builder.comment("Blocks per tick (0.6 = 12 blocks/s).").defineInRange("speed", 0.6, 0.05, 5.0);
+        BROOM_MANA_PER_SECOND = builder.comment("Mana spent per second of flight, before Mana Control.").defineInRange("manaPerSecond", 3.0, 0.0, 1_000.0);
+        BROOM_GLIDE_FALL = builder.comment("Blocks per tick the broom sinks while gliding with no mana.").defineInRange("glideFall", 0.08, 0.01, 1.0);
+        BROOM_MANA_CONTROL = builder.comment("Mana Control ranks needed to fly.").defineInRange("manaControl", 3, 0, 10);
         builder.pop();
         SPEC = builder.build();
     }
