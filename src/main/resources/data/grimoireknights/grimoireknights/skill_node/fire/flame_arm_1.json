@@ -1,0 +1,16 @@
+{
+  "branch": "grimoire",
+  "element": "grimoireknights:fire",
+  "cost": [
+    3
+  ],
+  "effect": {
+    "type": "grimoireknights:spell_upgrade",
+    "ability": "grimoireknights:flame_arm",
+    "level": 1
+  },
+  "icon": "minecraft:blaze_rod",
+  "x": 8,
+  "y": 1,
+  "required_rank": "knight"
+}

@@ -1,0 +1,18 @@
+{
+  "branch": "grimoire",
+  "element": "grimoireknights:fire",
+  "cost": [
+    4
+  ],
+  "requires": [
+    "grimoireknights:fire/fireball_1",
+    "grimoireknights:fire/flame_arm_1",
+    "grimoireknights:fire/ember_burst_1"
+  ],
+  "effect": {
+    "type": "grimoireknights:passive"
+  },
+  "icon": "minecraft:totem_of_undying",
+  "x": 8,
+  "y": 3
+}

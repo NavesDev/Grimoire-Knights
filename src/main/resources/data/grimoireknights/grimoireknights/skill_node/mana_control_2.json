@@ -1,0 +1,15 @@
+{
+  "branch": "mana",
+  "cost": [
+    2
+  ],
+  "requires": [
+    "grimoireknights:mana_control_1"
+  ],
+  "effect": {
+    "type": "grimoireknights:mana_control"
+  },
+  "icon": "minecraft:amethyst_shard",
+  "x": 3,
+  "y": 2
+}

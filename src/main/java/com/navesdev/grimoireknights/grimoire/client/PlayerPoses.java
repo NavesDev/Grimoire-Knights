@@ -31,7 +31,7 @@ final class PlayerPoses {
     static void onPlay(PlayerAnimationPayload payload) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || !(minecraft.level.getEntity(payload.entityId()) instanceof AbstractClientPlayer player)) return;
-        Optional<IPlayable> animation = PlayerAnimationRegistry.getAnimationOptional(payload.animation());
+        Optional<IPlayable> animation = resolve(payload.animation());
         if (animation.isEmpty()) {
             String known = PlayerAnimationRegistry.getAnimations().keySet().stream()
                     .filter(id -> id.getNamespace().equals(GrimoireKnights.MODID)).map(ResourceLocation::toString).sorted()
@@ -45,5 +45,14 @@ final class PlayerPoses {
         if (PlayerAnimationAccess.getPlayerAssociatedData(player).get(LAYER) instanceof ModifierLayer<?> layer) {
             ((ModifierLayer<IAnimation>) layer).setAnimation(animation.get().playAnimation());
         }
+    }
+
+    /** Exact id, or a short id like {@code grimoireknights:dash} matching {@code animation.player_cast.dash} in the same namespace. */
+    private static Optional<IPlayable> resolve(ResourceLocation id) {
+        Optional<IPlayable> exact = PlayerAnimationRegistry.getAnimationOptional(id);
+        if (exact.isPresent()) return exact;
+        return PlayerAnimationRegistry.getAnimations().entrySet().stream()
+                .filter(entry -> entry.getKey().getNamespace().equals(id.getNamespace()) && entry.getKey().getPath().endsWith("." + id.getPath()))
+                .map(java.util.Map.Entry::getValue).findFirst();
     }
 }

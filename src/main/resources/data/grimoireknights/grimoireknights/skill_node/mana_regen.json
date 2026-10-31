@@ -1,0 +1,19 @@
+{
+  "branch": "mana",
+  "cost": [
+    2,
+    2,
+    2,
+    2,
+    2
+  ],
+  "requires": [
+    "grimoireknights:max_mana"
+  ],
+  "effect": {
+    "type": "grimoireknights:mana_regen"
+  },
+  "icon": "minecraft:ghast_tear",
+  "x": 5,
+  "y": 1
+}

@@ -1,0 +1,12 @@
+{
+  "branch": "body",
+  "cost": [
+    2
+  ],
+  "effect": {
+    "type": "grimoireknights:dash"
+  },
+  "icon": "minecraft:rabbit_foot",
+  "x": 0,
+  "y": 0
+}

@@ -5,6 +5,7 @@ import com.navesdev.grimoireknights.ability.AbilityModule;
 import com.navesdev.grimoireknights.core.registry.CoreTabs;
 import com.navesdev.grimoireknights.core.vfx.Vfx;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
+import com.navesdev.grimoireknights.progression.ProgressionModule;
 import com.navesdev.grimoireknights.quest.QuestModule;
 import com.navesdev.grimoireknights.world.WorldModule;
 import net.neoforged.bus.api.IEventBus;
@@ -23,6 +24,7 @@ public class GrimoireKnights {
         Vfx.register(modBus);
         QuestModule.register(modBus, container);
         GrimoireModule.register(modBus, container);
+        ProgressionModule.register(modBus, container);
         AbilityModule.register(modBus, container);
         WorldModule.register(modBus, container);
     }

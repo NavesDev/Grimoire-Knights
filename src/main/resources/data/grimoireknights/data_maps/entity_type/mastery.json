@@ -1,0 +1,16 @@
+{
+  "values": {
+    "minecraft:wither": {
+      "amount": 300
+    },
+    "minecraft:ender_dragon": {
+      "amount": 500
+    },
+    "minecraft:elder_guardian": {
+      "amount": 120
+    },
+    "minecraft:warden": {
+      "amount": 250
+    }
+  }
+}
