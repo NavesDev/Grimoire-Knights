@@ -1,0 +1,25 @@
+{
+  "source": "story",
+  "giver": "grimoireknights:priest",
+  "objectives": [
+    {
+      "type": "grimoireknights:defeat",
+      "tag": "grimoireknights:trial/demon_lord",
+      "count": 1,
+      "name": "quest.grimoireknights.trial.demon_lord.target"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "grimoireknights:rank_up",
+      "rank": "magic_king"
+    },
+    {
+      "type": "grimoireknights:mastery",
+      "amount": 50
+    }
+  ],
+  "requires": [
+    "grimoireknights:trial/host"
+  ]
+}

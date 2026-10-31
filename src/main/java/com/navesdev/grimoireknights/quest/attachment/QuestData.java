@@ -41,6 +41,12 @@ public record QuestData(Map<ResourceLocation, List<Integer>> active, Set<Resourc
         return new QuestData(next, completed);
     }
 
+    public QuestData withProgress(ResourceLocation quest, List<Integer> progress) {
+        Map<ResourceLocation, List<Integer>> next = new HashMap<>(active);
+        next.put(quest, List.copyOf(progress));
+        return new QuestData(next, completed);
+    }
+
     public QuestData complete(ResourceLocation quest) {
         Set<ResourceLocation> done = new HashSet<>(completed);
         done.add(quest);
