@@ -5,7 +5,9 @@ import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.core.vfx.Vfx;
 import com.navesdev.grimoireknights.grimoire.GrimoireActivity;
 import com.navesdev.grimoireknights.progression.config.ProgressionConfig;
+import com.navesdev.grimoireknights.progression.event.DashEvent;
 import com.navesdev.grimoireknights.progression.network.DashCooldownPayload;
+import net.neoforged.neoforge.common.NeoForge;
 import com.navesdev.grimoireknights.progression.rules.DashRules;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +31,8 @@ public final class DashService {
     public static Result tryDash(ServerPlayer player, double moveX, double moveZ) {
         if (!player.isAlive() || player.isSpectator() || player.isPassenger()) return deny(player, Result.CANNOT_ACT);
         if (SkillTreeService.effectRank(player, SkillEffects.DASH) <= 0) return deny(player, Result.NOT_BOUGHT);
+        // higher features veto it (ability: held targets can't dash)
+        if (NeoForge.EVENT_BUS.post(new DashEvent(player)).isCanceled()) return deny(player, Result.CANNOT_ACT);
         long now = player.serverLevel().getGameTime();
         if (READY_AT.getOrDefault(player.getUUID(), 0L) > now) return deny(player, Result.ON_COOLDOWN);
         // Client input is only a hint: clamp it to a unit vector.

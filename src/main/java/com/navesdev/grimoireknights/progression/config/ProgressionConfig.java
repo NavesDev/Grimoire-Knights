@@ -46,7 +46,8 @@ public final class ProgressionConfig {
         COMBAT_TICKS = builder.comment("Ticks after the last hit given or taken that still count as in combat.").defineInRange("combatTicks", 200, 0, 72_000);
         builder.pop().push("rank");
         RANK_CEILINGS = builder.comment("Grimoire mastery ceiling per rank: Recruit, Knight, Elite Knight, Captain, Magic King.")
-                .defineList("ceilings", List.of(10, 20, 30, 40, 50), () -> 10, value -> value instanceof Integer i && i >= 1);
+                .defineList(List.of("ceilings"), () -> List.of(10, 20, 30, 40, 50), () -> 10, value -> value instanceof Integer i && i >= 1,
+                        ModConfigSpec.Range.of(5, 5));
         builder.pop().push("tree");
         MAX_MANA_PER_RANK = builder.comment("Max mana added by each rank of a max_mana node.").defineInRange("maxManaPerRank", 10.0, 0.0, 1e6);
         REGEN_PER_RANK = builder.comment("Mana per second added by each rank of a mana_regen node.").defineInRange("regenPerRank", 1.0, 0.0, 1e6);

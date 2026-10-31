@@ -27,7 +27,6 @@ import net.minecraft.resources.ResourceLocation;
  * mana per second (red while gliding) when they apply.
  */
 final class ManaHud {
-    private static final String[] KEYS = {"Z", "X", "C"};
     private static final int SLOT = 20;
     private static final int GAP = 2;
     private static final int BAR_WIDTH = 6;
@@ -69,7 +68,7 @@ final class ManaHud {
         graphics.fill(barX + 1, columnTop + 1, barX + BAR_WIDTH - 1, bottom - 1, EMPTY);
         graphics.fill(barX + 1, bottom - 1 - filled, barX + BAR_WIDTH - 1, bottom - 1, MANA);
 
-        for (int slot = 0; slot < KEYS.length; slot++) {
+        for (int slot = 0; slot < AbilityService.SLOTS; slot++) {
             slot(graphics, minecraft, player, element.get(), data, slot, x, columnTop + slot * (SLOT + GAP));
         }
         if (SkillTreeService.effectRank(player, SkillEffects.DASH) > 0) dash(graphics, barX - 15, bottom - 14);
@@ -100,7 +99,8 @@ final class ManaHud {
             int shade = (int) Math.ceil((SLOT - 2) * Math.min(1, (double) left / ability.get().cooldownTicks()));
             graphics.fill(x + 1, y + SLOT - 1 - shade, x + SLOT - 1, y + SLOT - 1, COOLDOWN);
         }
-        graphics.drawString(minecraft.font, KEYS[slot], x + SLOT - 6, y + SLOT - 8, 0xFFFFFFFF, true);
+        String key = AbilityClientModule.ABILITIES[slot].getTranslatedKeyMessage().getString();
+        graphics.drawString(minecraft.font, key.length() == 1 ? key : key.substring(0, 1), x + SLOT - 6, y + SLOT - 8, 0xFFFFFFFF, true);
     }
 
     /** Padlock drawn with fills: shackle and body. */

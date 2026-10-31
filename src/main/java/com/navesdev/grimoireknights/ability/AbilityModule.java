@@ -43,6 +43,8 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import com.navesdev.grimoireknights.progression.event.DashEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -122,6 +124,10 @@ public final class AbilityModule {
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, LivingDeathEvent.class, AbilityEvents::onDeath);
         NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, AbilityEvents::onIncoming);
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedOutEvent.class, AbilityEvents::onLogout);
+        NeoForge.EVENT_BUS.addListener(ServerStoppedEvent.class, event -> Delayed.clear());
+        NeoForge.EVENT_BUS.addListener(DashEvent.class, event -> {
+            if (HeldService.held(event.getEntity())) event.setCanceled(true);
+        });
         NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, event -> {
             GkCommands.register(event.getDispatcher(), AbilityCommand.mana());
             GkCommands.register(event.getDispatcher(), AbilityCommand.cooldown());

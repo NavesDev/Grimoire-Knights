@@ -9,7 +9,11 @@ import java.util.Map;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -42,12 +46,19 @@ public class WindArrowEntity extends SpellProjectile {
         if (!(level() instanceof ServerLevel server) || isRemoved()) return;
         if (tickCount % 2 == 0) Vfx.play(server, Ids.id("wind_trail"), position(), Map.of());
         if (!split && upgrade() >= 2) {
-            for (Projectile enemy : server.getEntitiesOfClass(Projectile.class, getBoundingBox().inflate(INTERCEPT),
-                    other -> !(other instanceof WindArrowEntity) && other.getOwner() != getOwner() && other.isAlive())) {
+            for (Projectile enemy : server.getEntitiesOfClass(Projectile.class, getBoundingBox().inflate(INTERCEPT), this::interceptable)) {
                 Vfx.play(server, Ids.id("wind_hit"), enemy.position(), Map.of("bonus", 0f));
                 enemy.discard();
             }
         }
+    }
+
+    /** Hostile arrows, fireballs and spells only: never tridents (the item would be lost), pearls, hooks, or allies' shots. */
+    private boolean interceptable(Projectile other) {
+        if (!other.isAlive() || other instanceof WindArrowEntity || other instanceof ThrownTrident) return false;
+        if (!(other instanceof AbstractArrow || other instanceof AbstractHurtingProjectile || other instanceof SpellProjectile)) return false;
+        Entity shooter = other.getOwner();
+        return shooter != getOwner() && !(shooter != null && getOwner() != null && shooter.isAlliedTo(getOwner()));
     }
 
     @Override

@@ -21,7 +21,7 @@ import org.lwjgl.glfw.GLFW;
 public final class AbilityClientModule {
     static final String CATEGORY = "key.categories." + GrimoireKnights.MODID;
     /** Slot keys Z, X, C (rebindable; X and C also load/save creative toolbars in vanilla). */
-    static final KeyMapping[] ABILITIES = {
+    public static final KeyMapping[] ABILITIES = {
             new KeyMapping(Ids.key("key", "ability_1"), InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, CATEGORY),
             new KeyMapping(Ids.key("key", "ability_2"), InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, CATEGORY),
             new KeyMapping(Ids.key("key", "ability_3"), InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY)};

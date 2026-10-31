@@ -74,8 +74,7 @@ public class FireballProjectile extends SpellProjectile {
         if (!(level() instanceof ServerLevel server)) return;
         double radius = AbilityConfig.FIREBALL_RADIUS.get() * scale();
         Vec3 center = position().add(0, getBbHeight() / 2, 0);
-        DamageSource source = new DamageSource(server.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE)
-                .getHolderOrThrow(AbilityModule.FIREBALL_DAMAGE), this, getOwner());
+        DamageSource source = Spells.source(server, AbilityModule.FIREBALL_DAMAGE, this, getOwner());
         if (direct != null && direct != getOwner()) hurt(direct, source, AbilityConfig.FIREBALL_DAMAGE.get());
         for (LivingEntity target : Spells.around(server, center, radius, getOwner(), target -> target != direct)) {
             hurt(target, source, AbilityConfig.FIREBALL_AREA_DAMAGE.get());

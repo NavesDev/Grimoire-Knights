@@ -1,5 +1,6 @@
 package com.navesdev.grimoireknights.quest;
 
+import com.navesdev.grimoireknights.GrimoireKnights;
 import com.navesdev.grimoireknights.quest.attachment.QuestData;
 import com.navesdev.grimoireknights.quest.event.QuestCompletedEvent;
 import com.navesdev.grimoireknights.quest.event.QuestFailedEvent;
@@ -94,7 +95,10 @@ public final class QuestService {
     /** Accepting gives only the quest the NPC offered last; anything else is ignored. */
     public static GiveResult answer(ServerPlayer player, ResourceLocation id, boolean accept) {
         ResourceLocation offered = OFFERED.remove(player.getUUID());
-        if (!id.equals(offered)) return GiveResult.UNKNOWN_QUEST;
+        if (!id.equals(offered)) {
+            GrimoireKnights.LOGGER.debug("Quest answer for {} from {} ignored: not the offered quest", id, player.getGameProfile().getName());
+            return GiveResult.UNKNOWN_QUEST;
+        }
         return accept ? give(player, id) : GiveResult.OK;
     }
 

@@ -16,6 +16,11 @@ public final class Delayed {
         TASKS.add(new Task(level, level.getGameTime() + ticks, run));
     }
 
+    /** Drops every pending step, so nothing pins a stopped server's levels. */
+    public static void clear() {
+        TASKS.clear();
+    }
+
     /** Called at the end of every level tick. */
     public static void tick(ServerLevel level) {
         List<Task> due = new ArrayList<>();

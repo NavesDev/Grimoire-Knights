@@ -34,8 +34,7 @@ public class Fireball implements Ability {
         int upgrade = SkillTreeService.upgradeLevel(player, ID);
         FireballProjectile fireball = new FireballProjectile(player.level(), player);
         fireball.withUpgrade(upgrade).withScale(upgrade >= 1 ? AbilityConfig.FIREBALL_BIG_SCALE.get().floatValue() : 1f);
-        fireball.setPos(player.getEyePosition().add(player.getLookAngle().scale(0.8)).subtract(0, 0.2, 0));
-        fireball.shoot(player.getLookAngle().x, player.getLookAngle().y, player.getLookAngle().z, AbilityConfig.FIREBALL_SPEED.get().floatValue(), 0);
+        fireball.launch(player, player.getLookAngle(), AbilityConfig.FIREBALL_SPEED.get(), AbilityConfig.FIREBALL_SPEED.get() * AbilityConfig.FIREBALL_LIFETIME_TICKS.get());
         player.level().addFreshEntity(fireball);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.8f, 1.2f);
         return true;

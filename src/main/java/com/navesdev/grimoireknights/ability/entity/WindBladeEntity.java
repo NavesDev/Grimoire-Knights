@@ -23,7 +23,9 @@ import software.bernie.geckolib.animation.RawAnimation;
 /** Crescent blade: a fast wind sickle that cuts through a few enemies and stops at blocks. */
 public class WindBladeEntity extends SpellProjectile {
     private static final RawAnimation SPIN = RawAnimation.begin().thenLoop("animation.wind_blade.spin");
-    private final Set<UUID> hit = new HashSet<>();
+    /** Shared by the blades of one wave, so a fan hits each target once. */
+    private Set<UUID> hit = new HashSet<>();
+    private int pierced;
 
     public WindBladeEntity(EntityType<? extends WindBladeEntity> type, Level level) {
         super(type, level);
@@ -31,6 +33,11 @@ public class WindBladeEntity extends SpellProjectile {
 
     public WindBladeEntity(Level level, LivingEntity owner) {
         super(AbilityModule.WIND_BLADE.get(), owner, level);
+    }
+
+    public WindBladeEntity sharing(Set<UUID> wave) {
+        hit = wave;
+        return this;
     }
 
     @Override
@@ -49,7 +56,7 @@ public class WindBladeEntity extends SpellProjectile {
         if (!(level() instanceof ServerLevel server) || !(result.getEntity() instanceof LivingEntity target)) return;
         hit.add(target.getUUID());
         WindService.hurt(server, this, getOwner(), target, AbilityConfig.BLADE_DAMAGE.get());
-        if (hit.size() >= AbilityConfig.BLADE_PIERCE.get()) discard();
+        if (++pierced >= AbilityConfig.BLADE_PIERCE.get()) discard();
     }
 
     @Override

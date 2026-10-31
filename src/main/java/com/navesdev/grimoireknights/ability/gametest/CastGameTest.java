@@ -37,7 +37,7 @@ public class CastGameTest {
         double spent = before - AbilityService.data(player).mana();
         helper.assertTrue(Math.abs(spent - AbilityConfig.FIREBALL_COST.get()) < 1e-6, "fireball cost spent, got " + spent);
         helper.assertTrue(AbilityService.tryCast(player, 0) == CastRules.Result.ON_COOLDOWN, "second cast waits for the cooldown");
-        helper.assertTrue(AbilityService.tryCast(player, 3) == CastRules.Result.NO_ABILITY, "empty slot denied");
+        helper.assertTrue(AbilityService.tryCast(player, 3) == CastRules.Result.CANNOT_ACT, "slot out of range denied");
         AbilityService.resetCooldowns(player);
         AbilityService.setMana(player, 0);
         helper.assertTrue(AbilityService.tryCast(player, 0) == CastRules.Result.NO_MANA, "no mana denied");

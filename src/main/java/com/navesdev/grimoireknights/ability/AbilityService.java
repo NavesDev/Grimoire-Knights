@@ -24,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
 
 /** Mana, cooldowns and casting, on the server. */
 public final class AbilityService {
-    private static final String[] SLOT_KEYS = {"Z", "X", "C"};
+    public static final int SLOTS = 3;
 
     private AbilityService() {}
 
@@ -81,6 +81,10 @@ public final class AbilityService {
 
     /** Validates grimoire, slot, cooldown and mana, then casts. Anything off denies. */
     public static CastRules.Result tryCast(ServerPlayer player, int slot) {
+        if (slot < 0 || slot >= SLOTS) {
+            GrimoireKnights.LOGGER.debug("Cast denied for {}: slot {} out of range", player.getGameProfile().getName(), slot);
+            return CastRules.Result.CANNOT_ACT;
+        }
         ensureMana(player);
         Optional<Element> element = GrimoireService.element(player);
         Optional<ResourceLocation> id = element.flatMap(e -> e.ability(slot));
@@ -93,7 +97,7 @@ public final class AbilityService {
         if (result != CastRules.Result.OK) {
             GrimoireKnights.LOGGER.debug("Cast denied for {} slot {}: {}", player.getGameProfile().getName(), slot, result);
             if (result == CastRules.Result.LOCKED) player.displayClientMessage(Component.translatable(Ids.key("message", "cast.locked"),
-                    SLOT_KEYS[slot], RankService.name(RankRules.slotRank(slot))).withStyle(ChatFormatting.RED), true);
+                    Component.keybind(Ids.key("key", "ability_" + (slot + 1))), RankService.name(RankRules.slotRank(slot))).withStyle(ChatFormatting.RED), true);
             return result;
         }
         if (!ability.get().cast(player)) {

@@ -30,6 +30,7 @@ public class TornadoEntity extends SpellProjectile {
     private static final RawAnimation HOLD = RawAnimation.begin().thenLoop("animation.tornado.hold");
     private static final EntityDataAccessor<Boolean> HOLDING = SynchedEntityData.defineId(TornadoEntity.class, EntityDataSerializers.BOOLEAN);
     private LivingEntity target;
+    private Vec3 flight = Vec3.ZERO;
     private int heldTicks;
 
     public TornadoEntity(EntityType<? extends TornadoEntity> type, Level level) {
@@ -64,6 +65,7 @@ public class TornadoEntity extends SpellProjectile {
     protected void onHitEntity(EntityHitResult result) {
         if (!(level() instanceof ServerLevel server) || target != null || !(result.getEntity() instanceof LivingEntity caught)) return;
         target = caught;
+        flight = new Vec3(getDeltaMovement().x, 0, getDeltaMovement().z);
         setDeltaMovement(Vec3.ZERO);
         setPos(caught.position().add(0, caught.getBbHeight() / 2 - getBbHeight() / 2, 0));
         entityData.set(HOLDING, true);
@@ -86,7 +88,7 @@ public class TornadoEntity extends SpellProjectile {
         HeldService.release(target);
         if (upgrade() >= 2 && target.isAlive()) {
             WindService.hurt(server, this, getOwner(), target, AbilityConfig.TORNADO_STONE_DAMAGE.get());
-            Vec3 push = getDeltaMovement().lengthSqr() > 0 ? getDeltaMovement().normalize() : target.position().subtract(position()).normalize();
+            Vec3 push = flight.lengthSqr() > 1e-6 ? flight.normalize() : Vec3.ZERO;
             target.setDeltaMovement(push.x * 1.2, 0.6, push.z * 1.2);
             target.hurtMarked = true;
         }

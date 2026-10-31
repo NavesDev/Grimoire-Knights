@@ -44,6 +44,31 @@ public class SpellGameTest {
     }
 
     @GameTest(template = "empty")
+    public static void theBurnDealsItsWholeDamage(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        Pig pig = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 1.5));
+        float health = pig.getHealth();
+        BurnService.ignite(pig, caster);
+        for (int i = 0; i <= AbilityConfig.BURN_DURATION_TICKS.get() + 1; i++) {
+            if (pig.hasData(AbilityModule.BURN)) BurnService.tick(pig);
+        }
+        helper.assertTrue(Math.abs(health - pig.getHealth() - AbilityConfig.BURN_DAMAGE.get()) < 1e-3, "full burn dealt, got " + (health - pig.getHealth()));
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void aHeldPlayerCannotDash(GameTestHelper helper) {
+        ServerPlayer player = TestPlayers.create(helper);
+        SkillTreeService.setPoints(player, com.navesdev.grimoireknights.progression.Masteries.BODY, 2);
+        SkillTreeService.buy(player, Ids.id("dash"));
+        HeldService.hold(player, helper.getLevel().getGameTime() + 40);
+        helper.assertTrue(com.navesdev.grimoireknights.progression.DashService.tryDash(player, 1, 0) == com.navesdev.grimoireknights.progression.DashService.Result.CANNOT_ACT, "held: no dash");
+        HeldService.release(player);
+        com.navesdev.grimoireknights.progression.DashService.forget(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void emberBurstDetonatesTheBurnAndPutsItOut(GameTestHelper helper) {
         ServerPlayer caster = TestPlayers.create(helper);
         GrimoireService.give(caster, Ids.id("fire"), GrimoireService.CEREMONY_LEAVES);
