@@ -33,6 +33,25 @@ const loop = (length, pose) => {
   return { loop: 'loop', length, bones };
 };
 
+// Key poses [time, {bone: [x, y, z]}] eased between, plus a tremor (degrees) whose strength follows
+// shake(t) (0 for none). Sampled every 0.05 s. A part with no key poses is left out of the animation.
+const acted = (length, poses, shake, seedNo) => {
+  const rnd = K.rng(seedNo), bones = {}, r2 = n => Math.round(n * 100) / 100;
+  const names = [...new Set(poses.flatMap(([, p]) => Object.keys(p)))];
+  for (let t = 0; t <= length + 1e-6; t += 0.05) {
+    const tt = r2(Math.min(t, length));
+    names.forEach(b => {
+      const ks = poses.filter(([, p]) => p[b]);
+      let i = ks.findIndex(([kt]) => kt >= tt);
+      if (i < 0) i = ks.length - 1;
+      const [ta, pa] = ks[Math.max(0, i - 1)], [tb, pb] = ks[i];
+      const s = tb > ta ? Math.min(1, Math.max(0, (tt - ta) / (tb - ta))) : 1, e = s * s * (3 - 2 * s), q = shake(tt);
+      const v = pa[b].map((x, j) => r2(x + (pb[b][j] - x) * e + (b === 'body' && j === 1 ? 0 : (rnd() - 0.5) * 2 * q)));
+      ((bones[b] ||= {}).rotation ||= []).push([tt, v]);
+    });
+  }
+  return { loop: 'once', length, bones };
+};
 const animations = {
   // Walk: sword held low in front, blade forward; the free arm and the legs follow the step.
   walk: loop(1, p => ({
@@ -52,4 +71,4 @@ const animations = {
   }))
 };
 
-module.exports = { name: 'player_sword', group: 'player', kind: 'player', spec, animations, loop, textures: { player_sword: painter } };
+module.exports = { name: 'player_sword', group: 'player', kind: 'player', spec, animations, loop, acted, textures: { player_sword: painter } };

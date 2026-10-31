@@ -1,0 +1,99 @@
+{
+	"format_version": "1.10.0",
+	"particle_effect": {
+		"description": {
+			"identifier": "grimoireknights:phoenix_embers",
+			"basic_render_parameters": {
+				"material": "particles_add",
+				"texture": "textures/particle/spark"
+			}
+		},
+		"components": {
+			"minecraft:emitter_lifetime_once": {
+				"active_time": 1.2
+			},
+			"minecraft:emitter_rate_steady": {
+				"spawn_rate": 40,
+				"max_particles": 60
+			},
+			"minecraft:emitter_shape_disc": {
+				"offset": [
+					0,
+					0,
+					0
+				],
+				"radius": 1.2,
+				"plane_normal": [
+					0,
+					1,
+					0
+				],
+				"direction": [
+					"math.random(-0.3, 0.3)",
+					1,
+					"math.random(-0.3, 0.3)"
+				]
+			},
+			"minecraft:particle_lifetime_expression": {
+				"max_lifetime": "math.random(0.8, 1.4)"
+			},
+			"minecraft:particle_initial_speed": "math.random(1.5, 3)",
+			"minecraft:particle_motion_dynamic": {
+				"linear_acceleration": [
+					0,
+					0,
+					0
+				],
+				"linear_drag_coefficient": 1
+			},
+			"minecraft:particle_appearance_billboard": {
+				"size": [
+					"math.lerp(0.07, 0.02, variable.particle_age / variable.particle_lifetime)",
+					"math.lerp(0.07, 0.02, variable.particle_age / variable.particle_lifetime)"
+				],
+				"facing_camera_mode": "lookat_direction",
+				"uv": {
+					"texture_width": 8,
+					"texture_height": 8,
+					"uv": [
+						0,
+						0
+					],
+					"uv_size": [
+						8,
+						8
+					]
+				},
+				"direction": {
+					"mode": "derive_from_velocity",
+					"min_speed_threshold": 0.01
+				}
+			},
+			"minecraft:particle_appearance_tinting": {
+				"color": {
+					"gradient": {
+						"0.00": [
+							1,
+							0.984,
+							0.902,
+							1
+						],
+						"0.50": [
+							1,
+							0.694,
+							0.18,
+							0.85
+						],
+						"1.00": [
+							1,
+							0.369,
+							0.055,
+							0
+						]
+					},
+					"interpolant": "variable.particle_age / variable.particle_lifetime"
+				}
+			}
+		}
+	}
+}

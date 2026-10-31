@@ -1,6 +1,6 @@
 """Particle textures for the Blockbench effects (docs/vfx.md). Run: python3 art/particles/textures.py
 
-Pixel art in the mod's fire palette; flipbooks stack 16x16 frames vertically, like Blockbench expects.
+Pixel art in the mod's fire palette and white wind; flipbooks stack 16x16 frames vertically, like Blockbench expects.
 Deterministic: same seed, same PNGs.
 """
 import math
@@ -11,6 +11,7 @@ from PIL import Image
 
 OUT = Path(__file__).resolve().parents[2] / 'src/main/resources/assets/grimoireknights/vfx/textures/particle'
 FIRE = ['#fffbe6', '#fff19a', '#ffd23f', '#ffb12e', '#ff7a12', '#e0420c', '#a81e08']
+WIND = ['#ffffff', '#f4f8fb', '#e9f0f5', '#cfdbe4']
 SMOKE = ['#6a625c', '#58514c', '#4a4440', '#3a3532', '#2c2826']
 
 
@@ -107,9 +108,61 @@ def ring(size=64):
     save(img, 'shockwave')
 
 
+def wind_streak(size=16):
+    """A thin gust line, bright in the middle and frayed at the ends; stretched by the emitter."""
+    rnd = random.Random(31)
+    img = Image.new('RGBA', (size, size))
+    for x in range(size):
+        t = abs(x - (size - 1) / 2) / (size / 2)
+        for y in (7, 8):
+            if rnd.random() < t * 0.6:
+                continue
+            img.putpixel((x, y), rgba(WIND[min(3, int(t * 4))], int(255 * (1 - t ** 2))))
+        if t < 0.5 and rnd.random() < 0.5:
+            img.putpixel((x, 6 if x % 2 else 9), rgba(WIND[3], 120))
+    save(img, 'wind_streak')
+
+
+def wind_ring(size=64):
+    """A gusty white ring seen from above: thin broken band, transparent inside."""
+    rnd = random.Random(37)
+    img = Image.new('RGBA', (size, size))
+    c = (size - 1) / 2
+    for y in range(size):
+        for x in range(size):
+            d = math.hypot(x - c, y - c) / (size / 2)
+            a = math.atan2(y - c, x - c)
+            edge = 0.88 + 0.04 * math.sin(a * 5)
+            band = abs(d - edge) / 0.07
+            if band > 1 or math.sin(a * 6 + d * 8) < -0.55 or rnd.random() < band * 0.4:
+                continue
+            img.putpixel((x, y), rgba(WIND[min(3, int(band * 3))], int(255 * (1 - band ** 2))))
+    save(img, 'wind_ring')
+
+
+def wind_wisp(frames=8, size=16):
+    """A small white swirl that curls open and thins out over the frames."""
+    rnd = random.Random(41)
+    img = Image.new('RGBA', (size, size * frames))
+    c = (size - 1) / 2
+    for f in range(frames):
+        t = f / (frames - 1)
+        for k in range(60):
+            s = k / 59
+            a = s * (4 + 2 * t) + f * 0.4
+            r = s * (size / 2 - 1) * (0.6 + 0.4 * t)
+            x, y = round(c + math.cos(a) * r), round(c + math.sin(a) * r)
+            if 0 <= x < size and 0 <= y < size and rnd.random() > 0.2 + 0.5 * t:
+                img.putpixel((x, f * size + y), rgba(WIND[min(3, int(s * 2 + t * 2))], int(255 * (1 - 0.6 * t))))
+    save(img, 'wind_wisp')
+
+
 if __name__ == '__main__':
     flame()
     smoke()
     spark()
     glow()
     ring()
+    wind_streak()
+    wind_ring()
+    wind_wisp()

@@ -12,6 +12,7 @@
 | `assets/grimoireknights/geo/<feature>/` | Generated; geometry used by the game |
 | `assets/grimoireknights/textures/{entity,block}/<feature>/` | Generated; textures and variants |
 | `assets/grimoireknights/animations/<feature>/` | Generated; animations used by the game |
+| `art/items/icons.py` | Source of the 16x16 inventory icons (`textures/item/`); run with `python3` |
 
 ## Rules
 - Model changes go in the `.js`. Hand edits to `.geo.json`, `.png` or `.bbmodel` are lost on the next generation.
@@ -37,6 +38,10 @@ Blockbench doesn't load files with `require`; the snippet above reads each `.js`
 - **Mantle:** open front (two flaps and a collar with a clasp), crest plate on the left flap. The black squad uses dark dye on `_cloth`.
 - **Demon form:** a layer over the player. Bones `s1_` to `s4_` are the stages (arm, half body, full form, union); the renderer shows all of them up to the current stage, and a hidden bone hides its children. Stages 1 to 3 are black only (anti-magic): 1 right arm and tentacles on the chest; 2 right horn and small wing; 3 left arm with its tentacles and both full wings (the small one stays hidden inside the right one), torso and legs still showing. Stage 4 (union) covers torso and legs and adds the left horn, black headband with the red mark, fixed red marks (chest; spiked stripe on the front and back of the arms and on the shin), pauldrons with a raised red star, claws and tail. The player's face stays visible. Wings (dark black, torn flame) and the headband front are planes with the shape cut out in the texture; wings, tentacles, marks and tail tip use transparency: render with the cutout render type.
 - **Renegade captain:** same skeleton as the mage; the bigger size comes from the renderer's scale.
+- **Wind:** air is white in every wind model (`wind_painter.js`), never green, and see-through: the `gust` material fades and breaks at the edges. Render wind with a translucent render type, without back-face culling. The wind blade, bow and arrow are thin cubes chained into strokes and curls; the tornado mixes a core of thin cubes with planes that have the funnel and rings drawn on the texture as smooth strokes.
+- **Fireball upgrade (bigger projectile):** scale in the renderer; no new model.
+- **Tornado:** a `core` of thin streaks winding around the flight axis, four planes crossing on the axis with the funnel's swirling lines, and rings of broken arcs facing forward; code also plays the `tornado_gust` VFX on it. `blades` (mini wind blades) and `stones` (rocks pulled from the ground) are upgrade parts: the renderer hides them until the upgrade is unlocked.
+- **Wind bow:** tangled see-through streams lying almost flat in front of the player, with broad gusts hooking at the tips (seeded noise in `wind_bow.js`, same every run); the tip gusts sway in every animation. Shoots north; `nocked_arrow` only shows during `draw`. The 6 arrows that fly are `wind_arrow` entities spawned by code at the end of `draw`; the 3-way split of the upgrade is code too.
 - **Anchors:** `grimoire_anchor` (mages) and `book_anchor` (altar) mark where the grimoire floats.
 
 ## Animations
@@ -90,6 +95,27 @@ Same `humanoid` as the mage (`idle`, `walk`) plus `bless` (1.4 s, on clicking it
 | Animation | Loop | Use |
 |---|---|---|
 | `spin` | loop | Core pulses, two shells spin in opposite directions, 6 tongues flicker each at its own pace, chained trail whips, embers orbit |
+
+### Flame fist
+Fire magic 2 (flame arm): a giant hand of fire that flies open, grabs the first target and slams it into the ground. Same materials as the fireball. Rest pose is the open hand, turned on its side (`side` bone: thumb up) so the fingers close sideways around the target. Size it in the renderer so the hand covers a player's torso, head and legs showing.
+
+| Animation | Loop | Use |
+|---|---|---|
+| `fly` | loop | Open hand swims: rolls and yaws a little, fingers ripple one after another, forearm and trail lag behind |
+| `grab` | hold | 0.25 s: lunges a little, fingers snap shut one after another past the fist and settle, thumb locks last |
+| `slam` | once | 0.45 s: code lifts fist and target 2 blocks (0-0.3 s) and drives them down (0.3-0.45 s); the fist dips, rises leaning back, whips down and squashes; impact at 0.45 s |
+| `impact` | once | 0.3 s: after the slam or on hitting a block: squashes and flares out; `flame_fist_explosion` VFX takes over |
+
+### Wind spells
+| Model | Animation | Loop | Use |
+|---|---|---|---|
+| Wind blade | `spin` | loop | Crescent blade (magic 1): a thin crescent slash like a "(", a little thicker in the middle with pointed tips; rocks on its flight axis and breathes. The upgrade fan and line volley are several blades spawned by code |
+| Tornado | `spin` | loop | Tornado fang (magic 2) flying: the funnel turns and each ring spins at its own speed |
+| Tornado | `hold` | loop | A target is trapped: twice as fast, rings squeeze in and out |
+| Wind bow | `summon` | hold | White gale bow (magic 3), 0.3 s: swirls in with a half turn |
+| Wind bow | `draw` | hold | 0.5 s: arrow appears on the string, string pulled back, limbs bend |
+| Wind bow | `release` | once | 0.6 s: string snaps forward, then the bow blows away |
+| Wind arrow | `fly` | loop | Spins around the shaft (">" head of swept-back barbs, wind hooks along the shaft, tail wisps) |
 
 ### Swords (`sword_anim.js`)
 Strikes and specials are player poses (playerAnimator); the sword only comes in and out. `root` rotates around the base of the pommel: during `summon` and `sheath` the renderer puts that base on the grimoire's `sword_anchor`, and the sword grows out of the pages from it. `summon` starts 0.35 s after the grimoire's `draw`; at the end the sword passes to the hand. In `summon` and `sheath` the `sword` bone rotates 90° on y (-90° on the katana, which has a single edge): the blade comes out in profile to the player, edge forward.
@@ -163,6 +189,18 @@ Rig `player_demon.js`: flight in demon form, each pose with the `fly_<dir>` of t
 | `dash` | loop 0.4 s | Dash: body flat, right fist forward, legs together |
 | `awaken` | once 4.1 s | Together with the demon form's `awaken`: hunches gripping the arm, trembles, opens the arms when the wings burst, hunches again at the union and stands up |
 | `revert` | once 4.1 s | Together with `revert`: the power drains, gets exhausted and recovers at the end |
+
+Rig `player_cast.js`: casting and dash. The cast poses key only `torso` and the arms; code turns the other parts off so the legs keep walking and the head follows the look. Each cast has the moment the spell leaves.
+
+| Animation | Length | Spell leaves | Use |
+|---|---|---|---|
+| `cast_z` | 0.6 s | 0.15 s | Z (fireball, crescent blade): right hand thrown forward |
+| `cast_x_fire` | 0.45 s, hold | 0.25 s | X fire (flame arm): pulls the arm back and thrusts the open hand; holds the reach until the grab |
+| `cast_x_fire_slam` | 0.8 s | - | X fire, on the grab: hauls the fist overhead and yanks it down with the hand's `slam` (impact at 0.45 s) |
+| `cast_x_wind` | 0.8 s | 0.3 s | X wind (tornado fang): two hands from the chest, pushed forward |
+| `cast_c_fire` | 1 s | 0.45 s | C fire (ember burst): arms crossed, then flung open |
+| `cast_c_wind` | 1.4 s | 0.8 s | C wind (white gale bow): left arm holds the bow, right hand draws and lets go, in step with the bow's `summon`, `draw` and `release` |
+| `dash` | 0.3 s | - | Whole body leans into the dash, arms swept back, legs split |
 
 Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering.
 

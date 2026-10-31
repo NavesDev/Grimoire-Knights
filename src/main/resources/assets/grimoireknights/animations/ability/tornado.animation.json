@@ -1,0 +1,215 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.tornado.spin": {
+			"loop": true,
+			"animation_length": 1,
+			"bones": {
+				"funnel": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -360"
+						]
+					}
+				},
+				"core": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -720"
+						]
+					}
+				},
+				"ring_1": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -720"
+						]
+					}
+				},
+				"ring_2": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -1080"
+						]
+					}
+				},
+				"ring_3": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -1440"
+						]
+					}
+				},
+				"ring_4": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -720"
+						]
+					}
+				},
+				"ring_5": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -1080"
+						]
+					}
+				},
+				"blades": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -720"
+						]
+					}
+				},
+				"stones": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360 + 0) * 4",
+							0,
+							"query.anim_time * -360"
+						]
+					}
+				}
+			}
+		},
+		"animation.tornado.hold": {
+			"loop": true,
+			"animation_length": 0.5,
+			"bones": {
+				"funnel": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -720"
+						]
+					}
+				},
+				"core": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -1440"
+						]
+					}
+				},
+				"ring_1": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -1440"
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 720 + 0) * 0.08",
+							"1 + math.sin(query.anim_time * 720 + 0) * 0.08",
+							1
+						]
+					}
+				},
+				"ring_2": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -2160"
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 720 + 60) * 0.08",
+							"1 + math.sin(query.anim_time * 720 + 60) * 0.08",
+							1
+						]
+					}
+				},
+				"ring_3": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -2880"
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 720 + 120) * 0.08",
+							"1 + math.sin(query.anim_time * 720 + 120) * 0.08",
+							1
+						]
+					}
+				},
+				"ring_4": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -1440"
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 720 + 180) * 0.08",
+							"1 + math.sin(query.anim_time * 720 + 180) * 0.08",
+							1
+						]
+					}
+				},
+				"ring_5": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -2160"
+						]
+					},
+					"scale": {
+						"vector": [
+							"1 + math.sin(query.anim_time * 720 + 240) * 0.08",
+							"1 + math.sin(query.anim_time * 720 + 240) * 0.08",
+							1
+						]
+					}
+				},
+				"blades": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * -1440"
+						]
+					}
+				},
+				"stones": {
+					"rotation": {
+						"vector": [
+							"-math.sin(query.anim_time * 360 + 0) * 4",
+							0,
+							"query.anim_time * -720"
+						]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

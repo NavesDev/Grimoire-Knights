@@ -4,6 +4,9 @@ Mod changes, newest first. Format based on [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Added
+- **Stage 2 models, animations and VFX** (#5): flame fist that grabs and slams, wind blade, tornado, wind bow and arrow made of tangled gusts; cast poses for Z, X and C and the dash pose; ground fire, flame fist explosion, ember burst, burn, phoenix revive, wind trail, wind hit, tailwind and dash effects; mana dust and broom icons.
+
 ## [0.1.0] - 2026-10-30
 
 ### Added

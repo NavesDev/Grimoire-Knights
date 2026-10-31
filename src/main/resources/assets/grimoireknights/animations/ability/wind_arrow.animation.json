@@ -1,0 +1,21 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.wind_arrow.fly": {
+			"loop": true,
+			"animation_length": 0.5,
+			"bones": {
+				"arrow": {
+					"rotation": {
+						"vector": [
+							0,
+							0,
+							"query.anim_time * 720"
+						]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}
