@@ -54,7 +54,152 @@ FIREBALL = {
     ],
 }
 
-ICONS = {'element/fire': FIRE, 'ability/fireball': FIREBALL}
+FIRE_PAL = {'k': '#3a1204', 'r': '#c8320f', 'o': '#f0701e', 'y': '#ffb43c', 'w': '#fff2b0'}
+WIND_PAL = {'k': '#3c4a5a', 'g': '#8fa6bd', 'l': '#cfdeec', 'w': '#ffffff'}
+
+# Fire, magic 2: an open hand of fire, fingers up.
+FLAME_ARM = {'palette': FIRE_PAL, 'rows': [
+    '.....k.k.k......',
+    '....kokokok.....',
+    '....kokokok.....',
+    '....kokokok.k...',
+    '....kokokokkok..',
+    '....koyoyokok...',
+    '.k..koyyyyookk..',
+    'kok.koyyyyyyok..',
+    '.kokkoywwwyyok..',
+    '..koooywwwyyok..',
+    '..kooyywwyyook..',
+    '...kooyyyyook...',
+    '....kroooork....',
+    '.....krrrrk.....',
+    '.....krrrrk.....',
+    '......kkkk......',
+]}
+
+# Fire, magic 3: embers bursting out of a hot core.
+EMBER_BURST = {'palette': FIRE_PAL, 'rows': [
+    '.......y........',
+    '..o....o....o...',
+    '...o...o...o....',
+    '....r..r..r.....',
+    '.y...kkkkk...y..',
+    '..ork.ooo.kro...',
+    '....kooyook.....',
+    'yoorkoywyokrrooy',
+    '....kooyook.....',
+    '..ork.ooo.kro...',
+    '.y...kkkkk...y..',
+    '....r..r..r.....',
+    '...o...o...o....',
+    '..o....o....o...',
+    '.......y........',
+    '................',
+]}
+
+# Wind element: three white gusts curling.
+WIND = {'palette': WIND_PAL, 'rows': [
+    '................',
+    '..........lll...',
+    '.........l...l..',
+    '.lllllllll....l.',
+    'wwwwwwwwww...l..',
+    '..........lll...',
+    '...gllllllll....',
+    '..wwwwwwwwwwwl..',
+    '.............l..',
+    '....lllllll.l...',
+    '...wwwwwwwwl....',
+    '........l.......',
+    '.......l.l......',
+    '........l.......',
+    '................',
+    '................',
+]}
+
+# Wind, magic 1: a crescent slash like "(".
+CRESCENT_BLADE = {'palette': WIND_PAL, 'rows': [
+    '.........ll.....',
+    '.......lwl......',
+    '......lwl.......',
+    '.....lwwl.......',
+    '....lwwl........',
+    '....lwwl........',
+    '...lwwwl........',
+    '...lwwwl........',
+    '...lwwwl........',
+    '...lwwwl........',
+    '....lwwl........',
+    '....lwwl........',
+    '.....lwwl.......',
+    '......lwl.......',
+    '.......lwl......',
+    '.........ll.....',
+]}
+
+# Wind, magic 2: a tornado lying on its side.
+TORNADO_FANG = {'palette': WIND_PAL, 'rows': [
+    '................',
+    '...........ll...',
+    '.......llllwwl..',
+    '....lllwwwwwwwl.',
+    '..llwwwgggwwwwl.',
+    '.lwwgg...gggwl..',
+    'lwwg..lll..gwl..',
+    'lwg..lwwwl..gwl.',
+    'lwg..lwwwl..gwl.',
+    'lwwg..lll..gwl..',
+    '.lwwgg...gggwl..',
+    '..llwwwgggwwwwl.',
+    '....lllwwwwwwwl.',
+    '.......llllwwl..',
+    '...........ll...',
+    '................',
+]}
+
+# Wind, magic 3: a white bow with an arrow nocked.
+GALE_BOW = {'palette': WIND_PAL, 'rows': [
+    '.....ll.........',
+    '....lwwl........',
+    '...lwl.l........',
+    '...wl...l.......',
+    '..lw.....l......',
+    '..wl......l.....',
+    '..wl.......l....',
+    'wwwwwwwwwwwwwwl.',
+    '..wl.......l....',
+    '..wl......l.....',
+    '..lw.....l......',
+    '...wl...l.......',
+    '...lwl.l........',
+    '....lwwl........',
+    '.....ll.........',
+    '................',
+]}
+
+# Body dash: a runner's streaks.
+DASH = {'palette': WIND_PAL, 'rows': [
+    '................',
+    '..........kk....',
+    '.........kwwk...',
+    '.........kwwk...',
+    '..........kk....',
+    '.llll....kwk....',
+    '........kwwwk...',
+    'llllll.kwkwwk...',
+    '.......k.kwwk...',
+    '..llll...kwk....',
+    '.........kwk....',
+    '........kw.wk...',
+    '.......kw...wk..',
+    '......kw.....k..',
+    '................',
+    '................',
+]}
+
+ICONS = {'element/fire': FIRE, 'element/wind': WIND, 'ability/fireball': FIREBALL, 'ability/flame_arm': FLAME_ARM,
+         'ability/ember_burst': EMBER_BURST, 'ability/crescent_blade': CRESCENT_BLADE, 'ability/tornado_fang': TORNADO_FANG,
+         'ability/gale_bow': GALE_BOW, 'ability/dash': DASH}
 
 
 def render(icon):
