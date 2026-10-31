@@ -71,7 +71,7 @@ public final class AbilityModule {
         NeoForge.EVENT_BUS.addListener(PlayerTickEvent.Post.class, AbilityEvents::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(EntityTickEvent.Post.class, AbilityEvents::onEntityTick);
         NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, event -> {
-            GkCommands.register(event.getDispatcher(), AbilityCommand.status());
+            GkCommands.register(event.getDispatcher(), AbilityCommand.mana());
             GkCommands.register(event.getDispatcher(), AbilityCommand.cooldown());
         });
     }

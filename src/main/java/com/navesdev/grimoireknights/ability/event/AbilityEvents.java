@@ -3,7 +3,6 @@ package com.navesdev.grimoireknights.ability.event;
 import com.navesdev.grimoireknights.ability.AbilityModule;
 import com.navesdev.grimoireknights.ability.AbilityService;
 import com.navesdev.grimoireknights.ability.BurnService;
-import com.navesdev.grimoireknights.ability.config.AbilityConfig;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -23,7 +22,7 @@ public final class AbilityEvents {
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player && player.tickCount % REGEN_INTERVAL == 0) {
             AbilityService.ensureMana(player);
-            AbilityService.regenerate(player, AbilityConfig.MANA_REGEN_PER_SECOND.get() * REGEN_INTERVAL / 20.0);
+            AbilityService.regenerate(player, AbilityService.regenPerSecond(player) * REGEN_INTERVAL / 20.0);
         }
     }
 

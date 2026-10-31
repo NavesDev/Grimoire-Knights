@@ -6,7 +6,6 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class AbilityConfig {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.DoubleValue MANA_BASE;
-    public static final ModConfigSpec.DoubleValue MANA_PER_POINT;
     public static final ModConfigSpec.DoubleValue MANA_REGEN_PER_SECOND;
     public static final ModConfigSpec.DoubleValue FIREBALL_COST;
     public static final ModConfigSpec.DoubleValue FIREBALL_DAMAGE;
@@ -22,9 +21,8 @@ public final class AbilityConfig {
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         builder.push("mana");
-        MANA_BASE = builder.comment("Maximum mana with the Mana stat at 0.").defineInRange("base", 100.0, 0.0, 100_000.0);
-        MANA_PER_POINT = builder.comment("Maximum mana added by each Mana stat point.").defineInRange("perPoint", 10.0, 0.0, 10_000.0);
-        MANA_REGEN_PER_SECOND = builder.comment("Current mana regenerated per second.").defineInRange("regenPerSecond", 5.0, 0.0, 10_000.0);
+        MANA_BASE = builder.comment("Maximum mana before the Mana branch nodes.").defineInRange("base", 100.0, 0.0, 100_000.0);
+        MANA_REGEN_PER_SECOND = builder.comment("Current mana regenerated per second, before the Mana branch nodes.").defineInRange("regenPerSecond", 5.0, 0.0, 10_000.0);
         builder.pop().push("fireball");
         FIREBALL_COST = builder.comment("Mana spent per fireball.").defineInRange("cost", 20.0, 0.0, 100_000.0);
         FIREBALL_DAMAGE = builder.comment("Damage on hit (2 = one heart).").defineInRange("damage", 6.0, 0.0, 1_000.0);

@@ -7,6 +7,10 @@ import com.navesdev.grimoireknights.ability.rules.CastRules;
 import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.core.gametest.TestPlayers;
 import com.navesdev.grimoireknights.grimoire.GrimoireService;
+import com.navesdev.grimoireknights.progression.Masteries;
+import com.navesdev.grimoireknights.progression.SkillTreeService;
+import com.navesdev.grimoireknights.progression.config.ProgressionConfig;
+import com.navesdev.grimoireknights.progression.rules.SkillTreeRules;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,7 +37,7 @@ public class CastGameTest {
         double spent = before - AbilityService.data(player).mana();
         helper.assertTrue(Math.abs(spent - AbilityConfig.FIREBALL_COST.get()) < 1e-6, "fireball cost spent, got " + spent);
         helper.assertTrue(AbilityService.tryCast(player, 0) == CastRules.Result.ON_COOLDOWN, "second cast waits for the cooldown");
-        helper.assertTrue(AbilityService.tryCast(player, 1) == CastRules.Result.NO_ABILITY, "empty slot denied");
+        helper.assertTrue(AbilityService.tryCast(player, 3) == CastRules.Result.NO_ABILITY, "empty slot denied");
         AbilityService.resetCooldowns(player);
         AbilityService.setMana(player, 0);
         helper.assertTrue(AbilityService.tryCast(player, 0) == CastRules.Result.NO_MANA, "no mana denied");
@@ -48,9 +52,9 @@ public class CastGameTest {
         AbilityService.setMana(player, max - 1);
         AbilityService.regenerate(player, 5);
         helper.assertTrue(AbilityService.data(player).mana() == max, "regeneration stops at the max");
-        AbilityService.setManaStat(player, 5);
-        helper.assertTrue(AbilityService.data(player).mana() == AbilityService.maxMana(player) && AbilityService.maxMana(player) > max,
-                "raising the Mana stat raises max and current");
+        SkillTreeService.addPoints(player, Masteries.MANA, 1);
+        helper.assertTrue(SkillTreeService.buy(player, Ids.id("max_mana")) == SkillTreeRules.Result.OK, "max mana node bought");
+        helper.assertTrue(AbilityService.maxMana(player) == max + ProgressionConfig.MAX_MANA_PER_RANK.get(), "the max mana node raises the max");
         helper.succeed();
     }
 }
