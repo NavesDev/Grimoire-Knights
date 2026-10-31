@@ -27,6 +27,15 @@ class BurnRulesTest {
     }
 
     @Test
+    void damageLandsEverySecondUpToTheLastTick() {
+        long hits = java.util.stream.IntStream.rangeClosed(0, 80).filter(since -> BurnRules.damageTick(since, 80)).count();
+        assertEquals(4, hits);
+        assertEquals(false, BurnRules.damageTick(0, 80));
+        assertEquals(true, BurnRules.damageTick(80, 80));
+        assertEquals(false, BurnRules.damageTick(100, 80));
+    }
+
+    @Test
     void rejectsInvalidInput() {
         assertThrows(IllegalArgumentException.class, () -> BurnRules.damagePerSecond(4, 0));
         assertThrows(IllegalArgumentException.class, () -> BurnRules.remaining(-1, 4, 80));

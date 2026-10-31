@@ -14,6 +14,11 @@ public final class BurnRules {
         return totalDamage * 20.0 / durationTicks;
     }
 
+    /** Whether the burn deals its damage this tick: once a second after the hit, the last one on the final tick. */
+    public static boolean damageTick(int ticksSinceHit, int durationTicks) {
+        return ticksSinceHit > 0 && ticksSinceHit <= durationTicks && ticksSinceHit % 20 == 0;
+    }
+
     /** Burn damage still to come, used by Ember burst to deal it at once. */
     public static double remaining(int ticksLeft, double totalDamage, int durationTicks) {
         if (ticksLeft < 0 || durationTicks <= 0) throw new IllegalArgumentException("invalid burn");

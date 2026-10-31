@@ -39,13 +39,13 @@ public final class BurnService {
 
     public static void tick(LivingEntity entity) {
         BurnData burn = entity.getData(AbilityModule.BURN);
-        if (burn.ticksLeft() <= 0 || !entity.isAlive() || !(entity.level() instanceof ServerLevel level)) {
+        if (burn.ticksLeft() < 0 || !entity.isAlive() || !(entity.level() instanceof ServerLevel level)) {
             entity.removeData(AbilityModule.BURN);
             return;
         }
         // Counted from the last hit, so the first tick of damage lands after the hit's invulnerability.
         int sinceHit = AbilityConfig.BURN_DURATION_TICKS.get() - burn.ticksLeft();
-        if (sinceHit > 0 && sinceHit % SECOND == 0) {
+        if (BurnRules.damageTick(sinceHit, AbilityConfig.BURN_DURATION_TICKS.get())) {
             float damage = (float) BurnRules.damagePerSecond(AbilityConfig.BURN_DAMAGE.get(), AbilityConfig.BURN_DURATION_TICKS.get());
             Entity owner = burn.owner().map(level::getEntity).orElse(null);
             if (damage > 0) {
@@ -54,7 +54,7 @@ public final class BurnService {
                 entity.hurt(owner != null ? Spells.source(level, Spells.FIRE, owner, owner) : entity.damageSources().onFire(), damage);
             }
         }
-        if (burn.ticksLeft() % SECOND == 0) {
+        if (burn.ticksLeft() > 0 && burn.ticksLeft() % SECOND == 0) {
             Vfx.play(level, Ids.id("burn"), entity.position(), Map.of("height", entity.getBbHeight()));
         }
         entity.setData(AbilityModule.BURN, new BurnData(burn.ticksLeft() - 1, burn.owner()));
