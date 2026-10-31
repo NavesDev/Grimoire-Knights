@@ -125,10 +125,6 @@ public final class ProgressionCommand {
                         }))));
     }
 
-    public static Component rankName(Rank rank) {
-        return Component.translatable(Ids.key("rank", rank.id()));
-    }
-
     private static Optional<ResourceLocation> mastery(CommandContext<CommandSourceStack> context, ServerPlayer player) {
         return mastery(context, player, StringArgumentType.getString(context, "mastery"));
     }
@@ -173,7 +169,7 @@ public final class ProgressionCommand {
 
     private static int rankInfo(CommandContext<CommandSourceStack> context, ServerPlayer player) {
         context.getSource().sendSuccess(() -> Component.translatable(Ids.key("command", "rank.info"), player.getDisplayName(),
-                rankName(RankService.rank(player)), RankService.ceiling(player)), false);
+                RankService.name(RankService.rank(player)), RankService.ceiling(player)), false);
         GrimoireKnights.LOGGER.debug("Rank of {}: {}", player.getGameProfile().getName(), RankService.rank(player));
         return 1;
     }

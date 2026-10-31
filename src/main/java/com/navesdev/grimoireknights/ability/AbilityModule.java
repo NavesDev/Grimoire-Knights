@@ -6,6 +6,12 @@ import com.navesdev.grimoireknights.ability.attachment.CombatData;
 import com.navesdev.grimoireknights.ability.command.AbilityCommand;
 import com.navesdev.grimoireknights.ability.config.AbilityConfig;
 import com.navesdev.grimoireknights.ability.entity.FireballProjectile;
+import com.navesdev.grimoireknights.ability.entity.FlameFistEntity;
+import com.navesdev.grimoireknights.ability.entity.TornadoEntity;
+import com.navesdev.grimoireknights.ability.entity.WindArrowEntity;
+import com.navesdev.grimoireknights.ability.entity.WindBladeEntity;
+import com.navesdev.grimoireknights.ability.entity.WindBowEntity;
+import com.navesdev.grimoireknights.ability.network.TailwindPayload;
 import com.navesdev.grimoireknights.ability.event.AbilityEvents;
 import com.navesdev.grimoireknights.ability.network.CastAbilityPayload;
 import com.navesdev.grimoireknights.core.Ids;
@@ -26,13 +32,17 @@ import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-/** Abilities on Z/X/C, mana, cooldowns and the fire burn. */
+/** Abilities on Z/X/C, mana, cooldowns, the fire burn, held targets and the passives. */
 public final class AbilityModule {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, GrimoireKnights.MODID);
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, GrimoireKnights.MODID);
@@ -46,12 +56,28 @@ public final class AbilityModule {
             .sync((holder, to) -> holder == to, CombatData.STREAM_CODEC)
             .build());
     public static final Supplier<AttachmentType<BurnData>> BURN = ATTACHMENTS.register("burn", () -> AttachmentType
-            .builder(() -> new BurnData(0, 0))
+            .builder(() -> new BurnData(0, java.util.Optional.empty()))
             .build());
 
     public static final Supplier<EntityType<FireballProjectile>> FIREBALL = ENTITIES.register("fireball", () -> EntityType.Builder
             .<FireballProjectile>of(FireballProjectile::new, MobCategory.MISC).sized(0.5f, 0.5f)
             .clientTrackingRange(8).updateInterval(1).build("fireball"));
+
+    public static final Supplier<EntityType<FlameFistEntity>> FLAME_FIST = ENTITIES.register("flame_fist", () -> EntityType.Builder
+            .<FlameFistEntity>of(FlameFistEntity::new, MobCategory.MISC).sized(1.0f, 1.0f)
+            .clientTrackingRange(8).updateInterval(1).build("flame_fist"));
+    public static final Supplier<EntityType<WindBladeEntity>> WIND_BLADE = ENTITIES.register("wind_blade", () -> EntityType.Builder
+            .<WindBladeEntity>of(WindBladeEntity::new, MobCategory.MISC).sized(1.2f, 0.5f)
+            .clientTrackingRange(8).updateInterval(1).build("wind_blade"));
+    public static final Supplier<EntityType<TornadoEntity>> TORNADO = ENTITIES.register("tornado", () -> EntityType.Builder
+            .<TornadoEntity>of(TornadoEntity::new, MobCategory.MISC).sized(1.2f, 1.2f)
+            .clientTrackingRange(8).updateInterval(1).build("tornado"));
+    public static final Supplier<EntityType<WindArrowEntity>> WIND_ARROW = ENTITIES.register("wind_arrow", () -> EntityType.Builder
+            .<WindArrowEntity>of(WindArrowEntity::new, MobCategory.MISC).sized(0.5f, 0.5f)
+            .clientTrackingRange(8).updateInterval(1).build("wind_arrow"));
+    public static final Supplier<EntityType<WindBowEntity>> WIND_BOW = ENTITIES.register("wind_bow", () -> EntityType.Builder
+            .<WindBowEntity>of(WindBowEntity::new, MobCategory.MISC).sized(0.5f, 0.5f)
+            .clientTrackingRange(8).updateInterval(1).build("wind_bow"));
 
     private AbilityModule() {}
 
@@ -65,11 +91,16 @@ public final class AbilityModule {
         modBus.addListener(RegisterPayloadHandlersEvent.class, event -> Network.registrar(event)
                 .playToServer(CastAbilityPayload.TYPE, CastAbilityPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) AbilityService.tryCast(player, payload.slot());
-                }));
+                })
+                .playToClient(TailwindPayload.TYPE, TailwindPayload.STREAM_CODEC, (payload, context) -> TailwindPayload.CLIENT.accept(payload)));
 
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedInEvent.class, AbilityEvents::onLogin);
         NeoForge.EVENT_BUS.addListener(PlayerTickEvent.Post.class, AbilityEvents::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(EntityTickEvent.Post.class, AbilityEvents::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(LevelTickEvent.Post.class, AbilityEvents::onLevelTick);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, LivingDeathEvent.class, AbilityEvents::onDeath);
+        NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, AbilityEvents::onIncoming);
+        NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedOutEvent.class, AbilityEvents::onLogout);
         NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, event -> {
             GkCommands.register(event.getDispatcher(), AbilityCommand.mana());
             GkCommands.register(event.getDispatcher(), AbilityCommand.cooldown());

@@ -4,7 +4,9 @@ import com.navesdev.grimoireknights.progression.attachment.RankData;
 import com.navesdev.grimoireknights.progression.config.ProgressionConfig;
 import com.navesdev.grimoireknights.progression.rules.Rank;
 import com.navesdev.grimoireknights.progression.rules.RankRules;
+import com.navesdev.grimoireknights.core.Ids;
 import java.util.List;
+import net.minecraft.network.chat.Component;
 import java.util.Optional;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -12,6 +14,10 @@ import net.minecraft.world.entity.player.Player;
 /** The player's rank: grimoire mastery ceiling and unlocked spell slots. */
 public final class RankService {
     private RankService() {}
+
+    public static Component name(Rank rank) {
+        return Component.translatable(Ids.key("rank", rank.id()));
+    }
 
     public static Rank rank(Player player) {
         return player.getData(ProgressionModule.RANK_DATA).rank();

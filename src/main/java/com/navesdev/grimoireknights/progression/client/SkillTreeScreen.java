@@ -8,7 +8,6 @@ import com.navesdev.grimoireknights.progression.RankService;
 import com.navesdev.grimoireknights.progression.SkillNode;
 import com.navesdev.grimoireknights.progression.SkillTreeService;
 import com.navesdev.grimoireknights.progression.attachment.SkillTreeData;
-import com.navesdev.grimoireknights.progression.command.ProgressionCommand;
 import com.navesdev.grimoireknights.progression.network.BuyNodePayload;
 import com.navesdev.grimoireknights.progression.rules.RankRules;
 import com.navesdev.grimoireknights.progression.rules.SkillTreeRules;
@@ -90,7 +89,7 @@ final class SkillTreeScreen extends Screen {
         SkillTreeData data = SkillTreeService.data(player);
         graphics.fill(left - 8, top - 30, left + COLUMNS * CELL + 8, top + (ROWS + 1) * CELL + 22, PANEL_EDGE);
         graphics.fill(left - 7, top - 29, left + COLUMNS * CELL + 7, top + (ROWS + 1) * CELL + 21, PANEL);
-        graphics.drawString(font, Component.translatable(Ids.key("screen", "skill_tree.rank"), ProgressionCommand.rankName(RankService.rank(player))), left, top - 22, 0xFFECE9E1);
+        graphics.drawString(font, Component.translatable(Ids.key("screen", "skill_tree.rank"), RankService.name(RankService.rank(player))), left, top - 22, 0xFFECE9E1);
 
         header(graphics, player, data, Masteries.BODY, 0, 2);
         header(graphics, player, data, MasteryService.resourceMastery(player), 3, 3);
@@ -148,7 +147,7 @@ final class SkillTreeScreen extends Screen {
             lines.add(Component.translatable(Ids.key("screen", "skill_tree.cost"), SkillTreeRules.nextCost(spot.node().rules(), rank)).withStyle(ChatFormatting.YELLOW));
             if (result == SkillTreeRules.Result.OK) lines.add(Component.translatable(Ids.key("screen", "skill_tree.click")).withStyle(ChatFormatting.GRAY));
             else if (result == SkillTreeRules.Result.RANK_TOO_LOW) lines.add(Component.translatable(Ids.key("screen", "skill_tree.needs_rank"),
-                    ProgressionCommand.rankName(spot.node().requiredRank())).withStyle(ChatFormatting.RED));
+                    RankService.name(spot.node().requiredRank())).withStyle(ChatFormatting.RED));
             else lines.add(Component.translatable(Ids.key("screen", "skill_tree." + result.name().toLowerCase(Locale.ROOT))).withStyle(ChatFormatting.RED));
         }
         return lines;
@@ -158,7 +157,7 @@ final class SkillTreeScreen extends Screen {
         List<Component> lines = new ArrayList<>();
         lines.add(Component.translatable("ability." + spell.id().getNamespace() + "." + spell.id().getPath()).withStyle(ChatFormatting.GOLD));
         if (!RankService.slotUnlocked(player, spell.slot())) {
-            lines.add(Component.translatable(Ids.key("screen", "skill_tree.needs_rank"), ProgressionCommand.rankName(RankRules.slotRank(spell.slot()))).withStyle(ChatFormatting.RED));
+            lines.add(Component.translatable(Ids.key("screen", "skill_tree.needs_rank"), RankService.name(RankRules.slotRank(spell.slot()))).withStyle(ChatFormatting.RED));
         }
         return lines;
     }

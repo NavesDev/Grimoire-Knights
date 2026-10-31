@@ -8,6 +8,10 @@ import com.navesdev.grimoireknights.ability.rules.ManaRules;
 import com.navesdev.grimoireknights.grimoire.Element;
 import com.navesdev.grimoireknights.grimoire.GrimoireActivity;
 import com.navesdev.grimoireknights.grimoire.GrimoireService;
+import com.navesdev.grimoireknights.core.Ids;
+import com.navesdev.grimoireknights.progression.rules.RankRules;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import com.navesdev.grimoireknights.progression.MasteryService;
 import com.navesdev.grimoireknights.progression.RankService;
 import com.navesdev.grimoireknights.progression.SkillEffects;
@@ -20,6 +24,8 @@ import net.minecraft.world.entity.player.Player;
 
 /** Mana, cooldowns and casting, on the server. */
 public final class AbilityService {
+    private static final String[] SLOT_KEYS = {"Z", "X", "C"};
+
     private AbilityService() {}
 
     public static CombatData data(Player player) {
@@ -82,10 +88,12 @@ public final class AbilityService {
         CombatData data = data(player);
         long now = player.serverLevel().getGameTime();
         double cost = cost(player, ability.map(Ability::manaCost).orElse(0.0));
-        CastRules.Result result = CastRules.check(player.isAlive() && !player.isSpectator(), element.isPresent(), ability.isPresent(),
+        CastRules.Result result = CastRules.check(player.isAlive() && !player.isSpectator() && !HeldService.held(player), element.isPresent(), ability.isPresent(),
                 RankService.slotUnlocked(player, slot), data.mana(), id.map(i -> data.cooldownLeft(i, now)).orElse(0L), cost);
         if (result != CastRules.Result.OK) {
             GrimoireKnights.LOGGER.debug("Cast denied for {} slot {}: {}", player.getGameProfile().getName(), slot, result);
+            if (result == CastRules.Result.LOCKED) player.displayClientMessage(Component.translatable(Ids.key("message", "cast.locked"),
+                    SLOT_KEYS[slot], RankService.name(RankRules.slotRank(slot))).withStyle(ChatFormatting.RED), true);
             return result;
         }
         if (!ability.get().cast(player)) {
@@ -93,8 +101,10 @@ public final class AbilityService {
             return CastRules.Result.FAILED;
         }
         spend(player, cost);
-        player.setData(AbilityModule.COMBAT_DATA, data(player).withCooldown(id.get(), now + ability.get().cooldownTicks()));
+        int cooldown = GrimoireService.data(player).element().equals(Optional.of(TailwindService.WIND)) ? TailwindService.cooldown(player, ability.get().cooldownTicks()) : ability.get().cooldownTicks();
+        player.setData(AbilityModule.COMBAT_DATA, data(player).withCooldown(id.get(), now + cooldown));
         GrimoireActivity.cast(player);
+        GrimoireActivity.pose(player, ability.get().pose());
         return result;
     }
 }
