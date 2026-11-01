@@ -2,6 +2,9 @@ package com.navesdev.grimoireknights.ability.entity;
 
 import com.navesdev.grimoireknights.ability.AbilityModule;
 import com.navesdev.grimoireknights.ability.config.AbilityConfig;
+import com.navesdev.grimoireknights.core.Ids;
+import com.navesdev.grimoireknights.core.vfx.Vfx;
+import java.util.Map;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -75,6 +78,9 @@ public class WindBowEntity extends Entity implements GeoEntity {
             return;
         }
         if (!entityData.get(RELEASED)) follow(owner);
+        // the wind rushing in as the bow gathers, then breaking up as it comes apart (the model does the rest)
+        if (tickCount == 1) Vfx.play(server, Ids.id("gale_bow_summon"), position(), Map.of());
+        if (tickCount == FIRE_AT + 4) Vfx.play(server, Ids.id("tornado_gust"), position(), Map.of());
         if (tickCount == FIRE_AT) fire(server, owner);
         if (tickCount >= FIRE_AT + RELEASE_TICKS) discard();
     }

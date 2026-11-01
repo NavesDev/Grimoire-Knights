@@ -112,9 +112,9 @@ Fire magic 2 (flame arm): a giant hand of fire that flies open, grabs the first 
 | Wind blade | `spin` | loop | Crescent blade (magic 1): a thin crescent slash like a "(", a little thicker in the middle with pointed tips; rocks on its flight axis and breathes. The upgrade fan and line volley are several blades spawned by code |
 | Tornado | `spin` | loop | Tornado fang (magic 2) flying: the funnel turns and each ring spins at its own speed |
 | Tornado | `hold` | loop | Unused since the tornado drills through instead of holding: twice as fast, rings squeeze in and out |
-| Wind bow | `summon` | hold | White gale bow (magic 3), 0.3 s: swirls in with a half turn, no arrows yet |
+| Wind bow | `summon` | hold | White gale bow (magic 3), 0.3 s: gathers out of the wind, each limb growing from the grip while twisting, tips unfurling last, string stretching; no arrows yet (code plays `gale_bow_summon`) |
 | Wind bow | `draw` | hold | 0.5 s: the six arrows appear from the middle out and are pulled back together, tips flex toward the player |
-| Wind bow | `release` | once | 0.6 s: the arrows leave at once, tips snap forward, then the bow blows away |
+| Wind bow | `release` | once | 0.6 s: the arrows leave at once, tips snap forward, then the limbs unravel back into wind, twisting and thinning out (code plays `tornado_gust`) |
 | Wind arrow | `fly` | loop | Spins around the shaft (">" head of swept-back barbs, wind hooks along the shaft, tail wisps) |
 
 ### Swords (`sword_anim.js`)

@@ -231,6 +231,27 @@
 					}
 				]
 			}
+		},
+		"animation.vfx.gale_bow_summon": {
+			"animation_length": 0.4,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "gale_bow_gather_wisps",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "gale_bow_gather_streaks",
+						"bind_to_actor": false
+					}
+				],
+				"0.1": [
+					{
+						"effect": "gale_bow_gather_wisps",
+						"bind_to_actor": false
+					}
+				]
+			}
 		}
 	},
 	"geckolib_format_version": 2
