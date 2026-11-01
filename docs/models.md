@@ -40,8 +40,8 @@ Blockbench doesn't load files with `require`; the snippet above reads each `.js`
 - **Renegade captain:** same skeleton as the mage; the bigger size comes from the renderer's scale.
 - **Wind:** air is white in every wind model (`wind_painter.js`), never green, and see-through: the `gust` material fades and breaks at the edges. Render wind with a translucent render type, without back-face culling. The wind blade, bow and arrow are thin cubes chained into strokes and curls; the tornado mixes a core of thin cubes with planes that have the funnel and rings drawn on the texture as smooth strokes.
 - **Fireball upgrade (bigger projectile):** scale in the renderer; no new model.
-- **Tornado:** a `core` of thin streaks winding around the flight axis, four planes crossing on the axis with the funnel's swirling lines, and rings of broken arcs facing forward; code also plays the `tornado_gust` VFX on it. `blades` (mini wind blades) and `stones` (rocks pulled from the ground) are upgrade parts: the renderer hides them until the upgrade is unlocked.
-- **Wind bow:** tangled see-through streams lying almost flat in front of the player, with broad gusts hooking at the tips (seeded noise in `wind_bow.js`, same every run); the tip gusts sway in every animation. Shoots north; `nocked_arrow` only shows during `draw`. The 6 arrows that fly are `wind_arrow` entities spawned by code at the end of `draw`; the 3-way split of the upgrade is code too.
+- **Tornado:** horizontal, like Yuno's Boran no Kiba: lies along -z with the wide mouth forward and turns with its flight (pitch too) around its axis, scaled 2× by the renderer. A `core` of thin streaks winding around the axis, four planes crossing on the axis with the funnel's swirling lines, and rings of broken arcs facing forward; code also plays the `tornado_gust` VFX on it. `blades` (mini wind blades) and `stones` (rocks pulled from the ground) are upgrade parts: the renderer hides them until the upgrade is unlocked.
+- **Wind bow:** Yuno's Shippu no Hakkyu: a huge bow (about 3.5 blocks across) modeled upright, a ")" seen from the side with the grip forward and the tips back toward the player, which the renderer lays on its side so the limbs go left and right; tangled see-through streams with broad gusts hooking at the tips (seeded noise in `wind_bow.js`, same every run); the tip gusts sway in every animation. Six big arrows (1.5× `wind_arrow`) nocked at once along the string (side by side in game), pointing north; they only show during `draw`. Modeled 16 pixels up; the renderer centers it on the entity, which floats 2.5 blocks ahead of the eyes and 0.6 below them, under the crosshair. At the end of `draw` the code fires six `wind_arrow` entities together from the arrows' spots (`ARROWS` in `wind_bow.js`, mirrored in `WindBowEntity`), then plays `release`; the 3-way split of the upgrade is code too.
 - **Anchors:** `grimoire_anchor` (mages) and `book_anchor` (altar) mark where the grimoire floats.
 
 ## Animations
@@ -111,10 +111,10 @@ Fire magic 2 (flame arm): a giant hand of fire that flies open, grabs the first 
 |---|---|---|---|
 | Wind blade | `spin` | loop | Crescent blade (magic 1): a thin crescent slash like a "(", a little thicker in the middle with pointed tips; rocks on its flight axis and breathes. The upgrade fan and line volley are several blades spawned by code |
 | Tornado | `spin` | loop | Tornado fang (magic 2) flying: the funnel turns and each ring spins at its own speed |
-| Tornado | `hold` | loop | A target is trapped: twice as fast, rings squeeze in and out |
-| Wind bow | `summon` | hold | White gale bow (magic 3), 0.3 s: swirls in with a half turn |
-| Wind bow | `draw` | hold | 0.5 s: arrow appears on the string, string pulled back, limbs bend |
-| Wind bow | `release` | once | 0.6 s: string snaps forward, then the bow blows away |
+| Tornado | `hold` | loop | Unused since the tornado drills through instead of holding: twice as fast, rings squeeze in and out |
+| Wind bow | `summon` | hold | White gale bow (magic 3), 0.3 s: gathers out of the wind, each limb growing from the grip while twisting, tips unfurling last, string stretching; no arrows yet (code plays `gale_bow_summon`) |
+| Wind bow | `draw` | hold | 0.5 s: the six arrows appear from the middle out and are pulled back together, tips flex toward the player |
+| Wind bow | `release` | once | 0.6 s: the arrows leave at once, tips snap forward, then the bow thins out into the wind without turning: tips first, then limbs and string (code plays `gale_bow_dissipate`) |
 | Wind arrow | `fly` | loop | Spins around the shaft (">" head of swept-back barbs, wind hooks along the shaft, tail wisps) |
 
 ### Swords (`sword_anim.js`)
@@ -145,7 +145,7 @@ Wings modeled open; `idle` and `walk` fold the wings over the body. Death and da
 | Tower core | `idle` / `active` | loop | Orb floats and spins, rings spin; `active` 4x faster with the orb pulsing |
 | Magic torch | `idle` | loop | Crystal spins and floats, glow pulses |
 | Banner | `wave` | loop | Cloth sways on the crossbar, forward only (it sits 0.25 from the pole), bottom lagging |
-| Broom | `hover` / `fly` | loop | Hovering in the air swaying / bristles fluttering in flight; tilt while riding comes from code |
+| Broom | `hover` / `fly` | loop | Bristles only (slow sway / fluttering in flight); the bob, sway and bank come from code (`BroomEntity.bob`, `bank`), drawn on broom and rider together |
 | Mantle | `idle` / `walk` | loop | Tail and hood sway; in `walk` they go back |
 
 ### Demon form
@@ -197,22 +197,26 @@ Rig `player_cast.js`: casting and dash. The cast poses key only `torso` and the 
 | `cast_z` | 0.6 s | 0.15 s | Z (fireball, crescent blade): right hand thrown forward |
 | `cast_x_fire` | 0.45 s, hold | 0.25 s | X fire (flame arm): pulls the arm back and thrusts the open hand; holds the reach until the grab |
 | `cast_x_fire_slam` | 0.8 s | - | X fire, on the grab: hauls the fist overhead and yanks it down with the hand's `slam` (impact at 0.45 s) |
+| `cast_x_fire_release` | 0.3 s | - | X fire when the hand explodes without grabbing: the held arm drops back to rest |
 | `cast_x_wind` | 0.8 s | 0.3 s | X wind (tornado fang): two hands from the chest, pushed forward |
 | `cast_c_fire` | 1 s | 0.45 s | C fire (ember burst): arms crossed, then flung open |
-| `cast_c_wind` | 1.4 s | 0.8 s | C wind (white gale bow): left arm holds the bow, right hand draws and lets go, in step with the bow's `summon`, `draw` and `release` |
-| `dash` | 0.3 s | - | Whole body leans into the dash, arms swept back, legs split |
+| `cast_c_wind` | 1.4 s | 0.8 s | C wind (white gale bow): left arm holds the upright bow, right hand draws the arrows and lets go, in step with the bow's `summon`, `draw` and `release` |
+| `dash` | 0.3 s | - | Quick lunge: slight lean, long stride, arms swinging opposite the legs |
+| `dash_back` | 0.3 s | - | Dash backward: leans away, arms thrown forward for balance, feet leading |
+| `dash_left`, `dash_right` | 0.3 s | - | Side dash: leans into it, leading arm and leg out, the other arm tucked; code picks the pose from the dash direction against the look |
+| `roll` | 0.5 s | - | Roll on landing (Body node): forward somersault, tucked, one full turn of the body, opening up standing at the end |
 
-Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering.
+Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering: the rider is drawn with the broom's yaw and no head pitch (the camera doesn't turn the pose), and the broom banks 16° into strafes with the rider drawn banked with it around the handle, so the feet stay on it (the strafe poses themselves don't roll). The broom poses don't bob either: the code lifts broom and rider by the same hover bob, since a pose and the broom animation run on separate clocks and drift apart.
 
 - With the body turned 90°, the `body`'s `x` and `z` rotate on the same axis (gimbal lock): the tilt is built on world axes and converted to ZYX Euler in `player_ride.js`.
 - With no knee, leaning forward or back lowers a hip: each leg opens along the board just enough for both feet (by the lowest corner) to stay on the board's floor.
 - Each pose rises, falls and rolls together with the prop animation of the same length; checked in Blockbench with the feet within 0.1 of the board.
-- Not yet tested in game: whether playerAnimator applies `body` in the same ZYX order.
+- playerAnimator applies `body` in the same ZYX order, but the game mirrors Blockbench (the limbs on y, `body` on x), so `run.js` writes this file with every rotation's y and z negated (`gameAxes`); without it the arms and legs close in and cross.
 
 | Animation | Loop | Pair | Use |
 |---|---|---|---|
 | `broom_hover`, `sword_hover` | 2 s | broom `hover` / greatsword `ride` | Still in the air, standing |
 | `broom_forward`, `sword_forward` | 0.5 s / 2 s | broom `fly` / greatsword `ride` | Leans toward the nose, back arm high |
 | `broom_backward`, `sword_backward` | 0.5 s / 2 s | same | Leans toward the tail, braking, front arm high |
-| `broom_left`, `sword_left` | 0.5 s / 2 s | same | Leans on the heels, arms forward, looks into the turn |
-| `broom_right`, `sword_right` | 0.5 s / 2 s | same | Leans on the toes, arms back, looks into the turn |
+| `broom_left`, `sword_left` | 0.5 s / 2 s | same | Strafes left: arms and look into the turn; the bank comes from code |
+| `broom_right`, `sword_right` | 0.5 s / 2 s | same | Strafes right: arms and look into the turn; the bank comes from code |

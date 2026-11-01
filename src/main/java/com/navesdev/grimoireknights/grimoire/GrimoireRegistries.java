@@ -15,7 +15,10 @@ public final class GrimoireRegistries {
 
     static final DeferredRegister<Element> ELEMENT_ENTRIES = DeferredRegister.create(ELEMENT, GrimoireKnights.MODID);
 
-    public static final Supplier<Element> FIRE = ELEMENT_ENTRIES.register("fire", () -> new Element(0xFF7A12, List.of(Ids.id("fireball"))));
+    public static final Supplier<Element> FIRE = ELEMENT_ENTRIES.register("fire",
+            () -> new Element(0xFF7A12, List.of(Ids.id("fireball"), Ids.id("flame_arm"), Ids.id("ember_burst"))));
+    public static final Supplier<Element> WIND = ELEMENT_ENTRIES.register("wind",
+            () -> new Element(0xE8F4FF, List.of(Ids.id("crescent_blade"), Ids.id("tornado_fang"), Ids.id("gale_bow"))));
 
     private GrimoireRegistries() {}
 }

@@ -1,0 +1,12 @@
+{
+  "branch": "body",
+  "cost": [
+    1
+  ],
+  "effect": {
+    "type": "grimoireknights:fall_resistance"
+  },
+  "icon": "grimoireknights:skill/fall_resistance",
+  "x": 1,
+  "y": 0
+}

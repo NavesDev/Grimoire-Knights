@@ -1,0 +1,25 @@
+{
+  "source": "story",
+  "giver": "grimoireknights:priest",
+  "objectives": [
+    {
+      "type": "grimoireknights:defeat",
+      "tag": "grimoireknights:trial/host",
+      "count": 1,
+      "name": "quest.grimoireknights.trial.host.target"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "grimoireknights:rank_up",
+      "rank": "captain"
+    },
+    {
+      "type": "grimoireknights:mastery",
+      "amount": 50
+    }
+  ],
+  "requires": [
+    "grimoireknights:trial/eclipse_twins"
+  ]
+}

@@ -1,5 +1,6 @@
-// Wind magic 2 (tornado fang): a white tornado lying on its side, flying toward north (-z) with the wide
-// mouth forward. Drawn on flat planes so it stays round and airy: four planes crossing on the flight axis
+// Wind magic 2 (tornado fang, Yuno's Boran no Kiba): a white tornado lying on its side, flying toward north (-z)
+// with the wide mouth forward.
+// Drawn on flat planes so it stays round and airy: four planes crossing on the flight axis
 // carry the funnel's swirling lines, and rings of broken arcs face forward. Inside, a 3D core of thin
 // streaks winds around the axis for body. Upgrade parts, hidden by the
 // renderer until unlocked: blades (mini wind blades inside) and stones (rocks pulled from the ground).

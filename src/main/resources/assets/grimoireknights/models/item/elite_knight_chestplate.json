@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "grimoireknights:item/elite_knight_chestplate"
+  }
+}

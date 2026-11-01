@@ -1,0 +1,16 @@
+{
+  "branch": "grimoire",
+  "element": "grimoireknights:wind",
+  "cost": [
+    3
+  ],
+  "effect": {
+    "type": "grimoireknights:spell_upgrade",
+    "ability": "grimoireknights:tornado_fang",
+    "level": 1
+  },
+  "icon": "grimoireknights:ability/tornado_fang",
+  "x": 8,
+  "y": 1,
+  "required_rank": "knight"
+}

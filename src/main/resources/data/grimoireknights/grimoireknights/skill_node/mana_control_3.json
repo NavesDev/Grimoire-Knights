@@ -1,0 +1,15 @@
+{
+  "branch": "mana",
+  "cost": [
+    3
+  ],
+  "requires": [
+    "grimoireknights:mana_control_2"
+  ],
+  "effect": {
+    "type": "grimoireknights:mana_control"
+  },
+  "icon": "grimoireknights:skill/mana_control",
+  "x": 3,
+  "y": 3
+}

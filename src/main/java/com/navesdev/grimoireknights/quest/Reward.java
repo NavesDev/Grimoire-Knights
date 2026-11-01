@@ -1,6 +1,7 @@
 package com.navesdev.grimoireknights.quest;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /** A quest reward. One class per type, registered in {@code grimoireknights:reward_type} by its owning feature. */
@@ -11,4 +12,7 @@ public interface Reward {
     RewardType<?> type();
 
     void grant(ServerPlayer player);
+
+    /** Shown in the dialogue and the journal. */
+    Component describe();
 }

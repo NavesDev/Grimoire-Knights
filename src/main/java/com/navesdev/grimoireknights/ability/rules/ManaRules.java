@@ -1,12 +1,12 @@
 package com.navesdev.grimoireknights.ability.rules;
 
-/** Mana: the Mana stat sets the maximum; current mana is spent by abilities and regenerates over time. */
+/** Mana: the base plus the skill tree bonus sets the maximum; abilities spend it and it regenerates once spending stops for a while. */
 public final class ManaRules {
     private ManaRules() {}
 
-    public static double max(int manaStat, double base, double perPoint) {
-        if (manaStat < 0 || base < 0 || perPoint < 0) throw new IllegalArgumentException("negative mana input");
-        return base + manaStat * perPoint;
+    public static double max(double base, double treeBonus) {
+        if (base < 0 || treeBonus < 0) throw new IllegalArgumentException("negative mana input");
+        return base + treeBonus;
     }
 
     public static double regenerate(double current, double max, double amount) {
@@ -14,8 +14,14 @@ public final class ManaRules {
         return Math.min(max, current + amount);
     }
 
-    /** Changing the Mana stat changes both (design: "subir o status aumenta as duas"): current mana becomes the new maximum. */
-    public static double currentAfterStatChange(double newMax) {
-        return newMax;
+    /** Regeneration resumes only {@code delayTicks} after the last mana spent, so a steady stream of casts runs dry. */
+    public static boolean regenerates(long now, long lastSpent, int delayTicks) {
+        return now - delayTicks >= lastSpent;
+    }
+
+    /** Mana Control: each rank cuts the cost by {@code discountPerRank}, never below zero. */
+    public static double cost(double base, int controlRank, double discountPerRank) {
+        if (base < 0 || controlRank < 0 || discountPerRank < 0) throw new IllegalArgumentException("negative cost input");
+        return base * Math.max(0, 1 - controlRank * discountPerRank);
     }
 }

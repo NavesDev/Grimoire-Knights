@@ -123,6 +123,21 @@ def wind_streak(size=16):
     save(img, 'wind_streak')
 
 
+def dash_streak(size=16):
+    """A thick, soft band for the dash trail: full brightness in the middle rows, fading to the edges and to a thin
+    tail on the left; white, tinted blue by the emitter."""
+    img = Image.new('RGBA', (size, size))
+    c = (size - 1) / 2
+    for x in range(size):
+        along = x / (size - 1)  # 0 tail, 1 head
+        half = 1.5 + 4.5 * along ** 0.6
+        for y in range(size):
+            across = abs(y - c) / half
+            if across < 1:
+                img.putpixel((x, y), (255, 255, 255, int(255 * (1 - across ** 2) * (0.25 + 0.75 * along))))
+    save(img, 'dash_streak')
+
+
 def wind_ring(size=64):
     """A gusty white ring seen from above: thin broken band, transparent inside."""
     rnd = random.Random(37)
@@ -164,5 +179,6 @@ if __name__ == '__main__':
     glow()
     ring()
     wind_streak()
+    dash_streak()
     wind_ring()
     wind_wisp()

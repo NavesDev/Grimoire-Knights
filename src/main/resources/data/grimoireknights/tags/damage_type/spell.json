@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "grimoireknights:fireball",
+    "grimoireknights:fire_spell",
+    "grimoireknights:wind_spell"
+  ]
+}

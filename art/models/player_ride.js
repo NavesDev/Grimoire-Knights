@@ -57,13 +57,16 @@ const stance = o => {
   };
 };
 
-// Same flight in each direction: lean, look and arms per direction, bob and roll from the prop.
+// Same flight in each direction: lean, look and arms per direction, bob and roll from the prop. The game shows
+// these poses mirrored (gameAxes negates y and z), so the arms and look of the heel side in Blockbench are the
+// right strafe in game. Strafes don't roll here: the code banks the broom and its rider together around the
+// handle (BroomEntity.BANK), so the feet stay on it.
 const DIRS = {
   hover: { pitch: 0, roll: 0, front: 40, back: 40 },
   forward: { pitch: 16, roll: 0, front: 20, back: 65, look: 0 },
   backward: { pitch: -12, roll: 0, front: 70, back: 25, swing: 10 },
-  left: { pitch: 4, roll: -16, front: 45, back: 45, swing: 35, look: -25 },
-  right: { pitch: 4, roll: 16, front: 45, back: 45, swing: -25, look: 25 }
+  right: { pitch: 4, roll: 0, front: 45, back: 45, swing: 35, look: -25 },
+  left: { pitch: 4, roll: 0, front: 45, back: 45, swing: -25, look: 25 }
 };
 // prop: { length, bob, roll, pitch } as functions of the phase, matching the prop animation.
 const flight = (prefix, prop) => Object.fromEntries(Object.entries(DIRS).map(([dir, d]) => {
@@ -74,11 +77,11 @@ const flight = (prefix, prop) => Object.fromEntries(Object.entries(DIRS).map(([d
 }));
 
 const animations = {
-  // Broom: hover pairs with broom hover (2 s: bob 0.6, pitch 1.5, roll 3), the directions with broom fly
-  // (0.5 s: bob 0.15, no roll).
+  // Broom: no bob or roll here; the code moves broom and rider together (BroomEntity.bob, bank), since a pose
+  // and the broom animation run on separate clocks and drift apart.
   ...flight('broom', {
-    hover: { length: 2, bob: p => 0.6 * sin(p), pitch: p => 1.5 * cos(p), roll: p => 3 * sin(p / 2) },
-    move: { length: 0.5, bob: p => 0.15 * sin(p), roll: () => 0 } }),
+    hover: { length: 2, bob: () => 0, roll: () => 0 },
+    move: { length: 0.5, bob: () => 0, roll: () => 0 } }),
   // Greatsword: every direction pairs with the sword ride (2 s: bob 0.4, roll 3 on the blade, opposite sign
   // because the blade's y runs tail to nose).
   ...flight('sword', {
@@ -86,4 +89,4 @@ const animations = {
     move: { length: 2, bob: p => 0.4 * sin(p), roll: p => -3 * sin(p / 2) } })
 };
 
-module.exports = { name: 'player_ride', group: 'player', kind: 'player', spec: P.spec, animations, textures: P.textures };
+module.exports = { name: 'player_ride', group: 'player', kind: 'player', gameAxes: true, spec: P.spec, animations, textures: P.textures };

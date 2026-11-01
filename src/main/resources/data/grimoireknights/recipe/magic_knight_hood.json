@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "minecraft:leather_helmet"
+    },
+    {
+      "item": "minecraft:black_dye"
+    },
+    {
+      "item": "grimoireknights:mana_dust"
+    }
+  ],
+  "result": {
+    "id": "grimoireknights:magic_knight_hood",
+    "count": 1
+  }
+}

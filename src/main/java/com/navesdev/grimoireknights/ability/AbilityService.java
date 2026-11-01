@@ -8,36 +8,67 @@ import com.navesdev.grimoireknights.ability.rules.ManaRules;
 import com.navesdev.grimoireknights.grimoire.Element;
 import com.navesdev.grimoireknights.grimoire.GrimoireActivity;
 import com.navesdev.grimoireknights.grimoire.GrimoireService;
+import com.navesdev.grimoireknights.core.Ids;
+import com.navesdev.grimoireknights.progression.rules.RankRules;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import com.navesdev.grimoireknights.progression.CombatTracker;
+import com.navesdev.grimoireknights.progression.MasteryService;
+import com.navesdev.grimoireknights.progression.RankService;
+import com.navesdev.grimoireknights.progression.SkillEffects;
+import com.navesdev.grimoireknights.progression.SkillTreeService;
+import com.navesdev.grimoireknights.progression.config.ProgressionConfig;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 /** Mana, cooldowns and casting, on the server. */
 public final class AbilityService {
+    /** Game time of each player's last mana spent; regeneration waits for a pause. In memory: a relog regenerates at once. */
+    private static final Map<UUID, Long> LAST_SPENT = new HashMap<>();
+    public static final int SLOTS = 3;
+
     private AbilityService() {}
 
     public static CombatData data(Player player) {
         return player.getData(AbilityModule.COMBAT_DATA);
     }
 
-    public static double maxMana(int manaStat) {
-        return ManaRules.max(manaStat, AbilityConfig.MANA_BASE.get(), AbilityConfig.MANA_PER_POINT.get());
+    /** Base plus the Mana branch's max mana nodes. */
+    public static double maxMana(Player player) {
+        return ManaRules.max(AbilityConfig.MANA_BASE.get(),
+                SkillTreeService.effectRank(player, SkillEffects.MAX_MANA) * ProgressionConfig.MAX_MANA_PER_RANK.get());
     }
 
-    public static double maxMana(Player player) {
-        return maxMana(data(player).manaStat());
+    /** Base plus the Mana branch's regeneration nodes. */
+    public static double regenPerSecond(Player player) {
+        return AbilityConfig.MANA_REGEN_PER_SECOND.get() + SkillTreeService.effectRank(player, SkillEffects.MANA_REGEN) * ProgressionConfig.REGEN_PER_RANK.get();
+    }
+
+    /** Mana cost after Mana Control; spells and broom flight both use it. */
+    public static double cost(Player player, double base) {
+        return ManaRules.cost(base, SkillTreeService.effectRank(player, SkillEffects.MANA_CONTROL), ProgressionConfig.MANA_CONTROL_DISCOUNT.get());
+    }
+
+    /** Spends mana and, in combat only, trains the Mana mastery with it. False, spending nothing, when there is not enough. */
+    public static boolean spend(ServerPlayer player, double amount) {
+        CombatData data = data(player);
+        if (amount <= 0) return true;
+        if (data.mana() < amount) return false;
+        player.setData(AbilityModule.COMBAT_DATA, data.withMana(data.mana() - amount));
+        LAST_SPENT.put(player.getUUID(), player.serverLevel().getGameTime());
+        if (CombatTracker.inCombat(player)) MasteryService.add(player, MasteryService.resourceMastery(player), amount * ProgressionConfig.MANA_SPENT_RATIO.get());
+        return true;
     }
 
     /** New players start with full mana. */
     public static void ensureMana(ServerPlayer player) {
         CombatData data = data(player);
-        if (!data.manaSet()) player.setData(AbilityModule.COMBAT_DATA, data.withMana(maxMana(data.manaStat())));
-    }
-
-    /** Changing the Mana stat changes both maximum and current mana. */
-    public static void setManaStat(ServerPlayer player, int stat) {
-        player.setData(AbilityModule.COMBAT_DATA, data(player).withManaStat(stat, ManaRules.currentAfterStatChange(maxMana(stat))));
+        if (!data.manaSet()) player.setData(AbilityModule.COMBAT_DATA, data.withMana(maxMana(player)));
     }
 
     public static void setMana(ServerPlayer player, double value) {
@@ -46,9 +77,15 @@ public final class AbilityService {
 
     public static void regenerate(ServerPlayer player, double amount) {
         CombatData data = data(player);
-        double max = maxMana(data.manaStat());
+        double max = maxMana(player);
         if (!data.manaSet() || data.mana() >= max) return;
+        if (!ManaRules.regenerates(player.serverLevel().getGameTime(), LAST_SPENT.getOrDefault(player.getUUID(), Long.MIN_VALUE),
+                AbilityConfig.MANA_REGEN_DELAY_TICKS.get())) return;
         player.setData(AbilityModule.COMBAT_DATA, data.withMana(ManaRules.regenerate(data.mana(), max, amount)));
+    }
+
+    public static void forget(ServerPlayer player) {
+        LAST_SPENT.remove(player.getUUID());
     }
 
     public static void resetCooldowns(ServerPlayer player) {
@@ -57,26 +94,34 @@ public final class AbilityService {
 
     /** Validates grimoire, slot, cooldown and mana, then casts. Anything off denies. */
     public static CastRules.Result tryCast(ServerPlayer player, int slot) {
+        if (slot < 0 || slot >= SLOTS) {
+            GrimoireKnights.LOGGER.debug("Cast denied for {}: slot {} out of range", player.getGameProfile().getName(), slot);
+            return CastRules.Result.CANNOT_ACT;
+        }
         ensureMana(player);
         Optional<Element> element = GrimoireService.element(player);
         Optional<ResourceLocation> id = element.flatMap(e -> e.ability(slot));
         Optional<Ability> ability = id.flatMap(AbilityRegistries.ABILITIES::getOptional);
         CombatData data = data(player);
         long now = player.serverLevel().getGameTime();
-        CastRules.Result result = CastRules.check(player.isAlive() && !player.isSpectator(), element.isPresent(), ability.isPresent(), data.mana(),
-                id.map(i -> data.cooldownLeft(i, now)).orElse(0L), ability.map(Ability::manaCost).orElse(0.0));
+        double cost = cost(player, ability.map(Ability::manaCost).orElse(0.0));
+        CastRules.Result result = CastRules.check(player.isAlive() && !player.isSpectator() && !HeldService.held(player), element.isPresent(), ability.isPresent(),
+                RankService.slotUnlocked(player, slot), data.mana(), id.map(i -> data.cooldownLeft(i, now)).orElse(0L), cost);
         if (result != CastRules.Result.OK) {
             GrimoireKnights.LOGGER.debug("Cast denied for {} slot {}: {}", player.getGameProfile().getName(), slot, result);
+            if (result == CastRules.Result.LOCKED) player.displayClientMessage(Component.translatable(Ids.key("message", "cast.locked"),
+                    Component.keybind(Ids.key("key", "ability_" + (slot + 1))), RankService.name(RankRules.slotRank(slot))).withStyle(ChatFormatting.RED), true);
             return result;
         }
         if (!ability.get().cast(player)) {
             GrimoireKnights.LOGGER.debug("Cast of {} failed for {}", id.get(), player.getGameProfile().getName());
             return CastRules.Result.FAILED;
         }
-        player.setData(AbilityModule.COMBAT_DATA, data
-                .withMana(data.mana() - ability.get().manaCost())
-                .withCooldown(id.get(), now + ability.get().cooldownTicks()));
+        spend(player, cost);
+        int cooldown = GrimoireService.data(player).element().equals(Optional.of(TailwindService.WIND)) ? TailwindService.cooldown(player, ability.get().cooldownTicks()) : ability.get().cooldownTicks();
+        player.setData(AbilityModule.COMBAT_DATA, data(player).withCooldown(id.get(), now + cooldown));
         GrimoireActivity.cast(player);
+        GrimoireActivity.pose(player, ability.get().pose());
         return result;
     }
 }

@@ -1,0 +1,25 @@
+{
+  "source": "story",
+  "giver": "grimoireknights:priest",
+  "objectives": [
+    {
+      "type": "grimoireknights:defeat",
+      "tag": "grimoireknights:trial/eclipse_twins",
+      "count": 1,
+      "name": "quest.grimoireknights.trial.eclipse_twins.target"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "grimoireknights:rank_up",
+      "rank": "elite_knight"
+    },
+    {
+      "type": "grimoireknights:mastery",
+      "amount": 50
+    }
+  ],
+  "requires": [
+    "grimoireknights:trial/renegade_captain"
+  ]
+}

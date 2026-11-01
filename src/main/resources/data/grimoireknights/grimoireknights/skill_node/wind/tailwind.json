@@ -1,0 +1,18 @@
+{
+  "branch": "grimoire",
+  "element": "grimoireknights:wind",
+  "cost": [
+    4
+  ],
+  "requires": [
+    "grimoireknights:wind/crescent_blade_1",
+    "grimoireknights:wind/tornado_fang_1",
+    "grimoireknights:wind/gale_bow_1"
+  ],
+  "effect": {
+    "type": "grimoireknights:passive"
+  },
+  "icon": "grimoireknights:skill/tailwind",
+  "x": 8,
+  "y": 3
+}

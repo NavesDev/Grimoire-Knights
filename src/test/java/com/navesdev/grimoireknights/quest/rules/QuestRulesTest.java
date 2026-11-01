@@ -1,6 +1,9 @@
 package com.navesdev.grimoireknights.quest.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Set;
@@ -28,5 +31,23 @@ class QuestRulesTest {
         assertEquals(QuestRules.StartResult.MISSING_PREREQUISITE, QuestRules.canStart("b", Set.of(), Set.of(), List.of("a"), false));
         assertEquals(QuestRules.StartResult.MISSING_PREREQUISITE, QuestRules.canStart("c", Set.of(), Set.of("a"), List.of("a", "b"), false));
         assertEquals(QuestRules.StartResult.OK, QuestRules.canStart("c", Set.of(), Set.of("a", "b"), List.of("a", "b"), false));
+    }
+
+    @Test
+    void progressAddsUpToEachObjectivesRequirement() {
+        assertEquals(List.of(2, 1), QuestRules.advance(List.of(1, 0), List.of(3, 1), List.of(1, 5)));
+        assertEquals(List.of(3, 1), QuestRules.advance(List.of(3, 1), List.of(3, 1), List.of(1, 1)));
+    }
+
+    @Test
+    void aQuestIsDoneWhenEveryObjectiveIs() {
+        assertTrue(QuestRules.done(List.of(3, 1), List.of(3, 1)));
+        assertFalse(QuestRules.done(List.of(2, 1), List.of(3, 1)));
+        assertTrue(QuestRules.done(List.of(), List.of()));
+    }
+
+    @Test
+    void progressListsMustMatchTheObjectives() {
+        assertThrows(IllegalArgumentException.class, () -> QuestRules.advance(List.of(1), List.of(3, 1), List.of(1, 1)));
     }
 }

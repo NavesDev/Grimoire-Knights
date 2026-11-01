@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-/** {@code /gk quest info|give|clear <player> [quest]} */
+/** {@code /gk quest info|give|complete|clear <player> [quest]} */
 public final class QuestCommand {
     private static final SuggestionProvider<CommandSourceStack> QUESTS =
             (context, builder) -> SharedSuggestionProvider.suggestResource(QuestService.ids(context.getSource().getServer()), builder);
@@ -29,6 +29,8 @@ public final class QuestCommand {
                 .then(Commands.literal("info").then(Commands.argument("player", EntityArgument.player()).executes(QuestCommand::info)))
                 .then(Commands.literal("give").then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("quest", ResourceLocationArgument.id()).suggests(QUESTS).executes(QuestCommand::give))))
+                .then(Commands.literal("complete").then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("quest", ResourceLocationArgument.id()).suggests(QUESTS).executes(QuestCommand::complete))))
                 .then(Commands.literal("clear").then(Commands.argument("player", EntityArgument.player())
                         .executes(QuestCommand::clearAll)
                         .then(Commands.argument("quest", ResourceLocationArgument.id()).suggests(QUESTS).executes(QuestCommand::clear))));
@@ -53,6 +55,17 @@ public final class QuestCommand {
             return 0;
         }
         context.getSource().sendSuccess(() -> Component.translatable(Ids.key("command", "quest.given"), quest.toString(), player.getDisplayName()), true);
+        return 1;
+    }
+
+    private static int complete(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerPlayer player = EntityArgument.getPlayer(context, "player");
+        ResourceLocation quest = ResourceLocationArgument.getId(context, "quest");
+        if (!QuestService.forceComplete(player, quest)) {
+            context.getSource().sendFailure(Component.translatable(Ids.key("command", "quest.give.unknown_quest"), quest.toString()));
+            return 0;
+        }
+        context.getSource().sendSuccess(() -> Component.translatable(Ids.key("command", "quest.completed"), quest.toString(), player.getDisplayName()), true);
         return 1;
     }
 

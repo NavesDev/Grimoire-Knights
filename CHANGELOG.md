@@ -5,7 +5,28 @@ Mod changes, newest first. Format based on [Keep a Changelog](https://keepachang
 ## [Unreleased]
 
 ### Added
+- **Stage 2: mastery, skill tree, ranks, full fire and wind, quests and broom flight** (#6).
+  - Masteries per element, Body and Mana, trained by fighting, dashing and spending mana; weak enemies give almost nothing and bosses can grant several levels (data map). Each level gives a point to its branch.
+  - Skill tree (K) as a graph: dash, max mana, regeneration, Mana Control I-III, two upgrades per spell and the element passive. Nodes are datapack JSON.
+  - Dash on R. Ranks from Recruit to Magic King set the grimoire mastery ceiling and unlock X (Knight) and C (Elite Knight).
+  - Fire: fireball (bigger, ground fire), flame arm that grabs and slams, ember burst (hits every nearby enemy and detonates the burn of those burning) and the Phoenix revive. Wind element: crescent blade, a horizontal tornado fang that drills through and pushes every enemy in its way, white gale bow that fires six arrows at once, chasing the enemy under the crosshair (no blocking of enemy attacks) and Tailwind; wind hits harder from afar.
+  - Quest engine with defeat, reach and talk objectives and rank, mastery and item rewards; NPC dialogue screen, quest journal (J), HUD tracker and the four rank trials.
+  - Mana dust (creative tab) and a craftable broom flown with Mana Control III; the rider turns with the broom, not the camera, and the broom banks into strafes.
+  - Commands: `/gk mastery`, `/gk tree`, `/gk rank`, `/gk quest complete`, `/gk mana`.
+  - Combat level (1-50) scales every hit after armor, in PvE and PvP: element mastery for spells, Body for the rest, a data map for mobs. A spell resistance attribute cuts spell damage.
+  - Armors: Knight (mana steel), Elite Knight (Knight piece, diamond and mana dust) and Magic Knight (leather, black dye and mana dust); mana steel ingot crafted from iron and mana dust, mana dust from lapis and amethyst.
+  - Armor look: an inventory button hides worn armor (seen by everyone) and four Curios cosmetic slots hide the piece of their slot.
+  - Body nodes: Vigor I-III (max health), Fall Resistance I-III and the landing roll (sneak right before landing: short forward roll, no fall damage).
+  - Directional dash poses (forward, back, left, right) with a blue streak trail.
+  - Skill tree and journal share one look; tree nodes have icon textures and show only when bought or next in line. Key hints show when there are points to spend or an unseen quest.
 - **Stage 2 models, animations and VFX** (#5): flame fist that grabs and slams, wind blade, tornado, wind bow and arrow made of tangled gusts; cast poses for Z, X and C and the dash pose; ground fire, flame fist explosion, ember burst, burn, phoenix revive, wind trail, wind hit, tailwind and dash effects; mana dust and broom icons.
+
+### Changed
+- Burn refreshes instead of stacking (#6).
+- Max mana comes from the base plus the Mana branch; the Mana stat and `/gk status mana` are gone (#6).
+- Broom: placed on the ground like a boat, ridden with right click and picked up with a hit; jump climbs, sprint sinks. It has health worn down only by the world (fire, lava, cactus, explosions); out of mana, rider and broom fall.
+- Mana regenerates only after a pause in spending; mana spent outside combat trains nothing.
+- The gale bow thins out into wind on release; the flame arm drops back to rest when it explodes without grabbing.
 
 ## [0.1.0] - 2026-10-30
 

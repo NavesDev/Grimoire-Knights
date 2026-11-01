@@ -1,0 +1,230 @@
+package com.navesdev.grimoireknights.ability.gametest;
+
+import com.navesdev.grimoireknights.GrimoireKnights;
+import com.navesdev.grimoireknights.ability.AbilityModule;
+import com.navesdev.grimoireknights.ability.AbilityService;
+import com.navesdev.grimoireknights.ability.BurnService;
+import com.navesdev.grimoireknights.ability.HeldService;
+import com.navesdev.grimoireknights.ability.PhoenixService;
+import com.navesdev.grimoireknights.ability.WindService;
+import com.navesdev.grimoireknights.ability.config.AbilityConfig;
+import com.navesdev.grimoireknights.ability.entity.BroomEntity;
+import com.navesdev.grimoireknights.ability.rules.CastRules;
+import com.navesdev.grimoireknights.core.Ids;
+import com.navesdev.grimoireknights.core.gametest.TestPlayers;
+import com.navesdev.grimoireknights.grimoire.GrimoireService;
+import com.navesdev.grimoireknights.progression.RankService;
+import com.navesdev.grimoireknights.progression.SkillTreeService;
+import com.navesdev.grimoireknights.progression.rules.Rank;
+import java.util.Optional;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+@GameTestHolder(GrimoireKnights.MODID)
+@PrefixGameTestTemplate(false)
+public class SpellGameTest {
+    @GameTest(template = "empty")
+    public static void burnRefreshesInsteadOfStacking(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        Pig pig = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 1.5));
+        BurnService.ignite(pig, caster);
+        double full = BurnService.remaining(pig);
+        for (int i = 0; i < 30; i++) BurnService.tick(pig);
+        helper.assertTrue(BurnService.remaining(pig) < full, "the burn wears down");
+        BurnService.ignite(pig, caster);
+        BurnService.ignite(pig, caster);
+        helper.assertTrue(Math.abs(BurnService.remaining(pig) - AbilityConfig.BURN_DAMAGE.get()) < 1e-6, "a new hit resets to the full burn, never more");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void theBurnDealsItsWholeDamage(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        Pig pig = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 1.5));
+        float health = pig.getHealth();
+        BurnService.ignite(pig, caster);
+        for (int i = 0; i <= AbilityConfig.BURN_DURATION_TICKS.get() + 1; i++) {
+            if (pig.hasData(AbilityModule.BURN)) BurnService.tick(pig);
+        }
+        helper.assertTrue(Math.abs(health - pig.getHealth() - AbilityConfig.BURN_DAMAGE.get()) < 1e-3, "full burn dealt, got " + (health - pig.getHealth()));
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void aHeldPlayerCannotDash(GameTestHelper helper) {
+        ServerPlayer player = TestPlayers.create(helper);
+        SkillTreeService.setPoints(player, com.navesdev.grimoireknights.progression.Masteries.BODY, 2);
+        SkillTreeService.buy(player, Ids.id("dash"));
+        HeldService.hold(player, helper.getLevel().getGameTime() + 40);
+        helper.assertTrue(com.navesdev.grimoireknights.progression.DashService.tryDash(player, 1, 0) == com.navesdev.grimoireknights.progression.DashService.Result.CANNOT_ACT, "held: no dash");
+        HeldService.release(player);
+        com.navesdev.grimoireknights.progression.DashService.forget(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void emberBurstHitsAloneAndDetonatesTheBurn(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        GrimoireService.give(caster, Ids.id("fire"), GrimoireService.CEREMONY_LEAVES);
+        RankService.set(caster, Rank.ELITE_KNIGHT);
+        AbilityService.ensureMana(caster);
+        caster.setPos(helper.absoluteVec(new Vec3(1.5, 1, 1.5)));
+        double before = AbilityService.data(caster).mana();
+        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "no enemy in range: still goes off");
+        helper.assertTrue(AbilityService.data(caster).mana() < before, "and still costs mana");
+        AbilityService.resetCooldowns(caster);
+        AbilityService.setMana(caster, AbilityService.maxMana(caster));
+        Pig pig = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 3.5));
+        float health = pig.getHealth();
+        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "ember burst with nothing burning");
+        helper.assertTrue(Math.abs(health - pig.getHealth() - AbilityConfig.EMBER_DAMAGE.get()) < 1e-3, "burst damage alone, got " + (health - pig.getHealth()));
+        AbilityService.resetCooldowns(caster);
+        BurnService.ignite(pig, caster);
+        health = pig.getHealth();
+        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "ember burst on a burning target");
+        float expected = (float) (AbilityConfig.BURN_DAMAGE.get() + AbilityConfig.EMBER_DAMAGE.get());
+        helper.assertTrue(Math.abs(health - pig.getHealth() - expected) < 1e-3, "burst + remaining burn, got " + (health - pig.getHealth()));
+        helper.assertFalse(BurnService.burning(pig), "the burn is out");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void tornadoFangFliesOutLevelAndUp(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        GrimoireService.give(caster, Ids.id("wind"), GrimoireService.CEREMONY_LEAVES);
+        RankService.set(caster, Rank.KNIGHT);
+        AbilityService.ensureMana(caster);
+        // standing on the floor (y 1 is inside it), so a tornado thrown level must clear the ground
+        caster.setPos(helper.absoluteVec(new Vec3(1.5, 2, 1.5)));
+        caster.setYRot(0);
+        caster.setXRot(0);
+        helper.assertTrue(AbilityService.tryCast(caster, 1) == CastRules.Result.OK, "tornado thrown level");
+        AbilityService.resetCooldowns(caster);
+        caster.setXRot(-60);
+        helper.assertTrue(AbilityService.tryCast(caster, 1) == CastRules.Result.OK, "tornado thrown up");
+        // one tick in: later they reach the barriers around the test
+        helper.runAfterDelay(1, () -> {
+            var tornadoes = helper.getLevel().getEntities(AbilityModule.TORNADO.get(), caster.getBoundingBox().inflate(16), entity -> true);
+            helper.assertTrue(tornadoes.size() == 2, "both tornadoes still fly, got " + tornadoes.size());
+            helper.assertTrue(tornadoes.stream().anyMatch(tornado -> tornado.getDeltaMovement().y > 0.5), "one goes up");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty")
+    public static void tornadoFangDrillsThroughEveryEnemyInItsWay(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        GrimoireService.give(caster, Ids.id("wind"), GrimoireService.CEREMONY_LEAVES);
+        RankService.set(caster, Rank.KNIGHT);
+        AbilityService.ensureMana(caster);
+        Pig near = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 2, 2.5));
+        Pig far = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 2, 3.5));
+        float health = near.getHealth();
+        caster.setPos(helper.absoluteVec(new Vec3(1.5, 2, 0.5)));
+        caster.setYRot(0);
+        caster.setXRot(0);
+        helper.assertTrue(AbilityService.tryCast(caster, 1) == CastRules.Result.OK, "tornado fang");
+        helper.runAfterDelay(1, () -> {
+            helper.assertTrue(near.getHealth() < health && far.getHealth() < health, "both pigs in its way are hit");
+            helper.assertTrue(near.getDeltaMovement().z > 0.1 && far.getDeltaMovement().z > 0.1, "and pushed along its flight, got " + far.getDeltaMovement());
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
+    public static void galeBowFiresSixArrowsAtOnce(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        GrimoireService.give(caster, Ids.id("wind"), GrimoireService.CEREMONY_LEAVES);
+        RankService.set(caster, Rank.ELITE_KNIGHT);
+        AbilityService.ensureMana(caster);
+        caster.setPos(helper.absoluteVec(new Vec3(1.5, 2, 1.5)));
+        caster.setXRot(-60);
+        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "gale bow");
+        helper.succeedWhen(() -> {
+            int arrows = helper.getLevel().getEntities(AbilityModule.WIND_ARROW.get(), caster.getBoundingBox().inflate(16), entity -> true).size();
+            helper.assertTrue(arrows == 6, "six arrows in the air together, got " + arrows);
+        });
+    }
+
+    @GameTest(template = "empty")
+    public static void windHitsHarderFromAfar(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        Pig near = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 4.5));
+        Pig far = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 17.5));
+        caster.setPos(helper.absoluteVec(new Vec3(1.5, 1, 1.5)));
+        helper.assertTrue(WindService.bonus(caster, near) == 0, "normal damage up to 6 blocks");
+        helper.assertTrue(Math.abs(WindService.bonus(caster, far) - 0.03 * (16 - 6)) < 1e-6, "+3% per block after 6, got " + WindService.bonus(caster, far));
+        float health = far.getHealth();
+        WindService.hurt(helper.getLevel(), caster, caster, far, 5);
+        helper.assertTrue(Math.abs(health - far.getHealth() - 5 * 1.3f) < 1e-3, "bonus applied to the damage");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void aHeldTargetCannotAttackOrCast(GameTestHelper helper) {
+        ServerPlayer player = TestPlayers.create(helper);
+        GrimoireService.give(player, Ids.id("wind"), GrimoireService.CEREMONY_LEAVES);
+        Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, new Vec3(1.5, 1, 1.5));
+        Pig pig = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(2.5, 1, 1.5));
+        HeldService.hold(zombie, helper.getLevel().getGameTime() + 40);
+        float health = pig.getHealth();
+        pig.hurt(helper.getLevel().damageSources().mobAttack(zombie), 3);
+        helper.assertTrue(pig.getHealth() == health, "held attacker deals nothing");
+        HeldService.hold(player, helper.getLevel().getGameTime() + 40);
+        helper.assertTrue(AbilityService.tryCast(player, 0) == CastRules.Result.CANNOT_ACT, "held caster can't cast");
+        HeldService.release(player);
+        helper.assertTrue(AbilityService.tryCast(player, 0) == CastRules.Result.OK, "released caster casts the crescent blade");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void lockedSlotsAndBothElementsInTheLottery(GameTestHelper helper) {
+        ServerPlayer player = TestPlayers.create(helper);
+        GrimoireService.give(player, Ids.id("fire"), GrimoireService.CEREMONY_LEAVES);
+        helper.assertTrue(AbilityService.tryCast(player, 1) == CastRules.Result.LOCKED, "X locked for a recruit");
+        helper.assertTrue(AbilityService.tryCast(player, 2) == CastRules.Result.LOCKED, "C locked for a recruit");
+        RankService.set(player, Rank.KNIGHT);
+        helper.assertTrue(AbilityService.tryCast(player, 1) == CastRules.Result.OK, "X at Knight");
+        helper.assertTrue(GrimoireService.lotteryWeights().containsKey(Optional.of(Ids.id("wind"))), "wind is in the lottery");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void phoenixRevivesOncePerFight(GameTestHelper helper) {
+        ServerPlayer player = TestPlayers.create(helper);
+        GrimoireService.give(player, Ids.id("fire"), GrimoireService.CEREMONY_LEAVES);
+        helper.assertFalse(PhoenixService.tryRevive(player), "no passive, no revive");
+        RankService.set(player, Rank.ELITE_KNIGHT);
+        SkillTreeService.setPoints(player, Ids.id("fire"), 13);
+        for (String node : new String[] {"fire/fireball_1", "fire/flame_arm_1", "fire/ember_burst_1", "fire/phoenix"}) SkillTreeService.buy(player, Ids.id(node));
+        helper.assertTrue(SkillTreeService.hasPassive(player), "phoenix bought");
+        helper.assertTrue(PhoenixService.tryRevive(player), "revives");
+        helper.assertTrue(player.getHealth() == player.getMaxHealth() * AbilityConfig.PHOENIX_HEALTH.get().floatValue(), "half health");
+        helper.assertFalse(PhoenixService.tryRevive(player), "only once per fight");
+        PhoenixService.forget(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void theWorldBreaksTheBroomAndHitsDont(GameTestHelper helper) {
+        BroomEntity broom = new BroomEntity(helper.getLevel(), helper.absoluteVec(new Vec3(1.5, 2, 1.5)), 0);
+        helper.getLevel().addFreshEntity(broom);
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 1, 2, 1);
+        helper.assertTrue(!broom.hurt(broom.damageSources().mobAttack(zombie), 50), "attacks don't harm it");
+        float full = broom.health();
+        broom.hurt(broom.damageSources().lava(), 4);
+        helper.assertTrue(!broom.isRemoved() && broom.health() == full - 4, "lava wears it down");
+        broom.hurt(broom.damageSources().cactus(), 1);
+        helper.assertTrue(broom.health() == full - 5, "so does a cactus");
+        while (!broom.isRemoved() && broom.health() > -100) broom.hurt(broom.damageSources().lava(), 4);
+        helper.assertTrue(broom.isRemoved(), "burnt up");
+        helper.succeed();
+    }
+}

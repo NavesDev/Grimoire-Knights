@@ -7,6 +7,7 @@ import com.navesdev.grimoireknights.grimoire.config.GrimoireConfig;
 import com.navesdev.grimoireknights.grimoire.entity.Priest;
 import com.navesdev.grimoireknights.grimoire.network.CeremonyPayload;
 import com.navesdev.grimoireknights.grimoire.network.ElementChoicePayload;
+import com.navesdev.grimoireknights.quest.Quest;
 import com.navesdev.grimoireknights.quest.QuestService;
 import java.util.HashMap;
 import java.util.List;
@@ -40,21 +41,32 @@ public final class CeremonyService {
     /** Game time when the player's grimoire achievement is due. */
     private static final Map<UUID, Long> PENDING_REVEAL = new HashMap<>();
 
+    private static final ResourceLocation PRIEST = Ids.id("priest");
+
     private CeremonyService() {}
 
-    /** Right-click on the priest. */
+    private static Component line(String key) {
+        return Component.translatable(Ids.key("message", key));
+    }
+
+    /**
+     * Right-click on the priest: its lines show in the dialogue screen. After the ceremony it offers its next quest
+     * (the rank trials); talking also counts for talk objectives.
+     */
     public static void talk(ServerPlayer player, Priest priest) {
+        QuestService.talked(player, priest);
         if (GrimoireService.data(player).ceremonyDone()) {
-            say(player, "priest.done");
+            Optional<ResourceLocation> quest = QuestService.offerFrom(player, PRIEST);
+            QuestService.say(player, priest, quest.map(Quest::offer).orElseGet(() -> line("priest.done")), quest);
         } else if (!GrimoireService.callingFull(player)) {
-            say(player, "priest.calling");
+            QuestService.say(player, priest, line("priest.calling"), Optional.empty());
         } else {
             Optional<BlockPos> altar = findAltar(player.serverLevel(), priest.home(), GrimoireConfig.PRIEST_ALTAR_RADIUS.get())
                     .or(() -> findAltar(player.serverLevel(), priest.blockPosition(), GrimoireConfig.PRIEST_ALTAR_RADIUS.get()));
             if (altar.isEmpty()) {
-                say(player, "priest.go_to_tower");
+                QuestService.say(player, priest, line("priest.go_to_tower"), Optional.empty());
             } else {
-                say(player, "priest.begin");
+                QuestService.say(player, priest, line("priest.begin"), Optional.empty());
                 start(player, altar.get());
             }
         }

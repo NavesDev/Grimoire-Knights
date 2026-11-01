@@ -1,0 +1,21 @@
+{
+  "branch": "mana",
+  "cost": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "effect": {
+    "type": "grimoireknights:max_mana"
+  },
+  "icon": "grimoireknights:skill/max_mana",
+  "x": 4,
+  "y": 0
+}

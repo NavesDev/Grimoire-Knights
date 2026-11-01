@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:in_fire",
+    "minecraft:on_fire",
+    "minecraft:campfire",
+    "minecraft:lava",
+    "minecraft:lightning_bolt",
+    "minecraft:explosion",
+    "minecraft:bad_respawn_point",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:in_wall",
+    "minecraft:falling_block",
+    "minecraft:falling_anvil",
+    "minecraft:falling_stalactite",
+    "minecraft:stalagmite"
+  ]
+}

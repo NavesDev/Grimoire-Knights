@@ -1,0 +1,22 @@
+{
+  "source": "story",
+  "giver": "grimoireknights:priest",
+  "objectives": [
+    {
+      "type": "grimoireknights:defeat",
+      "tag": "grimoireknights:trial/renegade_captain",
+      "count": 1,
+      "name": "quest.grimoireknights.trial.renegade_captain.target"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "grimoireknights:rank_up",
+      "rank": "knight"
+    },
+    {
+      "type": "grimoireknights:mastery",
+      "amount": 50
+    }
+  ]
+}

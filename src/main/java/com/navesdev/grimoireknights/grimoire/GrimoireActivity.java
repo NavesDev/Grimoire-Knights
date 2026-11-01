@@ -1,9 +1,11 @@
 package com.navesdev.grimoireknights.grimoire;
 
 import com.navesdev.grimoireknights.grimoire.network.GrimoireActivityPayload;
+import com.navesdev.grimoireknights.grimoire.network.PlayerAnimationPayload;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -27,6 +29,11 @@ public final class GrimoireActivity {
     public static void cast(ServerPlayer player) {
         if (!GrimoireService.data(player).hasGrimoire()) return;
         send(player, GrimoireActivityPayload.Kind.CAST);
+    }
+
+    /** Plays a playerAnimator pose on the player for everyone near; a short id like {@code grimoireknights:dash} works. */
+    public static void pose(ServerPlayer player, ResourceLocation animation) {
+        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new PlayerAnimationPayload(player.getId(), animation));
     }
 
     static void forget(ServerPlayer player) {

@@ -1,0 +1,12 @@
+{
+  "branch": "body",
+  "cost": [
+    2
+  ],
+  "effect": {
+    "type": "grimoireknights:dash"
+  },
+  "icon": "grimoireknights:ability/dash",
+  "x": 0,
+  "y": 0
+}

@@ -1,0 +1,18 @@
+{
+  "branch": "grimoire",
+  "element": "grimoireknights:wind",
+  "cost": [
+    4
+  ],
+  "effect": {
+    "type": "grimoireknights:spell_upgrade",
+    "ability": "grimoireknights:crescent_blade",
+    "level": 2
+  },
+  "icon": "grimoireknights:ability/crescent_blade",
+  "x": 7,
+  "y": 2,
+  "requires": [
+    "grimoireknights:wind/crescent_blade_1"
+  ]
+}

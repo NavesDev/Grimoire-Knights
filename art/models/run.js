@@ -12,6 +12,19 @@ const K = load('./lib.js');
 const ROOT = path.resolve(__dirname, '../..');
 const ASSETS = path.join(ROOT, 'src/main/resources/assets/grimoireknights');
 
+// playerAnimator reads the bedrock file as-is for the limbs and only undoes the x and y flip for body, while the
+// vanilla model mirrors Blockbench (y down for the parts, x for body): rotations keep Blockbench's look in game
+// with y and z negated.
+function toGameAxes(file) {
+  Object.values(file.animations).forEach(a => Object.values(a.bones || {}).forEach(bone => {
+    const r = bone.rotation;
+    if (!r) return;
+    const flip = v => [v[0], -v[1], -v[2]].map(n => n + 0);
+    if (Array.isArray(r)) bone.rotation = flip(r);
+    else Object.values(r).forEach(k => { if (Array.isArray(k)) k.splice(0, 3, ...flip(k)); else k.vector = flip(k.vector); });
+  }));
+}
+
 function generate(id) {
   const def = load('./' + id + '.js');
   const old = ModelProject.all.find(p => p.name === def.name);
@@ -46,7 +59,9 @@ function generate(id) {
     const file = rig ? path.join(ASSETS, 'player_animation', def.name + '.json')
       : path.join(ASSETS, 'animations', def.group, def.name + '.animation.json');
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, JSON.stringify(Animator.buildFile(null, names), null, '\t') + '\n');
+    const out = Animator.buildFile(null, names);
+    if (def.gameAxes) toGameAxes(out);
+    fs.writeFileSync(file, JSON.stringify(out, null, '\t') + '\n');
     written.push(path.relative(ROOT, file));
   }
   const bb = path.join(ROOT, 'art/blockbench', def.name + '.bbmodel');

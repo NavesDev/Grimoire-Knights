@@ -1,0 +1,19 @@
+{
+  "branch": "grimoire",
+  "element": "grimoireknights:fire",
+  "cost": [
+    4
+  ],
+  "effect": {
+    "type": "grimoireknights:spell_upgrade",
+    "ability": "grimoireknights:flame_arm",
+    "level": 2
+  },
+  "icon": "grimoireknights:ability/flame_arm",
+  "x": 8,
+  "y": 2,
+  "requires": [
+    "grimoireknights:fire/flame_arm_1"
+  ],
+  "required_rank": "knight"
+}
