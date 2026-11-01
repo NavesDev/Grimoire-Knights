@@ -133,6 +133,21 @@ public class SpellGameTest {
         });
     }
 
+    @GameTest(template = "empty", timeoutTicks = 40)
+    public static void galeBowFiresSixArrowsAtOnce(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        GrimoireService.give(caster, Ids.id("wind"), GrimoireService.CEREMONY_LEAVES);
+        RankService.set(caster, Rank.ELITE_KNIGHT);
+        AbilityService.ensureMana(caster);
+        caster.setPos(helper.absoluteVec(new Vec3(1.5, 2, 1.5)));
+        caster.setXRot(-60);
+        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "gale bow");
+        helper.succeedWhen(() -> {
+            int arrows = helper.getLevel().getEntities(AbilityModule.WIND_ARROW.get(), caster.getBoundingBox().inflate(16), entity -> true).size();
+            helper.assertTrue(arrows == 6, "six arrows in the air together, got " + arrows);
+        });
+    }
+
     @GameTest(template = "empty")
     public static void windHitsHarderFromAfar(GameTestHelper helper) {
         ServerPlayer caster = TestPlayers.create(helper);

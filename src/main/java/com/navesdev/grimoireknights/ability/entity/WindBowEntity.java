@@ -2,8 +2,9 @@ package com.navesdev.grimoireknights.ability.entity;
 
 import com.navesdev.grimoireknights.ability.AbilityModule;
 import com.navesdev.grimoireknights.ability.config.AbilityConfig;
-import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,21 +26,33 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
- * White gale bow (Yuno's Shippu no Hakkyu): floats in front of its caster, a little away, and shoots its arrows in
- * sequence from itself at the enemy under the crosshair, which they chase; with no enemy, toward where they look. Then fades.
+ * White gale bow (Yuno's Shippu no Hakkyu): a huge bow standing up and arching over its caster, a little ahead. It
+ * summons and draws six arrows at once, then fires them together from their spots on the bow at the enemy under the
+ * crosshair, which they chase; with no enemy, toward where the caster looks. Then it blows away.
  */
 public class WindBowEntity extends Entity implements GeoEntity {
     private static final RawAnimation SUMMON = RawAnimation.begin().thenPlay("animation.wind_bow.summon").thenLoop("animation.wind_bow.draw");
-    private static final int WARMUP = 6;
-    /** Blocks in front of the eyes and below them; the renderer centers the model on this spot. */
-    private static final double DISTANCE = 2.2;
-    private static final double DROP = 0.3;
+    private static final RawAnimation RELEASE = RawAnimation.begin().thenPlay("animation.wind_bow.release");
+    private static final EntityDataAccessor<Boolean> RELEASED = SynchedEntityData.defineId(WindBowEntity.class, EntityDataSerializers.BOOLEAN);
+    /** Ticks of summon (0.3 s) and draw (0.5 s) before the arrows leave, in step with the cast_c_wind pose. */
+    private static final int FIRE_AT = 16;
+    /** Ticks of release (0.6 s) before it goes. */
+    private static final int RELEASE_TICKS = 12;
+    /** Blocks in front of the eyes and below them; the renderer centers the arch on this spot. */
+    private static final double DISTANCE = 1.0;
+    private static final double DROP = 0.2;
     /** Blocks ahead of the eyes the arrows converge on, and how far an enemy can be locked on. */
     private static final double AIM = 24;
+    /** Arrows nocked on the arch (wind_bow.js ARROWS, INNER, R, SQUASH): angle from the top, and size (BIG). */
+    private static final double[] ARROW_ANGLES = {-82, -50, -18, 18, 50, 82};
+    private static final double ARROW_RADIUS = 34 * 0.78 / 16;
+    private static final double SQUASH = 0.85;
+    private static final double ARROW_AHEAD = 0.5;
+    private static final float ARROW_SIZE = 1.5f;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private UUID owner;
+    /** Held directly: the bow is never saved and lives under two seconds. */
+    private ServerPlayer owner;
     private int upgrade;
-    private LivingEntity target;
 
     public WindBowEntity(EntityType<? extends WindBowEntity> type, Level level) {
         super(type, level);
@@ -48,7 +61,7 @@ public class WindBowEntity extends Entity implements GeoEntity {
 
     public WindBowEntity(Level level, ServerPlayer owner, int upgrade) {
         this(AbilityModule.WIND_BOW.get(), level);
-        this.owner = owner.getUUID();
+        this.owner = owner;
         this.upgrade = upgrade;
         follow(owner);
     }
@@ -57,16 +70,13 @@ public class WindBowEntity extends Entity implements GeoEntity {
     public void tick() {
         super.tick();
         if (!(level() instanceof ServerLevel server)) return;
-        if (!(owner != null && server.getEntity(owner) instanceof ServerPlayer player) || !player.isAlive()) {
+        if (owner == null || owner.isRemoved() || !owner.isAlive()) {
             discard();
             return;
         }
-        follow(player);
-        int arrows = AbilityConfig.BOW_ARROWS.get();
-        int interval = AbilityConfig.BOW_INTERVAL_TICKS.get();
-        int shot = tickCount - WARMUP;
-        if (shot >= 0 && shot % interval == 0 && shot / interval < arrows) shoot(server, player);
-        if (shot >= arrows * interval + 4) discard();
+        if (!entityData.get(RELEASED)) follow(owner);
+        if (tickCount == FIRE_AT) fire(server, owner);
+        if (tickCount >= FIRE_AT + RELEASE_TICKS) discard();
     }
 
     private void follow(ServerPlayer player) {
@@ -76,20 +86,27 @@ public class WindBowEntity extends Entity implements GeoEntity {
         setXRot(player.getXRot());
     }
 
-    private void shoot(ServerLevel server, ServerPlayer player) {
-        WindArrowEntity arrow = new WindArrowEntity(server, player, false);
-        arrow.withUpgrade(upgrade);
-        // locks on the enemy under the crosshair (keeping the last one when there is none); with no lock it flies from
-        // the bow toward the point the caster looks at, so the arrow lands under the crosshair
-        LivingEntity aimed = aimed(player);
-        if (aimed != null) target = aimed;
-        if (target != null && !target.isAlive()) target = null;
+    /** All six at once, each from its spot on the arch (model -z forward, +x to the caster's right). */
+    private void fire(ServerLevel server, ServerPlayer player) {
+        entityData.set(RELEASED, true);
+        LivingEntity target = aimed(player);
         Vec3 point = target != null ? target.getBoundingBox().getCenter() : player.getEyePosition().add(player.getLookAngle().scale(AIM));
-        arrow.launch(player, point.subtract(position()).normalize(), AbilityConfig.ARROW_SPEED.get(), 40);
-        arrow.setPos(position());
-        arrow.withTarget(target);
-        server.addFreshEntity(arrow);
-        server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.6f, 1.5f);
+        Vec3 forward = Vec3.directionFromRotation(getXRot(), getYRot());
+        Vec3 right = forward.cross(new Vec3(0, 1, 0)).normalize();
+        Vec3 up = right.cross(forward);
+        for (double angle : ARROW_ANGLES) {
+            double a = Math.toRadians(angle);
+            Vec3 spot = position().add(right.scale(ARROW_RADIUS * Math.sin(a))).add(up.scale(ARROW_RADIUS * SQUASH * Math.cos(a)))
+                    .add(forward.scale(ARROW_AHEAD));
+            WindArrowEntity arrow = new WindArrowEntity(server, player, false);
+            arrow.withUpgrade(upgrade);
+            arrow.withScale(ARROW_SIZE);
+            arrow.launch(player, point.subtract(spot).normalize(), AbilityConfig.ARROW_SPEED.get(), 40);
+            arrow.setPos(spot);
+            arrow.withTarget(target);
+            server.addFreshEntity(arrow);
+        }
+        server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1, 1.2f);
     }
 
     @Nullable
@@ -102,7 +119,9 @@ public class WindBowEntity extends Entity implements GeoEntity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {}
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(RELEASED, false);
+    }
 
     @Override
     public boolean shouldBeSaved() {
@@ -117,7 +136,7 @@ public class WindBowEntity extends Entity implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 0, state -> state.setAndContinue(SUMMON)));
+        controllers.add(new AnimationController<>(this, "main", 0, state -> state.setAndContinue(entityData.get(RELEASED) ? RELEASE : SUMMON)));
     }
 
     @Override

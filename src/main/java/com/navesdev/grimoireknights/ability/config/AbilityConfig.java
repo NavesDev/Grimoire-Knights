@@ -57,8 +57,6 @@ public final class AbilityConfig {
     public static final ModConfigSpec.DoubleValue TORNADO_STONE_DAMAGE;
     public static final ModConfigSpec.DoubleValue BOW_COST;
     public static final ModConfigSpec.IntValue BOW_COOLDOWN_TICKS;
-    public static final ModConfigSpec.IntValue BOW_ARROWS;
-    public static final ModConfigSpec.IntValue BOW_INTERVAL_TICKS;
     public static final ModConfigSpec.DoubleValue ARROW_DAMAGE;
     public static final ModConfigSpec.DoubleValue ARROW_SPLIT_DAMAGE;
     public static final ModConfigSpec.DoubleValue ARROW_SPEED;
@@ -135,8 +133,6 @@ public final class AbilityConfig {
         builder.pop().push("galeBow");
         BOW_COST = builder.defineInRange("cost", 40.0, 0.0, 100_000.0);
         BOW_COOLDOWN_TICKS = builder.defineInRange("cooldownTicks", 300, 0, 72_000);
-        BOW_ARROWS = builder.defineInRange("arrows", 6, 1, 64);
-        BOW_INTERVAL_TICKS = builder.comment("Ticks between arrows.").defineInRange("intervalTicks", 4, 1, 40);
         ARROW_DAMAGE = builder.defineInRange("damage", 6.0, 0.0, 1_000.0);
         ARROW_SPLIT_DAMAGE = builder.comment("Upgrade 1: damage of each of the 3 split arrows.").defineInRange("splitDamage", 2.0, 0.0, 1_000.0);
         ARROW_SPEED = builder.defineInRange("speed", 2.5, 0.1, 10.0);
