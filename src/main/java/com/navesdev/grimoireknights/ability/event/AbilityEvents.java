@@ -55,6 +55,7 @@ public final class AbilityEvents {
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             TailwindService.forget(player);
+            AbilityService.forget(player);
             PhoenixService.forget(player);
             HeldService.release(player);
         }

@@ -7,6 +7,7 @@ public final class AbilityConfig {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.DoubleValue MANA_BASE;
     public static final ModConfigSpec.DoubleValue MANA_REGEN_PER_SECOND;
+    public static final ModConfigSpec.IntValue MANA_REGEN_DELAY_TICKS;
     public static final ModConfigSpec.DoubleValue FIREBALL_COST;
     public static final ModConfigSpec.DoubleValue FIREBALL_DAMAGE;
     public static final ModConfigSpec.DoubleValue FIREBALL_AREA_DAMAGE;
@@ -65,21 +66,23 @@ public final class AbilityConfig {
     public static final ModConfigSpec.DoubleValue TAILWIND_SPEED_PER_STACK;
     public static final ModConfigSpec.DoubleValue TAILWIND_COOLDOWN_CUT;
     public static final ModConfigSpec.DoubleValue BROOM_SPEED;
+    public static final ModConfigSpec.DoubleValue BROOM_CLIMB_SPEED;
+    public static final ModConfigSpec.DoubleValue BROOM_HEALTH;
     public static final ModConfigSpec.DoubleValue BROOM_MANA_PER_SECOND;
-    public static final ModConfigSpec.DoubleValue BROOM_GLIDE_FALL;
     public static final ModConfigSpec.IntValue BROOM_MANA_CONTROL;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         builder.push("mana");
         MANA_BASE = builder.comment("Maximum mana before the Mana branch nodes.").defineInRange("base", 100.0, 0.0, 100_000.0);
-        MANA_REGEN_PER_SECOND = builder.comment("Current mana regenerated per second, before the Mana branch nodes.").defineInRange("regenPerSecond", 5.0, 0.0, 10_000.0);
+        MANA_REGEN_PER_SECOND = builder.comment("Current mana regenerated per second, before the Mana branch nodes.").defineInRange("regenPerSecond", 2.0, 0.0, 10_000.0);
+        MANA_REGEN_DELAY_TICKS = builder.comment("Ticks without spending mana (casts, broom flight) before it starts regenerating.").defineInRange("regenDelayTicks", 60, 0, 72_000);
         builder.pop().push("fireball");
         FIREBALL_COST = builder.comment("Mana spent per fireball.").defineInRange("cost", 20.0, 0.0, 100_000.0);
         FIREBALL_DAMAGE = builder.comment("Damage on hit (2 = one heart).").defineInRange("damage", 6.0, 0.0, 1_000.0);
         FIREBALL_AREA_DAMAGE = builder.comment("Damage to the others caught in the explosion.").defineInRange("areaDamage", 3.0, 0.0, 1_000.0);
         FIREBALL_RADIUS = builder.comment("Explosion radius in blocks; it breaks nothing.").defineInRange("radius", 2.5, 0.0, 16.0);
-        FIREBALL_COOLDOWN_TICKS = builder.comment("Cooldown in ticks (20 = 1 s).").defineInRange("cooldownTicks", 20, 0, 72_000);
+        FIREBALL_COOLDOWN_TICKS = builder.comment("Cooldown in ticks (20 = 1 s).").defineInRange("cooldownTicks", 60, 0, 72_000);
         FIREBALL_SPEED = builder.comment("Blocks per tick.").defineInRange("speed", 1.5, 0.1, 10.0);
         FIREBALL_LIFETIME_TICKS = builder.comment("Ticks before a fireball that hit nothing fades.").defineInRange("lifetimeTicks", 60, 1, 1_200);
         FIREBALL_BIG_SCALE = builder.comment("Upgrade 1: size and radius multiplier.").defineInRange("bigScale", 1.6, 1.0, 5.0);
@@ -115,7 +118,7 @@ public final class AbilityConfig {
         WIND_BONUS_CAP = builder.defineInRange("bonusCap", 0.6, 0.0, 10.0);
         builder.pop().push("crescentBlade");
         BLADE_COST = builder.defineInRange("cost", 15.0, 0.0, 100_000.0);
-        BLADE_COOLDOWN_TICKS = builder.defineInRange("cooldownTicks", 16, 0, 72_000);
+        BLADE_COOLDOWN_TICKS = builder.defineInRange("cooldownTicks", 50, 0, 72_000);
         BLADE_DAMAGE = builder.defineInRange("damage", 5.0, 0.0, 1_000.0);
         BLADE_SPEED = builder.defineInRange("speed", 2.0, 0.1, 10.0);
         BLADE_RANGE = builder.defineInRange("range", 20.0, 1.0, 128.0);
@@ -133,8 +136,8 @@ public final class AbilityConfig {
         builder.pop().push("galeBow");
         BOW_COST = builder.defineInRange("cost", 40.0, 0.0, 100_000.0);
         BOW_COOLDOWN_TICKS = builder.defineInRange("cooldownTicks", 300, 0, 72_000);
-        ARROW_DAMAGE = builder.defineInRange("damage", 6.0, 0.0, 1_000.0);
-        ARROW_SPLIT_DAMAGE = builder.comment("Upgrade 1: damage of each of the 3 split arrows.").defineInRange("splitDamage", 2.0, 0.0, 1_000.0);
+        ARROW_DAMAGE = builder.comment("Damage of each of the 6 arrows.").defineInRange("damage", 2.5, 0.0, 1_000.0);
+        ARROW_SPLIT_DAMAGE = builder.comment("Upgrade 1: damage of each of the 3 split arrows.").defineInRange("splitDamage", 1.0, 0.0, 1_000.0);
         ARROW_SPEED = builder.defineInRange("speed", 2.5, 0.1, 10.0);
         builder.pop().push("tailwind");
         TAILWIND_MAX_STACKS = builder.defineInRange("maxStacks", 5, 1, 100);
@@ -143,8 +146,9 @@ public final class AbilityConfig {
         TAILWIND_COOLDOWN_CUT = builder.comment("Wind spell cooldown cut per stack.").defineInRange("cooldownCut", 0.06, 0.0, 0.2);
         builder.pop().push("broom");
         BROOM_SPEED = builder.comment("Blocks per tick (0.6 = 12 blocks/s).").defineInRange("speed", 0.6, 0.05, 5.0);
+        BROOM_CLIMB_SPEED = builder.comment("Blocks per tick up (jump) or down (sprint).").defineInRange("climbSpeed", 0.4, 0.0, 5.0);
+        BROOM_HEALTH = builder.comment("Health of a broom; only the world's damage (damage type tag grimoireknights:breaks_broom) wears it down. Lava hurts 4 a tick.").defineInRange("health", 10.0, 1.0, 1_000.0);
         BROOM_MANA_PER_SECOND = builder.comment("Mana spent per second of flight, before Mana Control.").defineInRange("manaPerSecond", 3.0, 0.0, 1_000.0);
-        BROOM_GLIDE_FALL = builder.comment("Blocks per tick the broom sinks while gliding with no mana.").defineInRange("glideFall", 0.08, 0.01, 1.0);
         BROOM_MANA_CONTROL = builder.comment("Mana Control ranks needed to fly.").defineInRange("manaControl", 3, 0, 10);
         builder.pop();
         SPEC = builder.build();

@@ -1,8 +1,8 @@
 // Player poses when casting a spell (Z, X, C) and dashing, for playerAnimator. Same rig as player_sword.js.
 // Cast poses key only the torso and arms: code turns the missing parts off, so the legs
 // keep walking and the head keeps following the look. +x swings an arm forward (90 = pointing ahead);
-// on the right arm +y swings it in toward the chest, -z lifts it out to the side (mirrored on the left). That is
-// how they look in game: Blockbench shows y the other way (the game mirrors it, see player_ride's gameAxes).
+// on the right arm +y swings it in toward the chest and +z lifts it out to the side (mirrored on the left): -z
+// sank the arm into the body in game. Blockbench shows y and z the other way (the game mirrors it, see player_ride's gameAxes).
 const P = load('./player_sword.js');
 const zero = [0, 0, 0];
 const REST = { torso: zero, right_arm: zero, left_arm: zero };
@@ -35,6 +35,11 @@ const animations = {
     [0.6, { torso: [-12, -8, 0], right_arm: [40, 8, 0], left_arm: [15, 0, 8] }],
     [0.8, REST]
   ]),
+  // X fire, when the hand explodes without grabbing anyone: the held arm drops back to rest.
+  cast_x_fire_release: pose(0.3, [
+    [0, { torso: [0, -20, 0], right_arm: [92, 8, 0], left_arm: [-20, 0, 10] }],
+    [0.3, REST]
+  ]),
   // X wind (tornado fang): both hands gathered at the chest, then pushed forward; the tornado leaves at 0.3 s.
   cast_x_wind: pose(0.8, [
     [0, REST],
@@ -63,12 +68,31 @@ const animations = {
   ])
 };
 
-// Dash (0.3 s, the dash's own duration): whole body leans into the burst, arms swept back, legs split.
-animations.dash = P.acted(0.3, [
+// Dash (0.3 s, the dash's own duration): a quick lunge, not a flight: slight lean, legs in a long stride, arms
+// swinging opposite to the legs like a sprint step.
+const dashPose = peak => P.acted(0.3, [
   [0, { body: zero, right_arm: zero, left_arm: zero, right_leg: zero, left_leg: zero }],
-  [0.06, { body: [-25, 0, 0], right_arm: [-45, 0, -15], left_arm: [-45, 0, 15], right_leg: [30, 0, 0], left_leg: [-35, 0, 0] }],
-  [0.22, { body: [-20, 0, 0], right_arm: [-40, 0, -12], left_arm: [-40, 0, 12], right_leg: [25, 0, 0], left_leg: [-30, 0, 0] }],
+  [0.06, peak],
+  [0.22, Object.fromEntries(Object.entries(peak).map(([k, v]) => [k, v.map(n => n * 0.85)]))],
   [0.3, { body: zero, right_arm: zero, left_arm: zero, right_leg: zero, left_leg: zero }]
 ], none, 1);
+animations.dash = dashPose({ body: [-8, 0, 0], right_arm: [-40, 0, 6], left_arm: [40, 0, -6], right_leg: [30, 0, 0], left_leg: [-25, 0, 0] });
+// Back: leans away, arms thrown forward for balance, feet leading. Sides: lean into it, the leading arm and leg out,
+// the other arm tucked.
+animations.dash_back = dashPose({ body: [12, 0, 0], right_arm: [45, 0, 12], left_arm: [45, 0, -12], right_leg: [-30, 0, 0], left_leg: [20, 0, 0] });
+animations.dash_right = dashPose({ body: [-4, 0, -12], right_arm: [0, 0, 55], left_arm: [-15, 0, 10], right_leg: [0, 0, 20], left_leg: [0, 0, -4] });
+animations.dash_left = dashPose({ body: [-4, 0, 12], right_arm: [-15, 0, -10], left_arm: [0, 0, -55], right_leg: [0, 0, 4], left_leg: [0, 0, -20] });
+
+// Roll (0.5 s, the roll's own push): a forward somersault on landing, tucked tight (knees to the chest, arms hugging
+// them), one full turn of the whole body eased over the whole roll, then it opens up standing. Keys on every sample,
+// so the per-key easing doesn't stall the turn at each key.
+const tuck = { right_arm: [70, 25, 0], left_arm: [70, -25, 0], right_leg: [100, 0, 0], left_leg: [100, 0, 0] };
+const open = { right_arm: zero, left_arm: zero, right_leg: zero, left_leg: zero };
+animations.roll = P.acted(0.5, Array.from({ length: 11 }, (_, i) => {
+  const t = i * 0.05, s = Math.min(1, t / 0.45), turn = -360 * s * s * (3 - 2 * s);
+  const limbs = t < 0.1 ? Object.fromEntries(Object.entries(tuck).map(([k, v]) => [k, v.map(n => n * t / 0.1)]))
+    : t < 0.35 ? tuck : Object.fromEntries(Object.entries(tuck).map(([k, v]) => [k, v.map(n => n * Math.max(0, (0.5 - t) / 0.15))]));
+  return [Math.round(t * 100) / 100, { body: [turn, 0, 0], ...(t >= 0.5 ? open : limbs) }];
+}), none, 1);
 
 module.exports = { name: 'player_cast', group: 'player', kind: 'player', spec: P.spec, animations, textures: P.textures };

@@ -68,12 +68,15 @@ public final class PlayerPoses {
         }
     }
 
-    /** Exact id, or a short id like {@code grimoireknights:dash} matching {@code animation.player_cast.dash} in the same namespace. */
+    /** Exact id, or a short id like {@code grimoireknights:cast_z} matching {@code animation.player_cast.cast_z} in the same
+     *  namespace. A short id two files share (player_cast and player_demon both have {@code dash}) resolves to nothing:
+     *  picking one at random played the demon's looping flight on a dash. */
     private static Optional<IPlayable> resolve(ResourceLocation id) {
         Optional<IPlayable> exact = PlayerAnimationRegistry.getAnimationOptional(id);
         if (exact.isPresent()) return exact;
-        return PlayerAnimationRegistry.getAnimations().entrySet().stream()
+        var matches = PlayerAnimationRegistry.getAnimations().entrySet().stream()
                 .filter(entry -> entry.getKey().getNamespace().equals(id.getNamespace()) && entry.getKey().getPath().endsWith("." + id.getPath()))
-                .map(java.util.Map.Entry::getValue).findFirst();
+                .map(java.util.Map.Entry::getValue).toList();
+        return matches.size() == 1 ? Optional.of(matches.get(0)) : Optional.empty();
     }
 }

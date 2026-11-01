@@ -12,18 +12,24 @@ import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.progression.rules.RankRules;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import com.navesdev.grimoireknights.progression.CombatTracker;
 import com.navesdev.grimoireknights.progression.MasteryService;
 import com.navesdev.grimoireknights.progression.RankService;
 import com.navesdev.grimoireknights.progression.SkillEffects;
 import com.navesdev.grimoireknights.progression.SkillTreeService;
 import com.navesdev.grimoireknights.progression.config.ProgressionConfig;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 /** Mana, cooldowns and casting, on the server. */
 public final class AbilityService {
+    /** Game time of each player's last mana spent; regeneration waits for a pause. In memory: a relog regenerates at once. */
+    private static final Map<UUID, Long> LAST_SPENT = new HashMap<>();
     public static final int SLOTS = 3;
 
     private AbilityService() {}
@@ -48,13 +54,14 @@ public final class AbilityService {
         return ManaRules.cost(base, SkillTreeService.effectRank(player, SkillEffects.MANA_CONTROL), ProgressionConfig.MANA_CONTROL_DISCOUNT.get());
     }
 
-    /** Spends mana and trains the Mana mastery with it. False, spending nothing, when there is not enough. */
+    /** Spends mana and, in combat only, trains the Mana mastery with it. False, spending nothing, when there is not enough. */
     public static boolean spend(ServerPlayer player, double amount) {
         CombatData data = data(player);
         if (amount <= 0) return true;
         if (data.mana() < amount) return false;
         player.setData(AbilityModule.COMBAT_DATA, data.withMana(data.mana() - amount));
-        MasteryService.add(player, MasteryService.resourceMastery(player), amount * ProgressionConfig.MANA_SPENT_RATIO.get());
+        LAST_SPENT.put(player.getUUID(), player.serverLevel().getGameTime());
+        if (CombatTracker.inCombat(player)) MasteryService.add(player, MasteryService.resourceMastery(player), amount * ProgressionConfig.MANA_SPENT_RATIO.get());
         return true;
     }
 
@@ -72,7 +79,13 @@ public final class AbilityService {
         CombatData data = data(player);
         double max = maxMana(player);
         if (!data.manaSet() || data.mana() >= max) return;
+        if (!ManaRules.regenerates(player.serverLevel().getGameTime(), LAST_SPENT.getOrDefault(player.getUUID(), Long.MIN_VALUE),
+                AbilityConfig.MANA_REGEN_DELAY_TICKS.get())) return;
         player.setData(AbilityModule.COMBAT_DATA, data.withMana(ManaRules.regenerate(data.mana(), max, amount)));
+    }
+
+    public static void forget(ServerPlayer player) {
+        LAST_SPENT.remove(player.getUUID());
     }
 
     public static void resetCooldowns(ServerPlayer player) {

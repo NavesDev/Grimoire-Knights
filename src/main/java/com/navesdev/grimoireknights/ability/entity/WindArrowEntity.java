@@ -30,8 +30,8 @@ public class WindArrowEntity extends SpellProjectile {
     private static final RawAnimation FLY = RawAnimation.begin().thenLoop("animation.wind_arrow.fly");
     /** Upgrade 2: blocks around the hit target in which the split arrows look for enemies to chase. */
     private static final double CHASE_RADIUS = 8;
-    /** Share of the way it turns toward its target each tick. */
-    private static final double TURN = 0.25;
+    /** Share of the way it turns toward its target each tick: gentle, so a fanned volley doesn't all land on one enemy. */
+    private static final double TURN = 0.1;
     private boolean split;
     private LivingEntity target;
 

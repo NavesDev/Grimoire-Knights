@@ -19,7 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 /**
  * Fire, magic 3: a burst that hits every nearby enemy, needing no other spell first. Burning enemies are detonated: they
  * also take the burn left at once, and it goes out. Upgrades: longer range, then each detonated enemy spreads burn
- * around it. With no enemy in range it fails and costs nothing.
+ * around it. It goes off (mana, cooldown) even with no enemy in range, so it can't be spammed for a sure hit.
  */
 public class EmberBurst implements Ability {
     public static final ResourceLocation ID = Ids.id("ember_burst");
@@ -45,7 +45,6 @@ public class EmberBurst implements Ability {
         int upgrade = SkillTreeService.upgradeLevel(player, ID);
         double range = upgrade >= 1 ? AbilityConfig.EMBER_BIG_RANGE.get() : AbilityConfig.EMBER_RANGE.get();
         List<LivingEntity> targets = Spells.around(level, player.position(), range, player, target -> true);
-        if (targets.isEmpty()) return false;
         Vfx.play(level, Ids.id("ember_burst_caster"), player.position(), Map.of("radius", (float) range));
         for (LivingEntity target : targets) {
             boolean burning = BurnService.burning(target);

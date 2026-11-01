@@ -52,6 +52,8 @@ public class WindBowEntity extends Entity implements GeoEntity {
     private static final double[] ARROW_HEIGHTS = {-12.5 / 16, -7.5 / 16, -2.5 / 16, 2.5 / 16, 7.5 / 16, 12.5 / 16};
     private static final double ARROW_AHEAD = 0.5;
     private static final float ARROW_SIZE = 1.5f;
+    /** Degrees the outer arrows open away from the aim, so they fan out instead of all landing on one spot. */
+    private static final double ARROW_SPREAD = 30;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     /** Held directly: the bow is never saved and lives under two seconds. */
     private ServerPlayer owner;
@@ -80,7 +82,7 @@ public class WindBowEntity extends Entity implements GeoEntity {
         if (!entityData.get(RELEASED)) follow(owner);
         // the wind rushing in as the bow gathers, then breaking up as it comes apart (the model does the rest)
         if (tickCount == 1) Vfx.play(server, Ids.id("gale_bow_summon"), position(), Map.of());
-        if (tickCount == FIRE_AT + 4) Vfx.play(server, Ids.id("tornado_gust"), position(), Map.of());
+        if (tickCount == FIRE_AT + 5) dissipate(server);
         if (tickCount == FIRE_AT) fire(server, owner);
         if (tickCount >= FIRE_AT + RELEASE_TICKS) discard();
     }
@@ -94,24 +96,35 @@ public class WindBowEntity extends Entity implements GeoEntity {
         setXRot(-player.getXRot());
     }
 
-    /** All six at once, each from its spot on the string, side by side across the look. */
+    /** All six at once, each from its spot on the string, fanned out across the look. */
     private void fire(ServerLevel server, ServerPlayer player) {
         entityData.set(RELEASED, true);
         LivingEntity target = aimed(player);
         Vec3 point = target != null ? target.getBoundingBox().getCenter() : player.getEyePosition().add(player.getLookAngle().scale(AIM));
         Vec3 forward = player.getLookAngle();
         Vec3 right = Vec3.directionFromRotation(0, player.getYRot() + 90);
-        for (double height : ARROW_HEIGHTS) {
+        for (int i = 0; i < ARROW_HEIGHTS.length; i++) {
+            double height = ARROW_HEIGHTS[i];
+            double fan = Math.toRadians(ARROW_SPREAD * (2.0 * i / (ARROW_HEIGHTS.length - 1) - 1));
             Vec3 spot = position().add(right.scale(height)).add(forward.scale(ARROW_AHEAD));
             WindArrowEntity arrow = new WindArrowEntity(server, player, false);
             arrow.withUpgrade(upgrade);
             arrow.withScale(ARROW_SIZE);
-            arrow.launch(player, point.subtract(spot).normalize(), AbilityConfig.ARROW_SPEED.get(), 40);
+            arrow.launch(player, point.subtract(spot).normalize().yRot((float) -fan), AbilityConfig.ARROW_SPEED.get(), 40);
             arrow.setPos(spot);
             arrow.withTarget(target);
             server.addFreshEntity(arrow);
         }
         server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1, 1.2f);
+    }
+
+    /** Wind drifting off along the bow, which lies across its aim, and blown on ahead; the rotation is stored in the
+     *  projectile convention (see follow), so it flips back to the player's. */
+    private void dissipate(ServerLevel server) {
+        Vec3 forward = Vec3.directionFromRotation(-getXRot(), -getYRot());
+        Vec3 right = Vec3.directionFromRotation(0, -getYRot() + 90);
+        Vfx.play(server, Ids.id("gale_bow_dissipate"), position(), Map.of("aimed", 1f, "right_x", (float) right.x, "right_z", (float) right.z,
+                "fwd_x", (float) forward.x, "fwd_y", (float) forward.y, "fwd_z", (float) forward.z));
     }
 
     @Nullable

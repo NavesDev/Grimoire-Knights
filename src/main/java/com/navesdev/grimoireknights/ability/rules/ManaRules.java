@@ -1,6 +1,6 @@
 package com.navesdev.grimoireknights.ability.rules;
 
-/** Mana: the base plus the skill tree bonus sets the maximum; abilities spend it and it regenerates over time. */
+/** Mana: the base plus the skill tree bonus sets the maximum; abilities spend it and it regenerates once spending stops for a while. */
 public final class ManaRules {
     private ManaRules() {}
 
@@ -12,6 +12,11 @@ public final class ManaRules {
     public static double regenerate(double current, double max, double amount) {
         if (amount < 0) throw new IllegalArgumentException("negative regeneration");
         return Math.min(max, current + amount);
+    }
+
+    /** Regeneration resumes only {@code delayTicks} after the last mana spent, so a steady stream of casts runs dry. */
+    public static boolean regenerates(long now, long lastSpent, int delayTicks) {
+        return now - delayTicks >= lastSpent;
     }
 
     /** Mana Control: each rank cuts the cost by {@code discountPerRank}, never below zero. */

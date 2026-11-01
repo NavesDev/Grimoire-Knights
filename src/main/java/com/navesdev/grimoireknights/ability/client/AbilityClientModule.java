@@ -3,11 +3,13 @@ package com.navesdev.grimoireknights.ability.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.navesdev.grimoireknights.GrimoireKnights;
 import com.navesdev.grimoireknights.ability.AbilityModule;
+import com.navesdev.grimoireknights.ability.entity.BroomEntity;
 import com.navesdev.grimoireknights.ability.network.CastAbilityPayload;
 import com.navesdev.grimoireknights.ability.network.TailwindPayload;
 import com.navesdev.grimoireknights.core.Ids;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -44,6 +46,9 @@ public final class AbilityClientModule {
             event.registerEntityRenderer(AbilityModule.WIND_BOW.get(), context -> new SpellRenderer<>(context, "wind_bow", true, 1.0f));
             event.registerEntityRenderer(AbilityModule.BROOM.get(), context -> new SpellRenderer<>(context, "broom", false, 1.0f));
         });
+        // jump climbs, sprint (Ctrl) sinks: sneak is taken by getting off
+        BroomEntity.climbInput = player -> player instanceof LocalPlayer local
+                ? (local.input.jumping ? 1 : 0) - (Minecraft.getInstance().options.keySprint.isDown() ? 1 : 0) : 0;
         NeoForge.EVENT_BUS.addListener(RenderPlayerEvent.Pre.class, event -> BroomPoses.lock(event.getEntity(), event.getPartialTick(), event.getPoseStack()));
         NeoForge.EVENT_BUS.addListener(RenderPlayerEvent.Post.class, event -> BroomPoses.unlock(event.getEntity(), event.getPoseStack()));
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, event -> {

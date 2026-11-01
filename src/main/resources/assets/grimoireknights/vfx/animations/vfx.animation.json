@@ -207,11 +207,7 @@
 			"particle_effects": {
 				"0.0": [
 					{
-						"effect": "dash_ring",
-						"bind_to_actor": false
-					},
-					{
-						"effect": "dash_gust",
+						"effect": "dash_burst_lines",
 						"bind_to_actor": false
 					}
 				]
@@ -248,6 +244,38 @@
 				"0.1": [
 					{
 						"effect": "gale_bow_gather_wisps",
+						"bind_to_actor": false
+					}
+				]
+			}
+		},
+		"animation.vfx.gale_bow_dissipate": {
+			"animation_length": 0.5,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "gale_bow_dissipate_wisps",
+						"bind_to_actor": false
+					},
+					{
+						"effect": "gale_bow_dissipate_streaks",
+						"bind_to_actor": false
+					}
+				],
+				"0.12": [
+					{
+						"effect": "gale_bow_dissipate_wisps",
+						"bind_to_actor": false
+					}
+				]
+			}
+		},
+		"animation.vfx.dash_trail": {
+			"animation_length": 0.3,
+			"particle_effects": {
+				"0.0": [
+					{
+						"effect": "dash_trail_lines",
 						"bind_to_actor": false
 					}
 				]

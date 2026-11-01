@@ -24,23 +24,27 @@ public final class BroomService {
         return Result.OK;
     }
 
-    /** Mounts a new broom; anything unmet denies with a message above the hotbar. */
-    public static Result mount(ServerPlayer player) {
+    /** Mounts a placed broom; anything unmet denies with a message above the hotbar. */
+    public static Result mount(ServerPlayer player, BroomEntity broom) {
         Result result = check(player);
         if (result != Result.OK) {
             if (result != Result.CANNOT_ACT) player.displayClientMessage(Component.translatable(Ids.key("message", "broom." + result.name().toLowerCase(java.util.Locale.ROOT)))
                     .withStyle(ChatFormatting.RED), true);
             return result;
         }
-        BroomEntity broom = new BroomEntity(player.level(), player);
-        player.level().addFreshEntity(broom);
-        player.startRiding(broom, true);
+        player.startRiding(broom);
         return result;
     }
 
-    /** One second of flight; false (gliding) when the mana or Mana Control ran out. */
+    /** One second of flight; false when the mana or Mana Control ran out. */
     public static boolean payFlight(ServerPlayer player) {
         if (SkillTreeService.effectRank(player, SkillEffects.MANA_CONTROL) < AbilityConfig.BROOM_MANA_CONTROL.get()) return false;
         return AbilityService.spend(player, BroomEntity.manaPerSecond(player));
+    }
+
+    /** Out of mana mid-flight: the broom lets go and both fall. */
+    public static void drop(ServerPlayer player) {
+        player.stopRiding();
+        player.displayClientMessage(Component.translatable(Ids.key("message", "broom.no_mana")).withStyle(ChatFormatting.RED), true);
     }
 }

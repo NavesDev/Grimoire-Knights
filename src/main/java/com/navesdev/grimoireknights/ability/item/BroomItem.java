@@ -1,26 +1,32 @@
 package com.navesdev.grimoireknights.ability.item;
 
-import com.navesdev.grimoireknights.ability.BroomService;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import com.navesdev.grimoireknights.ability.entity.BroomEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 
-/** Right click to fly on it (Mana Control III); the item stays in the hand slot, the flying broom is an entity. */
+/** Placed on the ground like a boat, leaving the inventory; right click the placed broom to fly it (Mana Control III). */
 public class BroomItem extends Item {
     public BroomItem(Properties properties) {
         super(properties);
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-        if (player instanceof ServerPlayer server) {
-            return BroomService.mount(server) == BroomService.Result.OK ? InteractionResultHolder.success(stack) : InteractionResultHolder.fail(stack);
+    public InteractionResult useOn(UseOnContext context) {
+        if (context.getClickedFace() != Direction.UP) return InteractionResult.PASS;
+        Level level = context.getLevel();
+        BroomEntity broom = new BroomEntity(level, context.getClickLocation(), context.getRotation());
+        if (!level.noCollision(broom, broom.getBoundingBox())) return InteractionResult.FAIL;
+        if (!level.isClientSide) {
+            level.addFreshEntity(broom);
+            level.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, context.getClickLocation());
+            Player player = context.getPlayer();
+            if (player == null || !player.getAbilities().instabuild) context.getItemInHand().shrink(1);
         }
-        return InteractionResultHolder.consume(stack);
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 }

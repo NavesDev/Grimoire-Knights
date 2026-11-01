@@ -8,6 +8,7 @@ import com.navesdev.grimoireknights.ability.HeldService;
 import com.navesdev.grimoireknights.ability.PhoenixService;
 import com.navesdev.grimoireknights.ability.WindService;
 import com.navesdev.grimoireknights.ability.config.AbilityConfig;
+import com.navesdev.grimoireknights.ability.entity.BroomEntity;
 import com.navesdev.grimoireknights.ability.rules.CastRules;
 import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.core.gametest.TestPlayers;
@@ -75,7 +76,11 @@ public class SpellGameTest {
         RankService.set(caster, Rank.ELITE_KNIGHT);
         AbilityService.ensureMana(caster);
         caster.setPos(helper.absoluteVec(new Vec3(1.5, 1, 1.5)));
-        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.FAILED, "no enemy in range: fails and costs nothing");
+        double before = AbilityService.data(caster).mana();
+        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "no enemy in range: still goes off");
+        helper.assertTrue(AbilityService.data(caster).mana() < before, "and still costs mana");
+        AbilityService.resetCooldowns(caster);
+        AbilityService.setMana(caster, AbilityService.maxMana(caster));
         Pig pig = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 3.5));
         float health = pig.getHealth();
         helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "ember burst with nothing burning");
@@ -204,6 +209,22 @@ public class SpellGameTest {
         helper.assertTrue(player.getHealth() == player.getMaxHealth() * AbilityConfig.PHOENIX_HEALTH.get().floatValue(), "half health");
         helper.assertFalse(PhoenixService.tryRevive(player), "only once per fight");
         PhoenixService.forget(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void theWorldBreaksTheBroomAndHitsDont(GameTestHelper helper) {
+        BroomEntity broom = new BroomEntity(helper.getLevel(), helper.absoluteVec(new Vec3(1.5, 2, 1.5)), 0);
+        helper.getLevel().addFreshEntity(broom);
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, 1, 2, 1);
+        helper.assertTrue(!broom.hurt(broom.damageSources().mobAttack(zombie), 50), "attacks don't harm it");
+        float full = broom.health();
+        broom.hurt(broom.damageSources().lava(), 4);
+        helper.assertTrue(!broom.isRemoved() && broom.health() == full - 4, "lava wears it down");
+        broom.hurt(broom.damageSources().cactus(), 1);
+        helper.assertTrue(broom.health() == full - 5, "so does a cactus");
+        while (!broom.isRemoved() && broom.health() > -100) broom.hurt(broom.damageSources().lava(), 4);
+        helper.assertTrue(broom.isRemoved(), "burnt up");
         helper.succeed();
     }
 }

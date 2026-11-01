@@ -88,15 +88,15 @@ const animations = {
     upper_limb: { rotation: DRAW.map(t => [t, [r2(6 * smooth(t / 0.5)), 0, 0]]) },
     lower_limb: { rotation: DRAW.map(t => [t, [r2(-6 * smooth(t / 0.5)), 0, 0]]) } } },
   // release (0.6 s): the arrows leave at once (the code spawns the real ones), the tips snap forward past
-  // rest and settle, then the bow comes apart back into wind: the limbs unravel, twisting and thinning out, while
-  // the code plays tornado_gust on it.
+  // rest and settle, then the bow thins out into the wind without turning: the tips go first, the limbs and
+  // string narrow to nothing, while the code plays gale_bow_dissipate along the bow.
   release: { loop: 'once', length: 0.6, bones: { ...sway, ...hidden,
-    upper_limb: { rotation: [[0, [6, 0, 0]], [0.06, [-3, 0, 0], 'catmullrom'], [0.16, [1, 0, 0], 'catmullrom'], [0.28, [0, 0, 0], 'catmullrom'], [0.6, [-10, -240, 0], 'catmullrom']],
-      scale: [[0.28, [1, 1, 1]], [0.6, [1.6, 0.05, 1.6], 'catmullrom']] },
-    lower_limb: { rotation: [[0, [-6, 0, 0]], [0.06, [3, 0, 0], 'catmullrom'], [0.16, [-1, 0, 0], 'catmullrom'], [0.28, [0, 0, 0], 'catmullrom'], [0.6, [10, 240, 0], 'catmullrom']],
-      scale: [[0.28, [1, 1, 1]], [0.6, [1.6, 0.05, 1.6], 'catmullrom']] },
-    string: { scale: [[0.2, [1, 1, 1]], [0.36, [1, 0, 1], 'catmullrom']] },
-    root: { scale: [[0.3, [1, 1, 1]], [0.6, [1.3, 1.3, 1.3], 'catmullrom']] } } }
+    upper_limb: { rotation: [[0, [6, 0, 0]], [0.06, [-3, 0, 0], 'catmullrom'], [0.16, [1, 0, 0], 'catmullrom'], [0.24, [0, 0, 0], 'catmullrom']],
+      scale: [[0.24, [1, 1, 1]], [0.48, [0.15, 1.05, 0.15], 'catmullrom'], [0.6, [0, 1.05, 0], 'catmullrom']] },
+    lower_limb: { rotation: [[0, [-6, 0, 0]], [0.06, [3, 0, 0], 'catmullrom'], [0.16, [-1, 0, 0], 'catmullrom'], [0.24, [0, 0, 0], 'catmullrom']],
+      scale: [[0.24, [1, 1, 1]], [0.48, [0.15, 1.05, 0.15], 'catmullrom'], [0.6, [0, 1.05, 0], 'catmullrom']] },
+    ...Object.fromEntries(['upper', 'lower'].map(n => [`${n}_tip`, { ...sway[`${n}_tip`], scale: [[0.22, [1, 1, 1]], [0.4, [0, 0, 0], 'catmullrom']] }])),
+    string: { scale: [[0.2, [1, 1, 1]], [0.36, [0, 1, 0], 'catmullrom']] } } }
 };
 
 module.exports = { name: 'wind_bow', group: 'ability', kind: 'entity', spec, animations, ARROWS, textures: { wind_bow: W.painter } };

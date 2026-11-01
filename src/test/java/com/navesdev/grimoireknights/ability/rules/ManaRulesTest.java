@@ -3,9 +3,19 @@ package com.navesdev.grimoireknights.ability.rules;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 class ManaRulesTest {
+    @Test
+    void regenerationWaitsForAPauseInSpending() {
+        assertFalse(ManaRules.regenerates(100, 50, 60));
+        assertFalse(ManaRules.regenerates(109, 50, 60));
+        assertTrue(ManaRules.regenerates(110, 50, 60));
+        assertTrue(ManaRules.regenerates(5, Long.MIN_VALUE, 60));
+    }
+
     @Test
     void maxManaIsTheBasePlusTheTreeBonus() {
         assertEquals(100.0, ManaRules.max(100, 0), 1e-9);

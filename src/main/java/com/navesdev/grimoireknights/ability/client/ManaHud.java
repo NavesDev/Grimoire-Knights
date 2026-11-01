@@ -4,7 +4,6 @@ import com.navesdev.grimoireknights.ability.Ability;
 import com.navesdev.grimoireknights.ability.AbilityRegistries;
 import com.navesdev.grimoireknights.ability.AbilityService;
 import com.navesdev.grimoireknights.ability.attachment.CombatData;
-import com.navesdev.grimoireknights.ability.entity.BroomEntity;
 import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.grimoire.Element;
 import com.navesdev.grimoireknights.grimoire.GrimoireService;
@@ -12,9 +11,7 @@ import com.navesdev.grimoireknights.progression.RankService;
 import com.navesdev.grimoireknights.progression.SkillEffects;
 import com.navesdev.grimoireknights.progression.SkillTreeService;
 import com.navesdev.grimoireknights.progression.client.ProgressionClientModule;
-import java.util.Locale;
 import java.util.Optional;
-import net.minecraft.network.chat.Component;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,8 +20,8 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * The one combat bar (approved mockup): mana standing left of the hotbar, slots Z, X and C in a column beside it
- * (darkening while cooling down, a lock while the rank keeps them closed), the dash icon, Tailwind stacks and the broom's
- * mana per second (red while gliding) when they apply.
+ * (darkening while cooling down, a lock while the rank keeps them closed), the dash icon and Tailwind stacks when
+ * they apply.
  */
 final class ManaHud {
     private static final int SLOT = 20;
@@ -74,11 +71,6 @@ final class ManaHud {
         if (SkillTreeService.effectRank(player, SkillEffects.DASH) > 0) dash(graphics, barX - 15, bottom - 14);
         if (tailwind > 0) {
             for (int i = 0; i < 5; i++) graphics.fill(x + i * 4, columnTop - 5, x + i * 4 + 3, columnTop - 2, i < tailwind ? TAILWIND : TAILWIND_OFF);
-        }
-        if (player.getVehicle() instanceof BroomEntity broom) {
-            String cost = String.format(Locale.ROOT, "-%.1f", BroomEntity.manaPerSecond(player));
-            Component text = Component.translatable(Ids.key("hud", "broom"), cost);
-            graphics.drawString(minecraft.font, text, barX, columnTop - 16, broom.gliding() ? 0xFFE24B4A : 0xFF85B7EB, true);
         }
     }
 

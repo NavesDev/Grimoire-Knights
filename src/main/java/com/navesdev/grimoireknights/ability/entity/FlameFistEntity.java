@@ -37,6 +37,8 @@ public class FlameFistEntity extends SpellProjectile {
     private static final RawAnimation IMPACT = RawAnimation.begin().thenPlay("animation.flame_fist.impact");
     private LivingEntity target;
     private int heldTicks;
+    /** The slam pose was sent; it ends on its own. */
+    private boolean slammed;
     private double baseY;
     private double groundY;
 
@@ -73,6 +75,7 @@ public class FlameFistEntity extends SpellProjectile {
         int lift = hold / 2;
         if (heldTicks == lift) {
             triggerAnim("main", "slam");
+            slammed = true;
             if (getOwner() instanceof ServerPlayer owner) GrimoireActivity.pose(owner, Ids.id("cast_x_fire_slam"));
         }
         double y = heldTicks <= lift
@@ -121,6 +124,8 @@ public class FlameFistEntity extends SpellProjectile {
     @Override
     public void remove(RemovalReason reason) {
         if (target != null) HeldService.release(target);
+        // the caster holds the arm out (cast_x_fire holds its last frame) until the slam; gone any other way, it drops it
+        if (!level().isClientSide && !slammed && getOwner() instanceof ServerPlayer owner) GrimoireActivity.pose(owner, Ids.id("cast_x_fire_release"));
         super.remove(reason);
     }
 
