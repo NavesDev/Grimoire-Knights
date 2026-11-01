@@ -202,7 +202,7 @@ Rig `player_cast.js`: casting and dash. The cast poses key only `torso` and the 
 | `cast_c_wind` | 1.4 s | 0.8 s | C wind (white gale bow): both arms sweep up and out raising the arch, open wide ahead while the arrows are drawn, then the right hand thrusts at the target as they leave; in step with the bow's `summon`, `draw` and `release` |
 | `dash` | 0.3 s | - | Whole body leans into the dash, arms swept back, legs split |
 
-Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering: the rider is drawn with the broom's yaw and no head pitch (the camera doesn't turn the pose), and the broom banks 16° into strafes, as far as the `broom_left` and `broom_right` lean.
+Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering: the rider is drawn with the broom's yaw and no head pitch (the camera doesn't turn the pose), and the broom banks 16° into strafes with the rider drawn banked with it around the handle, so the feet stay on it (the strafe poses themselves don't roll).
 
 - With the body turned 90°, the `body`'s `x` and `z` rotate on the same axis (gimbal lock): the tilt is built on world axes and converted to ZYX Euler in `player_ride.js`.
 - With no knee, leaning forward or back lowers a hip: each leg opens along the board just enough for both feet (by the lowest corner) to stay on the board's floor.
@@ -214,5 +214,5 @@ Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the g
 | `broom_hover`, `sword_hover` | 2 s | broom `hover` / greatsword `ride` | Still in the air, standing |
 | `broom_forward`, `sword_forward` | 0.5 s / 2 s | broom `fly` / greatsword `ride` | Leans toward the nose, back arm high |
 | `broom_backward`, `sword_backward` | 0.5 s / 2 s | same | Leans toward the tail, braking, front arm high |
-| `broom_left`, `sword_left` | 0.5 s / 2 s | same | Strafes left: leans left, looks into the turn (on the toes in Blockbench, mirrored in game) |
-| `broom_right`, `sword_right` | 0.5 s / 2 s | same | Strafes right: leans right, looks into the turn (on the heels in Blockbench, mirrored in game) |
+| `broom_left`, `sword_left` | 0.5 s / 2 s | same | Strafes left: arms and look into the turn; the bank comes from code |
+| `broom_right`, `sword_right` | 0.5 s / 2 s | same | Strafes right: arms and look into the turn; the bank comes from code |

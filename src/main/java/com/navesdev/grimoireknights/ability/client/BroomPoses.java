@@ -1,5 +1,6 @@
 package com.navesdev.grimoireknights.ability.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.navesdev.grimoireknights.ability.entity.BroomEntity;
 import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.grimoire.client.PlayerPoses;
@@ -12,6 +13,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Riders stand on the broom (player_ride poses): hover, or lean toward where the broom moves relative to their facing.
@@ -54,11 +56,17 @@ final class BroomPoses {
 
     /**
      * Before a rider is drawn: body and head take the broom's yaw and the head no pitch, so the pose stays on the broom
-     * however the camera turns. {@link #unlock} puts the rider's rotations back after drawing.
+     * however the camera turns, and the rider banks with the broom. {@link #unlock} puts it all back after drawing.
      */
-    static void lock(Player player, float partialTick) {
+    static void lock(Player player, float partialTick, PoseStack pose) {
         if (!(player.getVehicle() instanceof BroomEntity broom)) return;
         locked = player;
+        // banked with the broom around its handle, so the feet stay on it
+        Vec3 pivot = broom.getPosition(partialTick).subtract(player.getPosition(partialTick));
+        pose.pushPose();
+        pose.translate(pivot.x, pivot.y, pivot.z);
+        pose.mulPose(broom.bank(partialTick));
+        pose.translate(-pivot.x, -pivot.y, -pivot.z);
         saved = new float[] {player.yBodyRot, player.yBodyRotO, player.yHeadRot, player.yHeadRotO, player.getXRot(), player.xRotO};
         float yaw = Mth.rotLerp(partialTick, broom.yRotO, broom.getYRot());
         player.yBodyRot = player.yBodyRotO = player.yHeadRot = player.yHeadRotO = yaw;
@@ -66,8 +74,9 @@ final class BroomPoses {
         player.xRotO = 0;
     }
 
-    static void unlock(Player player) {
+    static void unlock(Player player, PoseStack pose) {
         if (player != locked) return;
+        pose.popPose();
         player.yBodyRot = saved[0];
         player.yBodyRotO = saved[1];
         player.yHeadRot = saved[2];

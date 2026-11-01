@@ -13,8 +13,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
@@ -45,11 +43,7 @@ class SpellRenderer<T extends net.minecraft.world.entity.Entity & GeoEntity> ext
         float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
         // the tornado turns around its axis (8 pixels up), so its funnel stays on its hitbox when aimed up or down
         if (entity instanceof TornadoEntity) pose.translate(0, TORNADO_AXIS, 0);
-        if (entity instanceof BroomEntity broom) {
-            // banks around its flight axis (world space), the top toward the strafe like its rider
-            Vec3 facing = Vec3.directionFromRotation(0, yaw);
-            pose.mulPose(new Quaternionf().rotationAxis(broom.roll(partialTick) * Mth.DEG_TO_RAD, (float) facing.x, 0, (float) facing.z));
-        }
+        if (entity instanceof BroomEntity broom) pose.mulPose(broom.bank(partialTick));
         pose.mulPose(Axis.YP.rotationDegrees(entity instanceof BroomEntity ? 180 - yaw : 180 + yaw));
         pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, entity.xRotO, entity.getXRot())));
         // the bow is modeled 16 pixels up: centered on the entity so it turns around its middle

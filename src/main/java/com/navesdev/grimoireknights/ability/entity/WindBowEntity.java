@@ -83,7 +83,8 @@ public class WindBowEntity extends Entity implements GeoEntity {
         Vec3 look = player.getLookAngle();
         setPos(player.getEyePosition().add(look.scale(DISTANCE)).subtract(0, DROP, 0));
         setYRot(player.getYRot());
-        setXRot(player.getXRot());
+        // projectile convention, as the renderer reads it: positive pitch aims up, the player's looks down
+        setXRot(-player.getXRot());
     }
 
     /** All six at once, each from its spot on the arch (model -z forward, +x to the caster's right). */
@@ -91,7 +92,7 @@ public class WindBowEntity extends Entity implements GeoEntity {
         entityData.set(RELEASED, true);
         LivingEntity target = aimed(player);
         Vec3 point = target != null ? target.getBoundingBox().getCenter() : player.getEyePosition().add(player.getLookAngle().scale(AIM));
-        Vec3 forward = Vec3.directionFromRotation(getXRot(), getYRot());
+        Vec3 forward = player.getLookAngle();
         Vec3 right = forward.cross(new Vec3(0, 1, 0)).normalize();
         Vec3 up = right.cross(forward);
         for (double angle : ARROW_ANGLES) {

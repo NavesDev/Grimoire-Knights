@@ -19,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
@@ -37,7 +38,7 @@ public class BroomEntity extends Entity implements GeoEntity {
     private static final RawAnimation FLY = RawAnimation.begin().thenLoop("animation.broom.fly");
     private static final EntityDataAccessor<Boolean> GLIDING = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.BOOLEAN);
     private static final double MOVING = 0.01;
-    /** Degrees it banks into a strafe, as far as its rider leans in broom_left and broom_right (player_ride.js). */
+    /** Degrees it banks into a strafe; the rider is drawn banked with it, standing straight on the handle. */
     private static final float BANK = 16;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private float roll;
@@ -121,6 +122,12 @@ public class BroomEntity extends Entity implements GeoEntity {
 
     public float roll(float partialTick) {
         return Mth.lerp(partialTick, rollO, roll);
+    }
+
+    /** Bank around its flight axis in world space, the top toward the strafe; the renderer turns broom and rider by it. */
+    public Quaternionf bank(float partialTick) {
+        Vec3 facing = Vec3.directionFromRotation(0, Mth.rotLerp(partialTick, yRotO, getYRot()));
+        return new Quaternionf().rotationAxis(roll(partialTick) * Mth.DEG_TO_RAD, (float) facing.x, 0, (float) facing.z);
     }
 
     @Override
