@@ -82,8 +82,9 @@ public class WindBowEntity extends Entity implements GeoEntity {
     private void follow(ServerPlayer player) {
         Vec3 look = player.getLookAngle();
         setPos(player.getEyePosition().add(look.scale(DISTANCE)).subtract(0, DROP, 0));
-        setYRot(player.getYRot());
-        // projectile convention, as the renderer reads it: positive pitch aims up, the player's looks down
+        // projectile convention, as the renderer reads it: yaw and pitch both run opposite to the player's (positive
+        // pitch aims up, the player's looks down)
+        setYRot(-player.getYRot());
         setXRot(-player.getXRot());
     }
 
