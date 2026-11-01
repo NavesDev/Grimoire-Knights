@@ -1,7 +1,8 @@
 // Player poses when casting a spell (Z, X, C) and dashing, for playerAnimator. Same rig as player_sword.js.
 // Cast poses key only the torso and arms: code turns the missing parts off, so the legs
 // keep walking and the head keeps following the look. +x swings an arm forward (90 = pointing ahead);
-// on the right arm +y swings it in toward the chest, -z lifts it out to the side (mirrored on the left).
+// on the right arm +y swings it in toward the chest, -z lifts it out to the side (mirrored on the left). That is
+// how they look in game: Blockbench shows y the other way (the game mirrors it, see player_ride's gameAxes).
 const P = load('./player_sword.js');
 const zero = [0, 0, 0];
 const REST = { torso: zero, right_arm: zero, left_arm: zero };
@@ -50,14 +51,15 @@ const animations = {
     [0.75, { torso: [-6, 0, 0], right_arm: [20, 0, -75], left_arm: [20, 0, 75] }],
     [1, REST]
   ]),
-  // C wind (white gale bow): left arm holds the bow ahead, right hand draws to the chin and lets go, in step
-  // with the bow's summon (0-0.3 s), draw (0.3-0.8 s) and release (from 0.8 s).
+  // C wind (white gale bow, Yuno's Shippu no Hakkyu): both arms sweep up and out, raising the arch over the head
+  // (summon, 0-0.3 s), open wide ahead holding it while the six arrows are drawn (draw, 0.3-0.8 s), then the right
+  // hand thrusts at the target as they all leave (release, from 0.8 s).
   cast_c_wind: pose(1.4, [
     [0, REST],
-    [0.3, { torso: [0, -20, 0], left_arm: [90, 15, 0], right_arm: [90, -5, 0] }],
-    [0.8, { torso: [0, -30, 0], left_arm: [90, 25, 0], right_arm: [95, 40, 0] }],
-    [0.9, { torso: [0, -28, 0], left_arm: [90, 22, 0], right_arm: [80, -10, -25] }],
-    [1.15, { torso: [0, -20, 0], left_arm: [80, 15, 0], right_arm: [60, -10, -20] }],
+    [0.3, { torso: [-6, 0, 0], right_arm: [15, 0, -140], left_arm: [15, 0, 140] }],
+    [0.8, { torso: [-3, 0, 0], right_arm: [80, -40, 0], left_arm: [80, 40, 0] }],
+    [0.9, { torso: [4, -15, 0], right_arm: [100, 12, 0], left_arm: [70, 30, 0] }],
+    [1.15, { torso: [2, -10, 0], right_arm: [92, 8, 0], left_arm: [55, 25, 0] }],
     [1.4, REST]
   ])
 };

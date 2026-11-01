@@ -199,7 +199,7 @@ Rig `player_cast.js`: casting and dash. The cast poses key only `torso` and the 
 | `cast_x_fire_slam` | 0.8 s | - | X fire, on the grab: hauls the fist overhead and yanks it down with the hand's `slam` (impact at 0.45 s) |
 | `cast_x_wind` | 0.8 s | 0.3 s | X wind (tornado fang): two hands from the chest, pushed forward |
 | `cast_c_fire` | 1 s | 0.45 s | C fire (ember burst): arms crossed, then flung open |
-| `cast_c_wind` | 1.4 s | 0.8 s | C wind (white gale bow): left arm holds the bow, right hand draws and lets go, in step with the bow's `summon`, `draw` and `release` |
+| `cast_c_wind` | 1.4 s | 0.8 s | C wind (white gale bow): both arms sweep up and out raising the arch, open wide ahead while the arrows are drawn, then the right hand thrusts at the target as they leave; in step with the bow's `summon`, `draw` and `release` |
 | `dash` | 0.3 s | - | Whole body leans into the dash, arms swept back, legs split |
 
 Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering: the rider is drawn with the broom's yaw and no head pitch (the camera doesn't turn the pose), and the broom banks 16° into strafes, as far as the `broom_left` and `broom_right` lean.
