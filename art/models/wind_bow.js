@@ -1,4 +1,5 @@
-// Wind magic 3 (white gale bow, Yuno's Shippu no Hakkyu): a huge bow of wind held upright in front of the player,
+// Wind magic 3 (white gale bow, Yuno's Shippu no Hakkyu): a huge bow of wind modeled upright (the renderer lays it
+// on its side, limbs left and right) in front of the player,
 // shooting toward north (-z): seen from the side a ")" with the grip forward and the tips back toward the player
 // (+z). Tangled see-through streams instead of a clean limb, broad gusts hooking at the tips, and six big arrows
 // nocked at once, stacked along the string. Thin cubes placed with seeded noise, so every run is the same.

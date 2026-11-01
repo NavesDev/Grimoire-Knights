@@ -46,8 +46,11 @@ class SpellRenderer<T extends net.minecraft.world.entity.Entity & GeoEntity> ext
         if (entity instanceof BroomEntity broom) pose.mulPose(broom.bank(partialTick));
         pose.mulPose(Axis.YP.rotationDegrees(entity instanceof BroomEntity ? 180 - yaw : 180 + yaw));
         pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, entity.xRotO, entity.getXRot())));
-        // the bow is modeled 16 pixels up: centered on the entity so it turns around its middle
-        if (entity instanceof WindBowEntity) pose.translate(0, -BOW_CENTER, 0);
+        // the bow is modeled upright, 16 pixels up: laid on its side (limbs left and right) around its middle
+        if (entity instanceof WindBowEntity) {
+            pose.mulPose(Axis.ZP.rotationDegrees(90));
+            pose.translate(0, -BOW_CENTER, 0);
+        }
         if (entity instanceof TornadoEntity) pose.translate(0, -TORNADO_AXIS, 0);
     }
 
