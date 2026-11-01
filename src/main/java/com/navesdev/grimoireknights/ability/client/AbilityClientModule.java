@@ -39,7 +39,7 @@ public final class AbilityClientModule {
             event.registerEntityRenderer(AbilityModule.FIREBALL.get(), FireballRenderer::new);
             event.registerEntityRenderer(AbilityModule.FLAME_FIST.get(), context -> new SpellRenderer<>(context, "flame_fist", false, 1.0f));
             event.registerEntityRenderer(AbilityModule.WIND_BLADE.get(), context -> new SpellRenderer<>(context, "wind_blade", true, 1.0f));
-            event.registerEntityRenderer(AbilityModule.TORNADO.get(), context -> new SpellRenderer<>(context, "tornado", true, 2.5f, "blades", "stones"));
+            event.registerEntityRenderer(AbilityModule.TORNADO.get(), context -> new SpellRenderer<>(context, "tornado", true, 2.0f, "blades", "stones"));
             event.registerEntityRenderer(AbilityModule.WIND_ARROW.get(), context -> new SpellRenderer<>(context, "wind_arrow", true, 1.0f));
             event.registerEntityRenderer(AbilityModule.WIND_BOW.get(), context -> new SpellRenderer<>(context, "wind_bow", true, 1.0f));
             event.registerEntityRenderer(AbilityModule.BROOM.get(), context -> new SpellRenderer<>(context, "broom", false, 1.0f));

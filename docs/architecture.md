@@ -88,7 +88,7 @@ Each feature has a `<Name>Module` with `register(IEventBus)`: it creates its `De
 ## Spells
 - Fire burn (`BurnService`): a fire hit sets a fixed burn (damage over a duration, credited to the caster); a new hit refreshes it. Ember burst deals what is left at once.
 - Wind hits go through `WindService`: strength of distance (`WindRules`) and a Tailwind stack.
-- Held targets (`HeldService`: flame arm grab, tornado) can't move, attack or cast until released.
+- Held targets (`HeldService`: flame arm grab) can't move, attack or cast until released.
 - Spell projectiles extend `SpellProjectile` (no gravity, range, synced upgrade level and scale; never saved). Upgrades and passives come from `SkillTreeService`.
 - Broom (`BroomEntity`, `BroomService`): the rider's client moves it (vanilla vehicle rule); the server charges mana every second and makes it glide when it runs out.
 

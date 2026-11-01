@@ -21,12 +21,10 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 /**
  * Spell entities: full bright, facing their flight (models face -z) and scaled by the spell. The broom takes its
- * rider's yaw, which turns the other way from a projectile's, and banks into strafes. The tornado model lies along its flight axis and is stood
- * up here, mouth up and tail on the ground: tornadoes are never sideways. Wind is drawn translucent
+ * rider's yaw, which turns the other way from a projectile's, and banks into strafes. The tornado and the bow turn around their middle. Wind is drawn translucent
  * without culling (docs/models.md); {@code upgradeBones} are hidden until the projectile's upgrade reaches their level.
  */
 class SpellRenderer<T extends net.minecraft.world.entity.Entity & GeoEntity> extends GeoEntityRenderer<T> {
-    private static final float TORNADO_TAIL = 11 / 16f;
     private static final float TORNADO_AXIS = 8 / 16f;
     private static final float BOW_CENTER = 16 / 16f;
     private final boolean translucent;
@@ -45,22 +43,18 @@ class SpellRenderer<T extends net.minecraft.world.entity.Entity & GeoEntity> ext
         float scale = size * (entity instanceof SpellProjectile spell ? spell.scale() : 1);
         pose.scale(scale, scale, scale);
         float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
+        // the tornado turns around its axis (8 pixels up), so its funnel stays on its hitbox when aimed up or down
+        if (entity instanceof TornadoEntity) pose.translate(0, TORNADO_AXIS, 0);
         if (entity instanceof BroomEntity broom) {
             // banks around its flight axis (world space), the top toward the strafe like its rider
             Vec3 facing = Vec3.directionFromRotation(0, yaw);
             pose.mulPose(new Quaternionf().rotationAxis(broom.roll(partialTick) * Mth.DEG_TO_RAD, (float) facing.x, 0, (float) facing.z));
         }
         pose.mulPose(Axis.YP.rotationDegrees(entity instanceof BroomEntity ? 180 - yaw : 180 + yaw));
-        if (entity instanceof TornadoEntity) {
-            // tail (z 11 pixels) on the ground, axis (y 8 pixels) on the entity's vertical, mouth (-z) up
-            pose.translate(0, TORNADO_TAIL, 0);
-            pose.mulPose(Axis.XP.rotationDegrees(90));
-            pose.translate(0, -TORNADO_AXIS, 0);
-            return;
-        }
         pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, entity.xRotO, entity.getXRot())));
         // the bow is modeled 16 pixels up: centered on the entity so it turns around its middle
         if (entity instanceof WindBowEntity) pose.translate(0, -BOW_CENTER, 0);
+        if (entity instanceof TornadoEntity) pose.translate(0, -TORNADO_AXIS, 0);
     }
 
     @Override

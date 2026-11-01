@@ -52,7 +52,7 @@ public final class AbilityConfig {
     public static final ModConfigSpec.DoubleValue TORNADO_DAMAGE;
     public static final ModConfigSpec.DoubleValue TORNADO_SPEED;
     public static final ModConfigSpec.DoubleValue TORNADO_RANGE;
-    public static final ModConfigSpec.IntValue TORNADO_HOLD_TICKS;
+    public static final ModConfigSpec.DoubleValue TORNADO_PUSH;
     public static final ModConfigSpec.DoubleValue TORNADO_BLADE_DAMAGE;
     public static final ModConfigSpec.DoubleValue TORNADO_STONE_DAMAGE;
     public static final ModConfigSpec.DoubleValue BOW_COST;
@@ -129,9 +129,9 @@ public final class AbilityConfig {
         TORNADO_DAMAGE = builder.defineInRange("damage", 3.0, 0.0, 1_000.0);
         TORNADO_SPEED = builder.defineInRange("speed", 0.8, 0.1, 10.0);
         TORNADO_RANGE = builder.defineInRange("range", 16.0, 1.0, 128.0);
-        TORNADO_HOLD_TICKS = builder.comment("Ticks a caught target is held (no moving or attacking).").defineInRange("holdTicks", 40, 1, 400);
-        TORNADO_BLADE_DAMAGE = builder.comment("Upgrade 1: damage of the mini blades every half second.").defineInRange("bladeDamage", 1.0, 0.0, 1_000.0);
-        TORNADO_STONE_DAMAGE = builder.comment("Upgrade 2: stones on the catch and when thrown at the end.").defineInRange("stoneDamage", 2.0, 0.0, 1_000.0);
+        TORNADO_PUSH = builder.comment("Speed each enemy it passes is pushed along its flight.").defineInRange("push", 1.2, 0.0, 10.0);
+        TORNADO_BLADE_DAMAGE = builder.comment("Upgrade 1: extra damage of the mini blades to each enemy it passes.").defineInRange("bladeDamage", 1.0, 0.0, 1_000.0);
+        TORNADO_STONE_DAMAGE = builder.comment("Upgrade 2: extra damage of the stones to each enemy it passes; the push is 1.5x.").defineInRange("stoneDamage", 2.0, 0.0, 1_000.0);
         builder.pop().push("galeBow");
         BOW_COST = builder.defineInRange("cost", 40.0, 0.0, 100_000.0);
         BOW_COOLDOWN_TICKS = builder.defineInRange("cooldownTicks", 300, 0, 72_000);

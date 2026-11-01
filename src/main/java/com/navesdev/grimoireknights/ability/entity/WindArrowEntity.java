@@ -18,18 +18,22 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 
 /**
- * An arrow of the White gale bow. Upgrade 1: splits in 3 small arrows on hit. Upgrade 2: destroys enemy projectiles it passes.
+ * An arrow of the White gale bow, chasing the enemy it was shot at. Upgrade 1: splits in 3 small arrows on hit. Upgrade 2: destroys enemy projectiles it passes.
  * Split arrows ({@code split}) do neither.
  */
 public class WindArrowEntity extends SpellProjectile {
     private static final RawAnimation FLY = RawAnimation.begin().thenLoop("animation.wind_arrow.fly");
     private static final double INTERCEPT = 1.5;
+    /** Share of the way it turns toward its target each tick. */
+    private static final double TURN = 0.25;
     private boolean split;
+    private LivingEntity target;
 
     public WindArrowEntity(EntityType<? extends WindArrowEntity> type, Level level) {
         super(type, level);
@@ -45,12 +49,30 @@ public class WindArrowEntity extends SpellProjectile {
         super.tick();
         if (!(level() instanceof ServerLevel server) || isRemoved()) return;
         if (tickCount % 2 == 0) Vfx.play(server, Ids.id("wind_trail"), position(), Map.of());
+        if (target != null) chase();
         if (!split && upgrade() >= 2) {
             for (Projectile enemy : server.getEntitiesOfClass(Projectile.class, getBoundingBox().inflate(INTERCEPT), this::interceptable)) {
                 Vfx.play(server, Ids.id("wind_hit"), enemy.position(), Map.of("bonus", 0f));
                 enemy.discard();
             }
         }
+    }
+
+    /** Chases the target it was shot at (at the same speed) until it dies. */
+    public WindArrowEntity withTarget(@Nullable LivingEntity target) {
+        this.target = target;
+        return this;
+    }
+
+    private void chase() {
+        if (!target.isAlive() || target.level() != level()) {
+            target = null;
+            return;
+        }
+        Vec3 motion = getDeltaMovement();
+        Vec3 toward = target.getBoundingBox().getCenter().subtract(position()).normalize();
+        Vec3 turned = motion.normalize().lerp(toward, TURN).normalize();
+        setDeltaMovement(turned.scale(motion.length()));
     }
 
     /** Hostile arrows, fireballs and spells only: never tridents (the item would be lost), pearls, hooks, or allies' shots. */

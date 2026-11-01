@@ -9,7 +9,7 @@ Mod changes, newest first. Format based on [Keep a Changelog](https://keepachang
   - Masteries per element, Body and Mana, trained by fighting, dashing and spending mana; weak enemies give almost nothing and bosses can grant several levels (data map). Each level gives a point to its branch.
   - Skill tree (K) as a graph: dash, max mana, regeneration, Mana Control I-III, two upgrades per spell and the element passive. Nodes are datapack JSON.
   - Dash on R. Ranks from Recruit to Magic King set the grimoire mastery ceiling and unlock X (Knight) and C (Elite Knight).
-  - Fire: fireball (bigger, ground fire), flame arm that grabs and slams, ember burst (hits every nearby enemy and detonates the burn of those burning) and the Phoenix revive. Wind element: crescent blade, an upright tornado fang that holds its target, white gale bow and Tailwind; wind hits harder from afar.
+  - Fire: fireball (bigger, ground fire), flame arm that grabs and slams, ember burst (hits every nearby enemy and detonates the burn of those burning) and the Phoenix revive. Wind element: crescent blade, a horizontal tornado fang that drills through and pushes every enemy in its way, white gale bow whose arrows chase the enemy under the crosshair and Tailwind; wind hits harder from afar.
   - Quest engine with defeat, reach and talk objectives and rank, mastery and item rewards; NPC dialogue screen, quest journal (J), HUD tracker and the four rank trials.
   - Mana dust (creative tab) and a craftable broom flown with Mana Control III; the rider turns with the broom, not the camera, and the broom banks into strafes.
   - Commands: `/gk mastery`, `/gk tree`, `/gk rank`, `/gk quest complete`, `/gk mana`.

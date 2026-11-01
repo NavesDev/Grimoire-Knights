@@ -1,15 +1,14 @@
 package com.navesdev.grimoireknights.ability.entity;
 
 import com.navesdev.grimoireknights.ability.AbilityModule;
-import com.navesdev.grimoireknights.ability.HeldService;
 import com.navesdev.grimoireknights.ability.WindService;
 import com.navesdev.grimoireknights.ability.config.AbilityConfig;
 import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.core.vfx.Vfx;
+import java.util.HashSet;
 import java.util.Map;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
+import java.util.Set;
+import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,16 +21,15 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 
 /**
- * Tornado fang: an upright tornado (drawn upright by the renderer); the first target it catches is held in it (no moving or attacking).
- * Upgrade 1: mini blades cut the trapped target; upgrade 2: stones hit it on the catch and it is thrown out at the end.
+ * Tornado fang (Yuno's Boran no Kiba): a horizontal tornado that drills through every enemy in its way, hitting each
+ * once and pushing it along its flight, until its range ends or it meets a block.
+ * Upgrade 1: mini blades cut each enemy it passes; upgrade 2: stones hit them too and the push is stronger.
  */
 public class TornadoEntity extends SpellProjectile {
     private static final RawAnimation SPIN = RawAnimation.begin().thenLoop("animation.tornado.spin");
-    private static final RawAnimation HOLD = RawAnimation.begin().thenLoop("animation.tornado.hold");
-    private static final EntityDataAccessor<Boolean> HOLDING = SynchedEntityData.defineId(TornadoEntity.class, EntityDataSerializers.BOOLEAN);
-    private LivingEntity target;
-    private Vec3 flight = Vec3.ZERO;
-    private int heldTicks;
+    private static final double STONE_PUSH = 1.5;
+    private static final double LIFT = 0.3;
+    private final Set<UUID> hit = new HashSet<>();
 
     public TornadoEntity(EntityType<? extends TornadoEntity> type, Level level) {
         super(type, level);
@@ -42,73 +40,39 @@ public class TornadoEntity extends SpellProjectile {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(HOLDING, false);
-    }
-
-    public boolean holding() {
-        return entityData.get(HOLDING);
-    }
-
-    @Override
     public void tick() {
-        if (target == null) {
-            super.tick();
-        } else if (level() instanceof ServerLevel server) {
-            holdTick(server);
+        super.tick();
+        if (!(level() instanceof ServerLevel server) || isRemoved()) return;
+        // the whole funnel hits, not only the ray the projectile flies along
+        for (LivingEntity target : server.getEntitiesOfClass(LivingEntity.class, getBoundingBox(), this::canHitEntity)) {
+            if (hit.add(target.getUUID())) drill(server, target);
         }
-        if (level() instanceof ServerLevel server && tickCount % 2 == 0) Vfx.play(server, Ids.id("tornado_gust"), position(), Map.of());
+        if (tickCount % 2 == 0) Vfx.play(server, Ids.id("tornado_gust"), position(), Map.of());
     }
 
+    private void drill(ServerLevel server, LivingEntity target) {
+        double damage = AbilityConfig.TORNADO_DAMAGE.get();
+        if (upgrade() >= 1) damage += AbilityConfig.TORNADO_BLADE_DAMAGE.get();
+        if (upgrade() >= 2) damage += AbilityConfig.TORNADO_STONE_DAMAGE.get();
+        WindService.hurt(server, this, getOwner(), target, damage);
+        Vec3 flight = getDeltaMovement().lengthSqr() > 1e-6 ? getDeltaMovement().normalize() : Vec3.ZERO;
+        Vec3 push = flight.scale(AbilityConfig.TORNADO_PUSH.get() * (upgrade() >= 2 ? STONE_PUSH : 1));
+        target.setDeltaMovement(push.x, Math.max(push.y, LIFT), push.z);
+        target.hurtMarked = true;
+    }
+
+    /** Entities are drilled by {@link #tick}: the hit doesn't stop the tornado. */
     @Override
-    protected void onHitEntity(EntityHitResult result) {
-        if (!(level() instanceof ServerLevel server) || target != null || !(result.getEntity() instanceof LivingEntity caught)) return;
-        target = caught;
-        flight = new Vec3(getDeltaMovement().x, 0, getDeltaMovement().z);
-        setDeltaMovement(Vec3.ZERO);
-        setPos(caught.position().add(0, caught.getBbHeight() / 2 - getBbHeight() / 2, 0));
-        entityData.set(HOLDING, true);
-        HeldService.hold(caught, server.getGameTime() + AbilityConfig.TORNADO_HOLD_TICKS.get());
-        WindService.hurt(server, this, getOwner(), caught, AbilityConfig.TORNADO_DAMAGE.get());
-        if (upgrade() >= 2) WindService.hurt(server, this, getOwner(), caught, AbilityConfig.TORNADO_STONE_DAMAGE.get());
-    }
-
-    private void holdTick(ServerLevel server) {
-        heldTicks++;
-        if (!target.isAlive() || heldTicks >= AbilityConfig.TORNADO_HOLD_TICKS.get()) {
-            release(server);
-            return;
-        }
-        HeldService.pin(target, getX(), getY() + getBbHeight() / 2 - target.getBbHeight() / 2, getZ());
-        if (upgrade() >= 1 && heldTicks % 10 == 0) WindService.hurt(server, this, getOwner(), target, AbilityConfig.TORNADO_BLADE_DAMAGE.get());
-    }
-
-    private void release(ServerLevel server) {
-        HeldService.release(target);
-        if (upgrade() >= 2 && target.isAlive()) {
-            WindService.hurt(server, this, getOwner(), target, AbilityConfig.TORNADO_STONE_DAMAGE.get());
-            Vec3 push = flight.lengthSqr() > 1e-6 ? flight.normalize() : Vec3.ZERO;
-            target.setDeltaMovement(push.x * 1.2, 0.6, push.z * 1.2);
-            target.hurtMarked = true;
-        }
-        discard();
-    }
-
-    @Override
-    public void remove(RemovalReason reason) {
-        if (target != null) HeldService.release(target);
-        super.remove(reason);
-    }
+    protected void onHitEntity(EntityHitResult result) {}
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
-        if (!level().isClientSide && target == null) discard();
+        if (!level().isClientSide) discard();
     }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 4, state -> state.setAndContinue(holding() ? HOLD : SPIN)));
+        controllers.add(new AnimationController<>(this, "main", 4, state -> state.setAndContinue(SPIN)));
     }
 }

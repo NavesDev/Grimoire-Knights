@@ -114,6 +114,26 @@ public class SpellGameTest {
     }
 
     @GameTest(template = "empty")
+    public static void tornadoFangDrillsThroughEveryEnemyInItsWay(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        GrimoireService.give(caster, Ids.id("wind"), GrimoireService.CEREMONY_LEAVES);
+        RankService.set(caster, Rank.KNIGHT);
+        AbilityService.ensureMana(caster);
+        Pig near = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 2, 2.5));
+        Pig far = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 2, 3.5));
+        float health = near.getHealth();
+        caster.setPos(helper.absoluteVec(new Vec3(1.5, 2, 0.5)));
+        caster.setYRot(0);
+        caster.setXRot(0);
+        helper.assertTrue(AbilityService.tryCast(caster, 1) == CastRules.Result.OK, "tornado fang");
+        helper.runAfterDelay(1, () -> {
+            helper.assertTrue(near.getHealth() < health && far.getHealth() < health, "both pigs in its way are hit");
+            helper.assertTrue(near.getDeltaMovement().z > 0.1 && far.getDeltaMovement().z > 0.1, "and pushed along its flight, got " + far.getDeltaMovement());
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty")
     public static void windHitsHarderFromAfar(GameTestHelper helper) {
         ServerPlayer caster = TestPlayers.create(helper);
         Pig near = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 4.5));
