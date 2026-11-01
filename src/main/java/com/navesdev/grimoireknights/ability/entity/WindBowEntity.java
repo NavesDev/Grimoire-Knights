@@ -26,9 +26,10 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
- * White gale bow (Yuno's Shippu no Hakkyu): a huge bow standing up and arching over its caster, a little ahead. It
- * summons and draws six arrows at once, then fires them together from their spots on the bow at the enemy under the
- * crosshair, which they chase; with no enemy, toward where the caster looks. Then it blows away.
+ * White gale bow (Yuno's Shippu no Hakkyu): a huge bow held upright ahead of its caster, a little to the left of the
+ * crosshair. It summons and draws six arrows at once, stacked on the string, then fires them together from their
+ * spots at the enemy under the crosshair, which they chase; with no enemy, toward where the caster looks. Then it
+ * blows away.
  */
 public class WindBowEntity extends Entity implements GeoEntity {
     private static final RawAnimation SUMMON = RawAnimation.begin().thenPlay("animation.wind_bow.summon").thenLoop("animation.wind_bow.draw");
@@ -38,15 +39,14 @@ public class WindBowEntity extends Entity implements GeoEntity {
     private static final int FIRE_AT = 16;
     /** Ticks of release (0.6 s) before it goes. */
     private static final int RELEASE_TICKS = 12;
-    /** Blocks in front of the eyes and below them; the renderer centers the arch on this spot. */
-    private static final double DISTANCE = 1.0;
+    /** Blocks in front of the eyes, to their left and below them; the renderer centers the bow on this spot. */
+    private static final double DISTANCE = 1.4;
+    private static final double LEFT = 0.5;
     private static final double DROP = 0.2;
     /** Blocks ahead of the eyes the arrows converge on, and how far an enemy can be locked on. */
     private static final double AIM = 24;
-    /** Arrows nocked on the arch (wind_bow.js ARROWS, INNER, R, SQUASH): angle from the top, and size (BIG). */
-    private static final double[] ARROW_ANGLES = {-82, -50, -18, 18, 50, 82};
-    private static final double ARROW_RADIUS = 34 * 0.78 / 16;
-    private static final double SQUASH = 0.85;
+    /** Arrows nocked on the string (wind_bow.js ARROWS): height off the grip in blocks, and size (BIG). */
+    private static final double[] ARROW_HEIGHTS = {-12.5 / 16, -7.5 / 16, -2.5 / 16, 2.5 / 16, 7.5 / 16, 12.5 / 16};
     private static final double ARROW_AHEAD = 0.5;
     private static final float ARROW_SIZE = 1.5f;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -81,24 +81,23 @@ public class WindBowEntity extends Entity implements GeoEntity {
 
     private void follow(ServerPlayer player) {
         Vec3 look = player.getLookAngle();
-        setPos(player.getEyePosition().add(look.scale(DISTANCE)).subtract(0, DROP, 0));
+        Vec3 left = Vec3.directionFromRotation(0, player.getYRot() - 90);
+        setPos(player.getEyePosition().add(look.scale(DISTANCE)).add(left.scale(LEFT)).subtract(0, DROP, 0));
         setYRot(player.getYRot());
         // projectile convention, as the renderer reads it: positive pitch aims up, the player's looks down
         setXRot(-player.getXRot());
     }
 
-    /** All six at once, each from its spot on the arch (model -z forward, +x to the caster's right). */
+    /** All six at once, each from its spot on the string (model -z forward, +y up). */
     private void fire(ServerLevel server, ServerPlayer player) {
         entityData.set(RELEASED, true);
         LivingEntity target = aimed(player);
         Vec3 point = target != null ? target.getBoundingBox().getCenter() : player.getEyePosition().add(player.getLookAngle().scale(AIM));
         Vec3 forward = player.getLookAngle();
-        Vec3 right = forward.cross(new Vec3(0, 1, 0)).normalize();
+        Vec3 right = Vec3.directionFromRotation(0, player.getYRot() + 90);
         Vec3 up = right.cross(forward);
-        for (double angle : ARROW_ANGLES) {
-            double a = Math.toRadians(angle);
-            Vec3 spot = position().add(right.scale(ARROW_RADIUS * Math.sin(a))).add(up.scale(ARROW_RADIUS * SQUASH * Math.cos(a)))
-                    .add(forward.scale(ARROW_AHEAD));
+        for (double height : ARROW_HEIGHTS) {
+            Vec3 spot = position().add(up.scale(height)).add(forward.scale(ARROW_AHEAD));
             WindArrowEntity arrow = new WindArrowEntity(server, player, false);
             arrow.withUpgrade(upgrade);
             arrow.withScale(ARROW_SIZE);

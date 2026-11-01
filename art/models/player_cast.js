@@ -51,15 +51,14 @@ const animations = {
     [0.75, { torso: [-6, 0, 0], right_arm: [20, 0, -75], left_arm: [20, 0, 75] }],
     [1, REST]
   ]),
-  // C wind (white gale bow, Yuno's Shippu no Hakkyu): both arms sweep up and out, raising the arch over the head
-  // (summon, 0-0.3 s), open wide ahead holding it while the six arrows are drawn (draw, 0.3-0.8 s), then the right
-  // hand thrusts at the target as they all leave (release, from 0.8 s).
+  // C wind (white gale bow): left arm holds the upright bow ahead, right hand draws the six arrows to the chin and
+  // lets go, in step with the bow's summon (0-0.3 s), draw (0.3-0.8 s) and release (from 0.8 s).
   cast_c_wind: pose(1.4, [
     [0, REST],
-    [0.3, { torso: [-6, 0, 0], right_arm: [15, 0, -140], left_arm: [15, 0, 140] }],
-    [0.8, { torso: [-3, 0, 0], right_arm: [80, -40, 0], left_arm: [80, 40, 0] }],
-    [0.9, { torso: [4, -15, 0], right_arm: [100, 12, 0], left_arm: [70, 30, 0] }],
-    [1.15, { torso: [2, -10, 0], right_arm: [92, 8, 0], left_arm: [55, 25, 0] }],
+    [0.3, { torso: [0, -20, 0], left_arm: [90, 15, 0], right_arm: [90, -5, 0] }],
+    [0.8, { torso: [0, -30, 0], left_arm: [90, 25, 0], right_arm: [95, 40, 0] }],
+    [0.9, { torso: [0, -28, 0], left_arm: [90, 22, 0], right_arm: [80, -10, -25] }],
+    [1.15, { torso: [0, -20, 0], left_arm: [80, 15, 0], right_arm: [60, -10, -20] }],
     [1.4, REST]
   ])
 };

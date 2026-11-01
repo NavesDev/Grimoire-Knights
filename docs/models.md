@@ -41,7 +41,7 @@ Blockbench doesn't load files with `require`; the snippet above reads each `.js`
 - **Wind:** air is white in every wind model (`wind_painter.js`), never green, and see-through: the `gust` material fades and breaks at the edges. Render wind with a translucent render type, without back-face culling. The wind blade, bow and arrow are thin cubes chained into strokes and curls; the tornado mixes a core of thin cubes with planes that have the funnel and rings drawn on the texture as smooth strokes.
 - **Fireball upgrade (bigger projectile):** scale in the renderer; no new model.
 - **Tornado:** horizontal, like Yuno's Boran no Kiba: lies along -z with the wide mouth forward and turns with its flight (pitch too) around its axis, scaled 2× by the renderer. A `core` of thin streaks winding around the axis, four planes crossing on the axis with the funnel's swirling lines, and rings of broken arcs facing forward; code also plays the `tornado_gust` VFX on it. `blades` (mini wind blades) and `stones` (rocks pulled from the ground) are upgrade parts: the renderer hides them until the upgrade is unlocked.
-- **Wind bow:** Yuno's Shippu no Hakkyu: a huge bow standing up and arching over the player (about 4 blocks wide), tangled see-through streams with broad gusts hooking at the low tips (seeded noise in `wind_bow.js`, same every run); the tip gusts sway in every animation. Six big arrows (1.5× `wind_arrow`) nocked at once in a fan inside the arch, pointing north; they only show during `draw`. Modeled 16 pixels up; the renderer centers it on the entity, which floats 1 block ahead of the eyes. At the end of `draw` the code fires six `wind_arrow` entities together from the arrows' spots (`ARROWS` in `wind_bow.js`, mirrored in `WindBowEntity`), then plays `release`; the 3-way split of the upgrade is code too.
+- **Wind bow:** Yuno's Shippu no Hakkyu: a huge bow (about 3.5 blocks tall) held upright, a ")" seen from the side with the grip forward and the tips back toward the player; tangled see-through streams with broad gusts hooking at the tips (seeded noise in `wind_bow.js`, same every run); the tip gusts sway in every animation. Six big arrows (1.5× `wind_arrow`) nocked at once, stacked along the string, pointing north; they only show during `draw`. Modeled 16 pixels up; the renderer centers it on the entity, which floats 1.4 blocks ahead of the eyes and 0.5 to their left. At the end of `draw` the code fires six `wind_arrow` entities together from the arrows' spots (`ARROWS` in `wind_bow.js`, mirrored in `WindBowEntity`), then plays `release`; the 3-way split of the upgrade is code too.
 - **Anchors:** `grimoire_anchor` (mages) and `book_anchor` (altar) mark where the grimoire floats.
 
 ## Animations
@@ -113,8 +113,8 @@ Fire magic 2 (flame arm): a giant hand of fire that flies open, grabs the first 
 | Tornado | `spin` | loop | Tornado fang (magic 2) flying: the funnel turns and each ring spins at its own speed |
 | Tornado | `hold` | loop | Unused since the tornado drills through instead of holding: twice as fast, rings squeeze in and out |
 | Wind bow | `summon` | hold | White gale bow (magic 3), 0.3 s: swirls in with a half turn, no arrows yet |
-| Wind bow | `draw` | hold | 0.5 s: the six arrows appear from the middle out and are pulled back together, limbs flex toward the player |
-| Wind bow | `release` | once | 0.6 s: the arrows leave at once, limbs snap forward, then the bow blows away |
+| Wind bow | `draw` | hold | 0.5 s: the six arrows appear from the middle out and are pulled back together, tips flex toward the player |
+| Wind bow | `release` | once | 0.6 s: the arrows leave at once, tips snap forward, then the bow blows away |
 | Wind arrow | `fly` | loop | Spins around the shaft (">" head of swept-back barbs, wind hooks along the shaft, tail wisps) |
 
 ### Swords (`sword_anim.js`)
@@ -199,7 +199,7 @@ Rig `player_cast.js`: casting and dash. The cast poses key only `torso` and the 
 | `cast_x_fire_slam` | 0.8 s | - | X fire, on the grab: hauls the fist overhead and yanks it down with the hand's `slam` (impact at 0.45 s) |
 | `cast_x_wind` | 0.8 s | 0.3 s | X wind (tornado fang): two hands from the chest, pushed forward |
 | `cast_c_fire` | 1 s | 0.45 s | C fire (ember burst): arms crossed, then flung open |
-| `cast_c_wind` | 1.4 s | 0.8 s | C wind (white gale bow): both arms sweep up and out raising the arch, open wide ahead while the arrows are drawn, then the right hand thrusts at the target as they leave; in step with the bow's `summon`, `draw` and `release` |
+| `cast_c_wind` | 1.4 s | 0.8 s | C wind (white gale bow): left arm holds the upright bow, right hand draws the arrows and lets go, in step with the bow's `summon`, `draw` and `release` |
 | `dash` | 0.3 s | - | Whole body leans into the dash, arms swept back, legs split |
 
 Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering: the rider is drawn with the broom's yaw and no head pitch (the camera doesn't turn the pose), and the broom banks 16° into strafes with the rider drawn banked with it around the handle, so the feet stay on it (the strafe poses themselves don't roll).
