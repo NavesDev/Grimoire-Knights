@@ -8,11 +8,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 
-/** The player's grimoire, always on screen after the ceremony: left of the mana bar and slot Z (ManaHud). */
+/** The player's grimoire, always on screen after the ceremony: left of ManaHud's slots, mana bar and dash icon. */
 final class GrimoireHud {
     private static final int SIZE = 24;
-    /** Past ManaHud's slot (hotbar half 91, offhand 29, gap 6, slot 20) with a 4 pixel gap. */
-    private static final int FROM_CENTER = 91 + 29 + 6 + 20 + 4 + SIZE;
+    /** Past ManaHud (hotbar half 91, offhand 29, gap 6, slot 20, gap 3, bar 6, dash 15) with a 4 pixel gap. */
+    private static final int FROM_CENTER = 91 + 29 + 6 + 20 + 3 + 6 + 15 + 4 + SIZE;
     private static ItemStack icon = ItemStack.EMPTY;
 
     private GrimoireHud() {}

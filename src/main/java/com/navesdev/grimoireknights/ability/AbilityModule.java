@@ -90,6 +90,8 @@ public final class AbilityModule {
 
     public static final Supplier<EntityType<BroomEntity>> BROOM = ENTITIES.register("broom", () -> EntityType.Builder
             .<BroomEntity>of(BroomEntity::new, MobCategory.MISC).sized(0.8f, 0.3f)
+            // the rider stands on the handle (1.5 pixels): lifted past the player's 0.6 sitting offset
+            .passengerAttachments(0.6f + 1.5f / 16)
             .clientTrackingRange(10).updateInterval(1).build("broom"));
 
     public static final DeferredItem<Item> MANA_DUST = ITEMS.registerSimpleItem("mana_dust", new Item.Properties());

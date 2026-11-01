@@ -207,7 +207,7 @@ Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the g
 - With the body turned 90°, the `body`'s `x` and `z` rotate on the same axis (gimbal lock): the tilt is built on world axes and converted to ZYX Euler in `player_ride.js`.
 - With no knee, leaning forward or back lowers a hip: each leg opens along the board just enough for both feet (by the lowest corner) to stay on the board's floor.
 - Each pose rises, falls and rolls together with the prop animation of the same length; checked in Blockbench with the feet within 0.1 of the board.
-- Not yet tested in game: whether playerAnimator applies `body` in the same ZYX order.
+- playerAnimator applies `body` in the same ZYX order, but the game mirrors Blockbench (the limbs on y, `body` on x), so `run.js` writes this file with every rotation's y and z negated (`gameAxes`); without it the arms and legs close in and cross.
 
 | Animation | Loop | Pair | Use |
 |---|---|---|---|

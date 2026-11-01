@@ -14,6 +14,8 @@ import net.minecraft.world.phys.Vec3;
 /** Riders stand on the broom (player_ride poses): hover, or lean toward where the broom moves relative to their facing. */
 final class BroomPoses {
     private static final double MOVING = 0.01;
+    /** Ticks to blend from one lean into the next. */
+    private static final int FADE = 6;
     private static final Map<UUID, ResourceLocation> CURRENT = new HashMap<>();
 
     private BroomPoses() {}
@@ -33,7 +35,7 @@ final class BroomPoses {
                     CURRENT.remove(player.getUUID());
                 }
             } else if (!wanted.equals(current)) {
-                PlayerPoses.play(player, wanted);
+                PlayerPoses.play(player, wanted, current == null ? 0 : FADE);
                 CURRENT.put(player.getUUID(), wanted);
             }
         }

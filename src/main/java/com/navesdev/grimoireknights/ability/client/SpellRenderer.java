@@ -2,6 +2,7 @@ package com.navesdev.grimoireknights.ability.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import com.navesdev.grimoireknights.ability.entity.BroomEntity;
 import com.navesdev.grimoireknights.ability.entity.SpellProjectile;
 import com.navesdev.grimoireknights.core.client.FixedGeoModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -15,7 +16,8 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 /**
- * Spell entities: full bright, facing their flight (models face -z) and scaled by the spell. Wind is drawn translucent
+ * Spell entities: full bright, facing their flight (models face -z) and scaled by the spell. The broom takes its
+ * rider's yaw, which turns the other way from a projectile's. Wind is drawn translucent
  * without culling (docs/models.md); {@code upgradeBones} are hidden until the projectile's upgrade reaches their level.
  */
 class SpellRenderer<T extends net.minecraft.world.entity.Entity & GeoEntity> extends GeoEntityRenderer<T> {
@@ -34,7 +36,8 @@ class SpellRenderer<T extends net.minecraft.world.entity.Entity & GeoEntity> ext
     protected void applyRotations(T entity, PoseStack pose, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
         float scale = size * (entity instanceof SpellProjectile spell ? spell.scale() : 1);
         pose.scale(scale, scale, scale);
-        pose.mulPose(Axis.YP.rotationDegrees(180 + Mth.lerp(partialTick, entity.yRotO, entity.getYRot())));
+        float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
+        pose.mulPose(Axis.YP.rotationDegrees(entity instanceof BroomEntity ? 180 - yaw : 180 + yaw));
         pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, entity.xRotO, entity.getXRot())));
     }
 

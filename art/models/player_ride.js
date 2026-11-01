@@ -86,4 +86,4 @@ const animations = {
     move: { length: 2, bob: p => 0.4 * sin(p), roll: p => -3 * sin(p / 2) } })
 };
 
-module.exports = { name: 'player_ride', group: 'player', kind: 'player', spec: P.spec, animations, textures: P.textures };
+module.exports = { name: 'player_ride', group: 'player', kind: 'player', gameAxes: true, spec: P.spec, animations, textures: P.textures };

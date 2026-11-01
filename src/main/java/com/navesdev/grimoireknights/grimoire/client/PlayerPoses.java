@@ -6,6 +6,8 @@ import com.navesdev.grimoireknights.grimoire.network.PlayerAnimationPayload;
 import dev.kosmx.playerAnim.api.IPlayable;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
+import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
+import dev.kosmx.playerAnim.core.util.Ease;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
@@ -40,8 +42,13 @@ public final class PlayerPoses {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static void play(AbstractClientPlayer player, ResourceLocation id) {
+        play(player, id, 0);
+    }
+
+    /** Plays the pose blending into it from the current one over {@code fadeTicks} (0 cuts straight to it). */
+    @SuppressWarnings("unchecked")
+    public static void play(AbstractClientPlayer player, ResourceLocation id, int fadeTicks) {
         Minecraft minecraft = Minecraft.getInstance();
         Optional<IPlayable> animation = resolve(id);
         if (animation.isEmpty()) {
@@ -55,7 +62,9 @@ public final class PlayerPoses {
             return;
         }
         if (PlayerAnimationAccess.getPlayerAssociatedData(player).get(LAYER) instanceof ModifierLayer<?> layer) {
-            ((ModifierLayer<IAnimation>) layer).setAnimation(animation.get().playAnimation());
+            ModifierLayer<IAnimation> modifier = (ModifierLayer<IAnimation>) layer;
+            if (fadeTicks > 0) modifier.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(fadeTicks, Ease.INOUTSINE), animation.get().playAnimation());
+            else modifier.setAnimation(animation.get().playAnimation());
         }
     }
 
