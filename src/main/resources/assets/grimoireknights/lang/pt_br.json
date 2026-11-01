@@ -130,7 +130,7 @@
   "skill_node.grimoireknights.wind.gale_bow_1": "Arco branco do vendaval +1",
   "skill_node.grimoireknights.wind.gale_bow_1.desc": "Flechas se dividem em 3 ao acertar.",
   "skill_node.grimoireknights.wind.gale_bow_2": "Arco branco do vendaval +2",
-  "skill_node.grimoireknights.wind.gale_bow_2.desc": "Flechas interceptam projéteis inimigos.",
+  "skill_node.grimoireknights.wind.gale_bow_2.desc": "As flechas divididas perseguem inimigos próximos.",
   "skill_node.grimoireknights.wind.tailwind": "Vento a favor",
   "skill_node.grimoireknights.wind.tailwind.desc": "Cada acerto de vento dá um acúmulo (até 5): mais velocidade e recarga menor do vento. Somem 4 s após o último acerto.",
   "key.grimoireknights.ability_2": "Magia 2",

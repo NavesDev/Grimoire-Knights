@@ -1,19 +1,18 @@
 package com.navesdev.grimoireknights.ability.entity;
 
 import com.navesdev.grimoireknights.ability.AbilityModule;
+import com.navesdev.grimoireknights.ability.Spells;
 import com.navesdev.grimoireknights.ability.WindService;
 import com.navesdev.grimoireknights.ability.config.AbilityConfig;
 import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.core.vfx.Vfx;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -24,12 +23,13 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 
 /**
- * An arrow of the White gale bow, chasing the enemy it was shot at. Upgrade 1: splits in 3 small arrows on hit. Upgrade 2: destroys enemy projectiles it passes.
- * Split arrows ({@code split}) do neither.
+ * An arrow of the White gale bow, chasing the enemy it was shot at. Upgrade 1: splits in 3 small arrows on hit. Upgrade 2:
+ * the small arrows chase the nearest other enemies. Split arrows ({@code split}) don't split again.
  */
 public class WindArrowEntity extends SpellProjectile {
     private static final RawAnimation FLY = RawAnimation.begin().thenLoop("animation.wind_arrow.fly");
-    private static final double INTERCEPT = 1.5;
+    /** Upgrade 2: blocks around the hit target in which the split arrows look for enemies to chase. */
+    private static final double CHASE_RADIUS = 8;
     /** Share of the way it turns toward its target each tick. */
     private static final double TURN = 0.25;
     private boolean split;
@@ -50,12 +50,6 @@ public class WindArrowEntity extends SpellProjectile {
         if (!(level() instanceof ServerLevel server) || isRemoved()) return;
         if (tickCount % 2 == 0) Vfx.play(server, Ids.id("wind_trail"), position(), Map.of());
         if (target != null) chase();
-        if (!split && upgrade() >= 2) {
-            for (Projectile enemy : server.getEntitiesOfClass(Projectile.class, getBoundingBox().inflate(INTERCEPT), this::interceptable)) {
-                Vfx.play(server, Ids.id("wind_hit"), enemy.position(), Map.of("bonus", 0f));
-                enemy.discard();
-            }
-        }
     }
 
     /** Chases the target it was shot at (at the same speed) until it dies. */
@@ -75,27 +69,26 @@ public class WindArrowEntity extends SpellProjectile {
         setDeltaMovement(turned.scale(motion.length()));
     }
 
-    /** Hostile arrows, fireballs and spells only: never tridents (the item would be lost), pearls, hooks, or allies' shots. */
-    private boolean interceptable(Projectile other) {
-        if (!other.isAlive() || other instanceof WindArrowEntity || other instanceof ThrownTrident) return false;
-        if (!(other instanceof AbstractArrow || other instanceof AbstractHurtingProjectile || other instanceof SpellProjectile)) return false;
-        Entity shooter = other.getOwner();
-        return shooter != getOwner() && !(shooter != null && getOwner() != null && shooter.isAlliedTo(getOwner()));
-    }
-
     @Override
     protected void onHitEntity(EntityHitResult result) {
         if (!(level() instanceof ServerLevel server) || !(result.getEntity() instanceof LivingEntity target)) return;
         WindService.hurt(server, this, getOwner(), target, split ? AbilityConfig.ARROW_SPLIT_DAMAGE.get() : AbilityConfig.ARROW_DAMAGE.get());
         if (!split && upgrade() >= 1 && getOwner() instanceof LivingEntity owner) {
             Vec3 forward = getDeltaMovement().normalize();
+            // upgrade 2: each piece chases one of the nearest other enemies, nearest first
+            List<LivingEntity> others = new ArrayList<>(upgrade() >= 2 ? Spells.around(server, target.position(), CHASE_RADIUS, owner,
+                    other -> other != target && !other.isAlliedTo(owner)) : List.of());
+            others.sort(Comparator.comparingDouble(other -> other.distanceToSqr(target)));
+            int piecesShot = 0;
             for (int angle : new int[] {-20, 0, 20}) {
                 WindArrowEntity piece = new WindArrowEntity(server, owner, true);
                 piece.withScale(0.5f);
                 piece.setPos(target.position().add(0, target.getBbHeight() / 2, 0).add(forward.scale(target.getBbWidth() + 0.3)));
                 Vec3 dir = forward.yRot((float) Math.toRadians(angle));
                 piece.shoot(dir.x, dir.y, dir.z, AbilityConfig.ARROW_SPEED.get().floatValue(), 0);
-                piece.maxTicks = 8;
+                piece.maxTicks = others.isEmpty() ? 8 : 20;
+                if (!others.isEmpty()) piece.withTarget(others.get(piecesShot % others.size()));
+                piecesShot++;
                 server.addFreshEntity(piece);
             }
         }

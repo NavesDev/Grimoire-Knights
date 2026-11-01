@@ -130,7 +130,7 @@
   "skill_node.grimoireknights.wind.gale_bow_1": "White gale bow +1",
   "skill_node.grimoireknights.wind.gale_bow_1.desc": "Arrows split in 3 on hit.",
   "skill_node.grimoireknights.wind.gale_bow_2": "White gale bow +2",
-  "skill_node.grimoireknights.wind.gale_bow_2.desc": "Arrows intercept enemy projectiles.",
+  "skill_node.grimoireknights.wind.gale_bow_2.desc": "The split arrows chase nearby enemies.",
   "skill_node.grimoireknights.wind.tailwind": "Tailwind",
   "skill_node.grimoireknights.wind.tailwind.desc": "Each wind hit gives a stack (max 5): more speed, shorter wind cooldowns. Lost 4 s after the last hit.",
   "key.grimoireknights.ability_2": "Magic 2",

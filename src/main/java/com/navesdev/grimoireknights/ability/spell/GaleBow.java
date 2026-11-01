@@ -8,7 +8,7 @@ import com.navesdev.grimoireknights.progression.SkillTreeService;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-/** Wind, magic 3: a bow of wind shoots large arrows in sequence. Upgrades: arrows split in 3 on hit, then intercept projectiles. */
+/** Wind, magic 3: a bow of wind shoots large arrows in sequence. Upgrades: arrows split in 3 on hit, then the split arrows chase nearby enemies. */
 public class GaleBow implements Ability {
     public static final ResourceLocation ID = Ids.id("gale_bow");
 
