@@ -57,13 +57,15 @@ const stance = o => {
   };
 };
 
-// Same flight in each direction: lean, look and arms per direction, bob and roll from the prop.
+// Same flight in each direction: lean, look and arms per direction, bob and roll from the prop. The game shows
+// these poses mirrored (gameAxes negates y and z), so the lean toward the heels in Blockbench is the right
+// strafe in game and the lean toward the toes the left one.
 const DIRS = {
   hover: { pitch: 0, roll: 0, front: 40, back: 40 },
   forward: { pitch: 16, roll: 0, front: 20, back: 65, look: 0 },
   backward: { pitch: -12, roll: 0, front: 70, back: 25, swing: 10 },
-  left: { pitch: 4, roll: -16, front: 45, back: 45, swing: 35, look: -25 },
-  right: { pitch: 4, roll: 16, front: 45, back: 45, swing: -25, look: 25 }
+  right: { pitch: 4, roll: -16, front: 45, back: 45, swing: 35, look: -25 },
+  left: { pitch: 4, roll: 16, front: 45, back: 45, swing: -25, look: 25 }
 };
 // prop: { length, bob, roll, pitch } as functions of the phase, matching the prop animation.
 const flight = (prefix, prop) => Object.fromEntries(Object.entries(DIRS).map(([dir, d]) => {

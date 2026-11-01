@@ -214,5 +214,5 @@ Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the g
 | `broom_hover`, `sword_hover` | 2 s | broom `hover` / greatsword `ride` | Still in the air, standing |
 | `broom_forward`, `sword_forward` | 0.5 s / 2 s | broom `fly` / greatsword `ride` | Leans toward the nose, back arm high |
 | `broom_backward`, `sword_backward` | 0.5 s / 2 s | same | Leans toward the tail, braking, front arm high |
-| `broom_left`, `sword_left` | 0.5 s / 2 s | same | Leans on the heels, arms forward, looks into the turn |
-| `broom_right`, `sword_right` | 0.5 s / 2 s | same | Leans on the toes, arms back, looks into the turn |
+| `broom_left`, `sword_left` | 0.5 s / 2 s | same | Strafes left: leans left, looks into the turn (on the toes in Blockbench, mirrored in game) |
+| `broom_right`, `sword_right` | 0.5 s / 2 s | same | Strafes right: leans right, looks into the turn (on the heels in Blockbench, mirrored in game) |

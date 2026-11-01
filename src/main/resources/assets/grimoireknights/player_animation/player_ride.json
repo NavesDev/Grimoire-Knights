@@ -2008,7 +2008,7 @@
 				}
 			}
 		},
-		"animation.player_ride.broom_left": {
+		"animation.player_ride.broom_right": {
 			"loop": true,
 			"animation_length": 0.5,
 			"bones": {
@@ -2677,7 +2677,7 @@
 				}
 			}
 		},
-		"animation.player_ride.broom_right": {
+		"animation.player_ride.broom_left": {
 			"loop": true,
 			"animation_length": 0.5,
 			"bones": {
@@ -5353,7 +5353,7 @@
 				}
 			}
 		},
-		"animation.player_ride.sword_left": {
+		"animation.player_ride.sword_right": {
 			"loop": true,
 			"animation_length": 2,
 			"bones": {
@@ -6022,7 +6022,7 @@
 				}
 			}
 		},
-		"animation.player_ride.sword_right": {
+		"animation.player_ride.sword_left": {
 			"loop": true,
 			"animation_length": 2,
 			"bones": {
