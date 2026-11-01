@@ -79,7 +79,7 @@ public final class AbilityModule {
             .<WindBladeEntity>of(WindBladeEntity::new, MobCategory.MISC).sized(1.2f, 0.5f)
             .clientTrackingRange(8).updateInterval(1).build("wind_blade"));
     public static final Supplier<EntityType<TornadoEntity>> TORNADO = ENTITIES.register("tornado", () -> EntityType.Builder
-            .<TornadoEntity>of(TornadoEntity::new, MobCategory.MISC).sized(1.2f, 1.2f)
+            .<TornadoEntity>of(TornadoEntity::new, MobCategory.MISC).sized(2.0f, 3.0f)
             .clientTrackingRange(8).updateInterval(1).build("tornado"));
     public static final Supplier<EntityType<WindArrowEntity>> WIND_ARROW = ENTITIES.register("wind_arrow", () -> EntityType.Builder
             .<WindArrowEntity>of(WindArrowEntity::new, MobCategory.MISC).sized(0.5f, 0.5f)

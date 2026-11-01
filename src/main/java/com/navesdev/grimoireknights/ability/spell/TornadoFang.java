@@ -9,9 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.phys.Vec3;
 
-/** Wind, magic 2: an upright tornado that runs along the ground and holds the first target it catches. */
+/** Wind, magic 2: an upright tornado thrown where the caster looks; it holds the first target it catches. */
 public class TornadoFang implements Ability {
     public static final ResourceLocation ID = Ids.id("tornado_fang");
 
@@ -32,13 +31,11 @@ public class TornadoFang implements Ability {
 
     @Override
     public boolean cast(ServerPlayer player) {
-        Vec3 look = player.getLookAngle();
-        // runs level from the caster's feet, standing up
-        Vec3 flat = new Vec3(look.x, 0, look.z).lengthSqr() < 1e-4 ? look : new Vec3(look.x, 0, look.z).normalize();
         TornadoEntity tornado = new TornadoEntity(player.level(), player);
         tornado.withUpgrade(SkillTreeService.upgradeLevel(player, ID));
-        tornado.launch(player, flat, AbilityConfig.TORNADO_SPEED.get(), AbilityConfig.TORNADO_RANGE.get());
-        tornado.setPos(tornado.getX(), player.getY() + 0.05, tornado.getZ());
+        tornado.launch(player, player.getLookAngle(), AbilityConfig.TORNADO_SPEED.get(), AbilityConfig.TORNADO_RANGE.get());
+        // flies where the caster looks, standing up and centered on the eyes: thrown level it brushes the ground
+        tornado.setPos(tornado.getX(), tornado.getY() - tornado.getBbHeight() / 2, tornado.getZ());
         player.level().addFreshEntity(tornado);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_IDLE_AIR, SoundSource.PLAYERS, 1, 0.8f);
         return true;
