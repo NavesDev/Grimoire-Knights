@@ -7,7 +7,7 @@
 |---|---|---|
 | GeckoLib | 4.9.3 | 3D models and animations: bosses, mages, creatures, swords, floating grimoire |
 | playerAnimator (KosmX) | 2.0.4+1.21.1 | Player poses: casting, sword, broom, sword flight |
-| Curios API | 9.5.1+1.21.1 | Back slot for the mantle |
+| Curios API | 9.5.1+1.21.1 | Back slot for the mantle; cosmetic slots (head, chest, legs, feet) |
 
 All required in `neoforge.mods.toml`.
 

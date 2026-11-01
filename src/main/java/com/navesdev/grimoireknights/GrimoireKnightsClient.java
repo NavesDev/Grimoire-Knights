@@ -2,6 +2,7 @@ package com.navesdev.grimoireknights;
 
 import com.navesdev.grimoireknights.ability.client.AbilityClientModule;
 import com.navesdev.grimoireknights.core.client.vfx.VfxClient;
+import com.navesdev.grimoireknights.cosmetic.client.CosmeticClientModule;
 import com.navesdev.grimoireknights.grimoire.client.GrimoireClientModule;
 import com.navesdev.grimoireknights.progression.client.ProgressionClientModule;
 import com.navesdev.grimoireknights.quest.client.QuestClientModule;
@@ -18,6 +19,7 @@ public class GrimoireKnightsClient {
         GrimoireClientModule.register(modBus);
         ProgressionClientModule.register(modBus);
         AbilityClientModule.register(modBus);
+        CosmeticClientModule.register(modBus);
         WorldClientModule.register(modBus);
     }
 }

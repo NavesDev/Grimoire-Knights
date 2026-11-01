@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "# #",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "grimoireknights:mana_steel_ingot"
+    }
+  },
+  "result": {
+    "id": "grimoireknights:knight_chestplate",
+    "count": 1
+  }
+}

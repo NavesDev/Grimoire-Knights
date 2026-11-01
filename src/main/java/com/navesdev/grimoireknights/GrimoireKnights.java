@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import com.navesdev.grimoireknights.ability.AbilityModule;
 import com.navesdev.grimoireknights.core.registry.CoreTabs;
 import com.navesdev.grimoireknights.core.vfx.Vfx;
+import com.navesdev.grimoireknights.cosmetic.CosmeticModule;
+import com.navesdev.grimoireknights.gear.GearModule;
 import com.navesdev.grimoireknights.grimoire.GrimoireModule;
 import com.navesdev.grimoireknights.progression.ProgressionModule;
 import com.navesdev.grimoireknights.quest.QuestModule;
@@ -26,6 +28,8 @@ public class GrimoireKnights {
         GrimoireModule.register(modBus, container);
         ProgressionModule.register(modBus, container);
         AbilityModule.register(modBus, container);
+        GearModule.register(modBus);
+        CosmeticModule.register(modBus);
         WorldModule.register(modBus, container);
     }
 }

@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.navesdev.grimoireknights.cosmetic.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["HumanoidArmorLayerMixin"],
+  "injectors": {"defaultRequire": 1}
+}

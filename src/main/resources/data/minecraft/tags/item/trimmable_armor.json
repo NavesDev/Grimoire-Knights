@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "grimoireknights:knight_helmet",
+    "grimoireknights:knight_chestplate",
+    "grimoireknights:knight_leggings",
+    "grimoireknights:knight_boots",
+    "grimoireknights:elite_knight_helmet",
+    "grimoireknights:elite_knight_chestplate",
+    "grimoireknights:elite_knight_leggings",
+    "grimoireknights:elite_knight_boots"
+  ]
+}

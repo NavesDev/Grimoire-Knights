@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "minecraft:leather_chestplate"
+    },
+    {
+      "item": "minecraft:black_dye"
+    },
+    {
+      "item": "grimoireknights:mana_dust"
+    }
+  ],
+  "result": {
+    "id": "grimoireknights:magic_knight_robe",
+    "count": 1
+  }
+}
