@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -28,13 +29,22 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 /**
  * A ridden broom, standing like a hoverboard. The rider steers with the movement keys toward where they look; the
  * client of the rider moves it (vanilla vehicle rule), the server spends mana every second. Out of mana it glides down
- * slowly with no fall damage and drops its rider on landing. It vanishes without a rider.
+ * slowly with no fall damage and drops its rider on landing. It vanishes without a rider. It banks into strafes with
+ * its rider's lean.
  */
 public class BroomEntity extends Entity implements GeoEntity {
     private static final RawAnimation HOVER = RawAnimation.begin().thenLoop("animation.broom.hover");
     private static final RawAnimation FLY = RawAnimation.begin().thenLoop("animation.broom.fly");
     private static final EntityDataAccessor<Boolean> GLIDING = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final double MOVING = 0.01;
+    /** Degrees it banks into a strafe, as far as its rider leans in broom_left and broom_right (player_ride.js). */
+    private static final float BANK = 16;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    private float roll;
+    private float rollO;
+
+    /** Where the broom moves relative to its rider's facing; picks the rider's pose and the broom's bank. */
+    public enum Lean { HOVER, FORWARD, BACKWARD, LEFT, RIGHT }
 
     public BroomEntity(EntityType<? extends BroomEntity> type, Level level) {
         super(type, level);
@@ -72,6 +82,7 @@ public class BroomEntity extends Entity implements GeoEntity {
                 return;
             }
         }
+        if (level().isClientSide) bank(rider);
         if (rider != null) rider.fallDistance = 0;
         fallDistance = 0;
         if (rider instanceof Player player && isControlledByLocalInstance()) steer(player);
@@ -88,6 +99,28 @@ public class BroomEntity extends Entity implements GeoEntity {
         setDeltaMovement(getDeltaMovement().scale(0.6).add(wanted.scale(0.4)));
         setYRot(rider.getYRot());
         move(MoverType.SELF, getDeltaMovement());
+    }
+
+    public Lean lean(float riderYaw) {
+        Vec3 motion = getDeltaMovement();
+        if (motion.horizontalDistanceSqr() < MOVING) return Lean.HOVER;
+        Vec3 facing = Vec3.directionFromRotation(0, riderYaw);
+        double forward = motion.x * facing.x + motion.z * facing.z;
+        double side = motion.x * -facing.z + motion.z * facing.x;
+        if (Math.abs(side) > Math.abs(forward)) return side > 0 ? Lean.RIGHT : Lean.LEFT;
+        return forward >= 0 ? Lean.FORWARD : Lean.BACKWARD;
+    }
+
+    /** Client: eases into the bank of the current strafe, toward the right when positive. */
+    private void bank(@Nullable LivingEntity rider) {
+        rollO = roll;
+        Lean lean = rider == null ? Lean.HOVER : lean(rider.getYRot());
+        float target = lean == Lean.RIGHT ? BANK : lean == Lean.LEFT ? -BANK : 0;
+        roll += (target - roll) * 0.25f;
+    }
+
+    public float roll(float partialTick) {
+        return Mth.lerp(partialTick, rollO, roll);
     }
 
     @Override
@@ -131,7 +164,7 @@ public class BroomEntity extends Entity implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "main", 4,
-                state -> state.setAndContinue(getDeltaMovement().horizontalDistanceSqr() > 0.01 ? FLY : HOVER)));
+                state -> state.setAndContinue(getDeltaMovement().horizontalDistanceSqr() > MOVING ? FLY : HOVER)));
     }
 
     @Override

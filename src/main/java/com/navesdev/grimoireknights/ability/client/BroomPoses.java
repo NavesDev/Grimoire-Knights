@@ -4,19 +4,25 @@ import com.navesdev.grimoireknights.ability.entity.BroomEntity;
 import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.grimoire.client.PlayerPoses;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 
-/** Riders stand on the broom (player_ride poses): hover, or lean toward where the broom moves relative to their facing. */
+/**
+ * Riders stand on the broom (player_ride poses): hover, or lean toward where the broom moves relative to their facing.
+ * They are drawn turned with the broom, not with the camera.
+ */
 final class BroomPoses {
-    private static final double MOVING = 0.01;
     /** Ticks to blend from one lean into the next. */
     private static final int FADE = 6;
     private static final Map<UUID, ResourceLocation> CURRENT = new HashMap<>();
+    private static Player locked;
+    private static float[] saved;
 
     private BroomPoses() {}
 
@@ -43,12 +49,31 @@ final class BroomPoses {
     }
 
     private static ResourceLocation pose(AbstractClientPlayer player, BroomEntity broom) {
-        Vec3 motion = broom.getDeltaMovement();
-        if (motion.horizontalDistanceSqr() < MOVING) return Ids.id("broom_hover");
-        Vec3 facing = Vec3.directionFromRotation(0, player.getYRot());
-        double forward = motion.x * facing.x + motion.z * facing.z;
-        double side = motion.x * -facing.z + motion.z * facing.x;
-        if (Math.abs(side) > Math.abs(forward)) return Ids.id(side > 0 ? "broom_right" : "broom_left");
-        return Ids.id(forward >= 0 ? "broom_forward" : "broom_backward");
+        return Ids.id("broom_" + broom.lean(player.getYRot()).name().toLowerCase(Locale.ROOT));
+    }
+
+    /**
+     * Before a rider is drawn: body and head take the broom's yaw and the head no pitch, so the pose stays on the broom
+     * however the camera turns. {@link #unlock} puts the rider's rotations back after drawing.
+     */
+    static void lock(Player player, float partialTick) {
+        if (!(player.getVehicle() instanceof BroomEntity broom)) return;
+        locked = player;
+        saved = new float[] {player.yBodyRot, player.yBodyRotO, player.yHeadRot, player.yHeadRotO, player.getXRot(), player.xRotO};
+        float yaw = Mth.rotLerp(partialTick, broom.yRotO, broom.getYRot());
+        player.yBodyRot = player.yBodyRotO = player.yHeadRot = player.yHeadRotO = yaw;
+        player.setXRot(0);
+        player.xRotO = 0;
+    }
+
+    static void unlock(Player player) {
+        if (player != locked) return;
+        player.yBodyRot = saved[0];
+        player.yBodyRotO = saved[1];
+        player.yHeadRot = saved[2];
+        player.yHeadRotO = saved[3];
+        player.setXRot(saved[4]);
+        player.xRotO = saved[5];
+        locked = null;
     }
 }

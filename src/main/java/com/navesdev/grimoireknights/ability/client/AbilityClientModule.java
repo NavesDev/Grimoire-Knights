@@ -13,6 +13,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -43,6 +44,8 @@ public final class AbilityClientModule {
             event.registerEntityRenderer(AbilityModule.WIND_BOW.get(), context -> new SpellRenderer<>(context, "wind_bow", true, 1.0f));
             event.registerEntityRenderer(AbilityModule.BROOM.get(), context -> new SpellRenderer<>(context, "broom", false, 1.0f));
         });
+        NeoForge.EVENT_BUS.addListener(RenderPlayerEvent.Pre.class, event -> BroomPoses.lock(event.getEntity(), event.getPartialTick()));
+        NeoForge.EVENT_BUS.addListener(RenderPlayerEvent.Post.class, event -> BroomPoses.unlock(event.getEntity()));
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, event -> {
             BroomPoses.tick();
             for (int slot = 0; slot < ABILITIES.length; slot++) {

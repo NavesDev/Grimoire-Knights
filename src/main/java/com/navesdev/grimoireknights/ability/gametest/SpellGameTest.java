@@ -69,19 +69,23 @@ public class SpellGameTest {
     }
 
     @GameTest(template = "empty")
-    public static void emberBurstDetonatesTheBurnAndPutsItOut(GameTestHelper helper) {
+    public static void emberBurstHitsAloneAndDetonatesTheBurn(GameTestHelper helper) {
         ServerPlayer caster = TestPlayers.create(helper);
         GrimoireService.give(caster, Ids.id("fire"), GrimoireService.CEREMONY_LEAVES);
         RankService.set(caster, Rank.ELITE_KNIGHT);
         AbilityService.ensureMana(caster);
-        Pig pig = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 3.5));
         caster.setPos(helper.absoluteVec(new Vec3(1.5, 1, 1.5)));
-        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.FAILED, "nothing burning: fails and costs nothing");
-        BurnService.ignite(pig, caster);
+        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.FAILED, "no enemy in range: fails and costs nothing");
+        Pig pig = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 3.5));
         float health = pig.getHealth();
-        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "ember burst");
-        float expected = (float) (AbilityConfig.BURN_DAMAGE.get() + AbilityConfig.EMBER_BONUS.get());
-        helper.assertTrue(Math.abs(health - pig.getHealth() - expected) < 1e-3, "remaining burn + bonus, got " + (health - pig.getHealth()));
+        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "ember burst with nothing burning");
+        helper.assertTrue(Math.abs(health - pig.getHealth() - AbilityConfig.EMBER_DAMAGE.get()) < 1e-3, "burst damage alone, got " + (health - pig.getHealth()));
+        AbilityService.resetCooldowns(caster);
+        BurnService.ignite(pig, caster);
+        health = pig.getHealth();
+        helper.assertTrue(AbilityService.tryCast(caster, 2) == CastRules.Result.OK, "ember burst on a burning target");
+        float expected = (float) (AbilityConfig.BURN_DAMAGE.get() + AbilityConfig.EMBER_DAMAGE.get());
+        helper.assertTrue(Math.abs(health - pig.getHealth() - expected) < 1e-3, "burst + remaining burn, got " + (health - pig.getHealth()));
         helper.assertFalse(BurnService.burning(pig), "the burn is out");
         helper.succeed();
     }

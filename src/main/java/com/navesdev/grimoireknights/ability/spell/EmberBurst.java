@@ -17,8 +17,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * Fire, magic 3: detonates the burn of nearby enemies (the burn left at once, plus a bonus) and puts it out.
- * Upgrades: longer range, then each detonated enemy spreads burn around it. With nothing burning it fails and costs nothing.
+ * Fire, magic 3: a burst that hits every nearby enemy, needing no other spell first. Burning enemies are detonated: they
+ * also take the burn left at once, and it goes out. Upgrades: longer range, then each detonated enemy spreads burn
+ * around it. With no enemy in range it fails and costs nothing.
  */
 public class EmberBurst implements Ability {
     public static final ResourceLocation ID = Ids.id("ember_burst");
@@ -43,16 +44,17 @@ public class EmberBurst implements Ability {
         ServerLevel level = player.serverLevel();
         int upgrade = SkillTreeService.upgradeLevel(player, ID);
         double range = upgrade >= 1 ? AbilityConfig.EMBER_BIG_RANGE.get() : AbilityConfig.EMBER_RANGE.get();
-        List<LivingEntity> burning = Spells.around(level, player.position(), range, player, BurnService::burning);
-        if (burning.isEmpty()) return false;
+        List<LivingEntity> targets = Spells.around(level, player.position(), range, player, target -> true);
+        if (targets.isEmpty()) return false;
         Vfx.play(level, Ids.id("ember_burst_caster"), player.position(), Map.of("radius", (float) range));
-        for (LivingEntity target : burning) {
-            double damage = BurnService.remaining(target) + AbilityConfig.EMBER_BONUS.get();
-            BurnService.extinguish(target);
+        for (LivingEntity target : targets) {
+            boolean burning = BurnService.burning(target);
+            double damage = AbilityConfig.EMBER_DAMAGE.get() + (burning ? BurnService.remaining(target) : 0);
+            if (burning) BurnService.extinguish(target);
             target.invulnerableTime = 0;
             target.hurt(Spells.source(level, Spells.FIRE, player, player), (float) damage);
             Vfx.play(level, Ids.id("ember_burst_target"), target.position(), Map.of());
-            if (upgrade >= 2) {
+            if (burning && upgrade >= 2) {
                 Spells.around(level, target.position(), AbilityConfig.EMBER_SPREAD_RADIUS.get(), player, other -> other != target)
                         .forEach(other -> BurnService.ignite(other, player));
             }

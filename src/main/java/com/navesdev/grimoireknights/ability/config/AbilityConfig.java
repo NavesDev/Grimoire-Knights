@@ -32,7 +32,7 @@ public final class AbilityConfig {
     public static final ModConfigSpec.IntValue EMBER_COOLDOWN_TICKS;
     public static final ModConfigSpec.DoubleValue EMBER_RANGE;
     public static final ModConfigSpec.DoubleValue EMBER_BIG_RANGE;
-    public static final ModConfigSpec.DoubleValue EMBER_BONUS;
+    public static final ModConfigSpec.DoubleValue EMBER_DAMAGE;
     public static final ModConfigSpec.DoubleValue EMBER_SPREAD_RADIUS;
     public static final ModConfigSpec.DoubleValue PHOENIX_HEALTH;
     public static final ModConfigSpec.IntValue PHOENIX_COOLDOWN_TICKS;
@@ -105,7 +105,7 @@ public final class AbilityConfig {
         EMBER_COOLDOWN_TICKS = builder.defineInRange("cooldownTicks", 300, 0, 72_000);
         EMBER_RANGE = builder.defineInRange("range", 6.0, 0.0, 64.0);
         EMBER_BIG_RANGE = builder.comment("Upgrade 1 range.").defineInRange("bigRange", 10.0, 0.0, 64.0);
-        EMBER_BONUS = builder.comment("Damage added to the remaining burn.").defineInRange("bonus", 3.0, 0.0, 1_000.0);
+        EMBER_DAMAGE = builder.comment("Damage to every enemy in range; burning ones also take what is left of their burn.").defineInRange("damage", 3.0, 0.0, 1_000.0);
         EMBER_SPREAD_RADIUS = builder.comment("Upgrade 2: burn spreads to enemies this close to a detonated one.").defineInRange("spreadRadius", 3.0, 0.0, 16.0);
         builder.pop().push("phoenix");
         PHOENIX_HEALTH = builder.comment("Health fraction after reviving.").defineInRange("health", 0.5, 0.05, 1.0);

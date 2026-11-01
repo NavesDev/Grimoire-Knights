@@ -22,7 +22,7 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 
 /**
- * Tornado fang: a horizontal tornado; the first target it catches is held in it (no moving or attacking).
+ * Tornado fang: an upright tornado (drawn upright by the renderer); the first target it catches is held in it (no moving or attacking).
  * Upgrade 1: mini blades cut the trapped target; upgrade 2: stones hit it on the catch and it is thrown out at the end.
  */
 public class TornadoEntity extends SpellProjectile {
