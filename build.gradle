@@ -66,6 +66,8 @@ neoForge {
             programArguments.addAll '--username', 'Dev2'
             gameDirectory = project.file('run-client2')
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            // LAN discovery can report an IPv6 link-local host without its scope id, which fails to connect.
+            systemProperty 'java.net.preferIPv4Stack', 'true'
         }
 
         server {
