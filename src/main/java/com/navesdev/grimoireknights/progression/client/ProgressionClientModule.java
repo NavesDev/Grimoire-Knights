@@ -11,7 +11,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
@@ -28,6 +30,7 @@ public final class ProgressionClientModule {
     private ProgressionClientModule() {}
 
     public static void register(IEventBus modBus) {
+        modBus.addListener(RegisterGuiLayersEvent.class, event -> event.registerAbove(VanillaGuiLayers.HOTBAR, Ids.id("tree_hint"), TreeHint::render));
         modBus.addListener(RegisterKeyMappingsEvent.class, event -> {
             event.register(DASH);
             event.register(TREE);

@@ -9,7 +9,7 @@
     "ability": "grimoireknights:gale_bow",
     "level": 2
   },
-  "icon": "minecraft:bow",
+  "icon": "grimoireknights:ability/gale_bow",
   "x": 9,
   "y": 2,
   "requires": [

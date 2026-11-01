@@ -9,7 +9,7 @@
     "ability": "grimoireknights:ember_burst",
     "level": 2
   },
-  "icon": "minecraft:blaze_powder",
+  "icon": "grimoireknights:ability/ember_burst",
   "x": 9,
   "y": 2,
   "requires": [

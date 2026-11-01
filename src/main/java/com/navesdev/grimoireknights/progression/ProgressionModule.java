@@ -4,6 +4,7 @@ import com.navesdev.grimoireknights.GrimoireKnights;
 import com.navesdev.grimoireknights.core.command.GkCommands;
 import com.navesdev.grimoireknights.core.config.Configs;
 import com.navesdev.grimoireknights.core.network.Network;
+import com.navesdev.grimoireknights.core.Ids;
 import com.navesdev.grimoireknights.progression.attachment.MasteryData;
 import com.navesdev.grimoireknights.progression.attachment.RankData;
 import com.navesdev.grimoireknights.progression.attachment.SkillTreeData;
@@ -15,22 +16,29 @@ import com.navesdev.grimoireknights.progression.network.DashCooldownPayload;
 import com.navesdev.grimoireknights.progression.network.DashPayload;
 import com.navesdev.grimoireknights.progression.quest.MasteryReward;
 import com.navesdev.grimoireknights.progression.quest.RankUpReward;
+import com.navesdev.grimoireknights.progression.rules.DamageRules;
 import com.navesdev.grimoireknights.quest.QuestRegistries;
 import com.navesdev.grimoireknights.quest.RewardType;
 import java.util.function.Supplier;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent;
@@ -38,6 +46,7 @@ import net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent;
 /** Masteries, skill tree, ranks and the dash. */
 public final class ProgressionModule {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, GrimoireKnights.MODID);
+    private static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(Registries.ATTRIBUTE, GrimoireKnights.MODID);
     private static final DeferredRegister<RewardType<?>> REWARDS = DeferredRegister.create(QuestRegistries.REWARD_TYPE, GrimoireKnights.MODID);
 
     public static final Supplier<AttachmentType<MasteryData>> MASTERY_DATA = ATTACHMENTS.register("mastery", () -> AttachmentType
@@ -59,6 +68,10 @@ public final class ProgressionModule {
             .sync((holder, to) -> holder == to, RankData.STREAM_CODEC)
             .build());
 
+    /** Share of spell damage cut, after the combat level; only the mod's armors give it. */
+    public static final DeferredHolder<Attribute, Attribute> SPELL_RESISTANCE = ATTRIBUTES.register("spell_resistance", () ->
+            new RangedAttribute(Ids.key("attribute.name", "spell_resistance"), 0, 0, DamageRules.MAX_RESISTANCE).setSyncable(true));
+
     public static final Supplier<RewardType<RankUpReward>> RANK_UP = REWARDS.register("rank_up", () -> new RewardType<>(RankUpReward.CODEC));
     public static final Supplier<RewardType<MasteryReward>> MASTERY_REWARD = REWARDS.register("mastery", () -> new RewardType<>(MasteryReward.CODEC));
 
@@ -67,10 +80,15 @@ public final class ProgressionModule {
     public static void register(IEventBus modBus, ModContainer container) {
         ATTACHMENTS.register(modBus);
         REWARDS.register(modBus);
+        ATTRIBUTES.register(modBus);
+        modBus.addListener(EntityAttributeModificationEvent.class, event -> event.getTypes().forEach(type -> event.add(type, SPELL_RESISTANCE)));
         Configs.registerServer(container, "progression", ProgressionConfig.SPEC);
         modBus.addListener(DataPackRegistryEvent.NewRegistry.class,
                 event -> event.dataPackRegistry(ProgressionRegistries.SKILL_NODE, SkillNode.CODEC, SkillNode.CODEC));
-        modBus.addListener(RegisterDataMapTypesEvent.class, event -> event.register(ProgressionRegistries.MASTERY));
+        modBus.addListener(RegisterDataMapTypesEvent.class, event -> {
+            event.register(ProgressionRegistries.MASTERY);
+            event.register(ProgressionRegistries.COMBAT_LEVEL);
+        });
         modBus.addListener(RegisterPayloadHandlersEvent.class, event -> Network.registrar(event)
                 .playToServer(DashPayload.TYPE, DashPayload.STREAM_CODEC, (payload, context) -> {
                     if (context.player() instanceof ServerPlayer player) DashService.tryDash(player, payload.x(), payload.z());
@@ -81,7 +99,9 @@ public final class ProgressionModule {
                 .playToClient(DashCooldownPayload.TYPE, DashCooldownPayload.STREAM_CODEC, (payload, context) -> DashCooldownPayload.CLIENT.accept(payload)));
 
         NeoForge.EVENT_BUS.addListener(LivingIncomingDamageEvent.class, ProgressionEvents::onIncoming);
+        NeoForge.EVENT_BUS.addListener(LivingFallEvent.class, ProgressionEvents::onFall);
         NeoForge.EVENT_BUS.addListener(LivingDamageEvent.Pre.class, ProgressionEvents::onDamagePre);
+        NeoForge.EVENT_BUS.addListener(LivingDamageEvent.Pre.class, DamageScaling::onDamagePre);
         NeoForge.EVENT_BUS.addListener(LivingDamageEvent.Post.class, ProgressionEvents::onDamage);
         NeoForge.EVENT_BUS.addListener(LivingDeathEvent.class, ProgressionEvents::onDeath);
         NeoForge.EVENT_BUS.addListener(PlayerTickEvent.Post.class, ProgressionEvents::onPlayerTick);

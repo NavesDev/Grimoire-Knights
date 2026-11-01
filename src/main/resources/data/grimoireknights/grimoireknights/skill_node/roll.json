@@ -1,0 +1,15 @@
+{
+  "branch": "body",
+  "cost": [
+    2
+  ],
+  "requires": [
+    "grimoireknights:fall_resistance_3"
+  ],
+  "effect": {
+    "type": "grimoireknights:roll"
+  },
+  "icon": "grimoireknights:skill/roll",
+  "x": 1,
+  "y": 3
+}

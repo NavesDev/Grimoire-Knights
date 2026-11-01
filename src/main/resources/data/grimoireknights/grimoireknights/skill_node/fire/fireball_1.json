@@ -9,7 +9,7 @@
     "ability": "grimoireknights:fireball",
     "level": 1
   },
-  "icon": "minecraft:fire_charge",
+  "icon": "grimoireknights:ability/fireball",
   "x": 7,
   "y": 1
 }

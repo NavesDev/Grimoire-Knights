@@ -23,7 +23,10 @@ public final class QuestClientModule {
 
     public static void register(IEventBus modBus) {
         modBus.addListener(RegisterKeyMappingsEvent.class, event -> event.register(JOURNAL));
-        modBus.addListener(RegisterGuiLayersEvent.class, event -> event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, Ids.id("quest_tracker"), QuestTrackerHud::render));
+        modBus.addListener(RegisterGuiLayersEvent.class, event -> {
+            event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, Ids.id("quest_tracker"), QuestTrackerHud::render);
+            event.registerAbove(VanillaGuiLayers.HOTBAR, Ids.id("journal_hint"), JournalHint::render);
+        });
         DialoguePayload.CLIENT.set(payload -> Minecraft.getInstance().setScreen(new DialogueScreen(payload)));
         NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, event -> {
             Minecraft minecraft = Minecraft.getInstance();

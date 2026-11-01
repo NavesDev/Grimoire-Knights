@@ -9,6 +9,7 @@ import com.navesdev.grimoireknights.progression.Masteries;
 import com.navesdev.grimoireknights.progression.MasteryService;
 import com.navesdev.grimoireknights.progression.RankService;
 import com.navesdev.grimoireknights.progression.SkillTreeService;
+import com.navesdev.grimoireknights.progression.VigorService;
 import com.navesdev.grimoireknights.progression.quest.RankUpReward;
 import com.navesdev.grimoireknights.progression.rules.Rank;
 import com.navesdev.grimoireknights.progression.rules.SkillTreeRules;
@@ -19,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -63,7 +65,7 @@ public class ProgressionGameTest {
         double strong = MasteryService.strengthFactor(player, Masteries.BODY, zombie);
         helper.assertTrue(fresh == 1 && strong < 0.05, "factor " + fresh + " then " + strong);
         LivingEntity wither = helper.spawn(EntityType.WITHER, 1, 2, 1);
-        helper.assertTrue(MasteryService.enemyValue(wither) == 300 && MasteryService.enemyValue(zombie) == 10, "data map and default values");
+        helper.assertTrue(MasteryService.enemyValue(wither) == 300 && MasteryService.enemyValue(zombie) == 5, "data map and default values");
         helper.succeed();
     }
 
@@ -106,6 +108,48 @@ public class ProgressionGameTest {
         helper.assertTrue(DashService.invulnerable(player), "invulnerable right after");
         helper.assertTrue(DashService.tryDash(player, 1, 0) == DashService.Result.ON_COOLDOWN, "cooldown");
         DashService.forget(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void lightLandingCutsFallDamageAndTheRollRemovesIt(GameTestHelper helper) {
+        // fake players cannot be hurt, so read the multiplier the fall hook hands to vanilla (null: the fall deals nothing)
+        ServerPlayer player = TestPlayers.create(helper);
+        SkillTreeService.setPoints(player, Masteries.BODY, 8);
+        helper.assertTrue(CommonHooks.onLivingFall(player, 11, 1)[1] == 1, "no node: full damage");
+        SkillTreeService.buy(player, Ids.id("fall_resistance_1"));
+        helper.assertTrue(CommonHooks.onLivingFall(player, 11, 1)[1] == 0.75f, "I: 25% less");
+        helper.assertTrue(SkillTreeService.buy(player, Ids.id("roll")) == SkillTreeRules.Result.MISSING_PREREQUISITE, "roll needs III");
+        SkillTreeService.buy(player, Ids.id("fall_resistance_2"));
+        SkillTreeService.buy(player, Ids.id("fall_resistance_3"));
+        helper.assertTrue(CommonHooks.onLivingFall(player, 11, 1)[1] == 0.25f, "III: 75% less, never none");
+        player.setShiftKeyDown(true);
+        helper.assertTrue(CommonHooks.onLivingFall(player, 11, 1) != null, "roll not bought");
+        helper.assertTrue(SkillTreeService.buy(player, Ids.id("roll")) == SkillTreeRules.Result.OK, "roll bought");
+        // the press is noted on this tick, inside the window
+        helper.assertTrue(!DashService.tryRoll(player, 2), "short falls don't roll");
+        helper.assertTrue(CommonHooks.onLivingFall(player, 11, 1) == null, "a timed sneak rolls and takes no fall damage");
+        helper.assertTrue(CommonHooks.onLivingFall(player, 11, 1)[1] == 0.25f, "one press rolls once, holding doesn't roll again");
+        player.setShiftKeyDown(false);
+        DashService.tick(player);
+        player.setShiftKeyDown(true);
+        helper.assertTrue(CommonHooks.onLivingFall(player, 11, 1) == null, "a new press rolls again");
+        DashService.forget(player);
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void vigorAddsHeartsAndTheLastNeedsKnight(GameTestHelper helper) {
+        ServerPlayer player = TestPlayers.create(helper);
+        SkillTreeService.setPoints(player, Masteries.BODY, 7);
+        SkillTreeService.buy(player, Ids.id("vigor_1"));
+        SkillTreeService.buy(player, Ids.id("vigor_2"));
+        helper.assertTrue(SkillTreeService.buy(player, Ids.id("vigor_3")) == SkillTreeRules.Result.RANK_TOO_LOW, "III needs Knight");
+        VigorService.refresh(player);
+        helper.assertTrue(player.getMaxHealth() == 24, "two hearts more, got " + player.getMaxHealth());
+        SkillTreeService.reset(player);
+        VigorService.refresh(player);
+        helper.assertTrue(player.getMaxHealth() == 20, "reset takes them back, got " + player.getMaxHealth());
         helper.succeed();
     }
 }

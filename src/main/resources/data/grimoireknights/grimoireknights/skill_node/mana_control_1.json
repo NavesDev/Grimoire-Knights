@@ -9,7 +9,7 @@
   "effect": {
     "type": "grimoireknights:mana_control"
   },
-  "icon": "minecraft:amethyst_shard",
+  "icon": "grimoireknights:skill/mana_control",
   "x": 3,
   "y": 1
 }

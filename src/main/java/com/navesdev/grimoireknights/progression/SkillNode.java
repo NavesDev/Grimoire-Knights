@@ -13,7 +13,7 @@ import net.minecraft.util.StringRepresentable;
 
 /**
  * A skill tree node from the {@code grimoireknights:skill_node} datapack registry. The effect is applied in code by its type;
- * {@code icon} (an item) and {@code x}/{@code y} (grid cell, row 0 at the bottom) only draw the tree screen.
+ * {@code icon} (a 16px texture: {@code ns:path} is {@code textures/gui/path.png}) and {@code x}/{@code y} (grid cell, row 0 at the bottom) only draw the tree screen.
  */
 public record SkillNode(Branch branch, Optional<ResourceLocation> element, List<Integer> cost, List<ResourceLocation> requires,
                         Rank requiredRank, Effect effect, ResourceLocation icon, int x, int y) {

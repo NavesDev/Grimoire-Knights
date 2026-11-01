@@ -12,7 +12,7 @@
   "effect": {
     "type": "grimoireknights:passive"
   },
-  "icon": "minecraft:phantom_membrane",
+  "icon": "grimoireknights:skill/tailwind",
   "x": 8,
   "y": 3
 }

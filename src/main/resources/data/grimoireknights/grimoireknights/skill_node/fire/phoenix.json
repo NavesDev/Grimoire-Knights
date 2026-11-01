@@ -12,7 +12,7 @@
   "effect": {
     "type": "grimoireknights:passive"
   },
-  "icon": "minecraft:totem_of_undying",
+  "icon": "grimoireknights:skill/phoenix",
   "x": 8,
   "y": 3
 }

@@ -30,6 +30,11 @@ public final class SkillTreeRules {
         return Result.OK;
     }
 
+    /** The tree only shows what is bought or next in line (its prerequisites bought), so the rest stays a mystery. */
+    public static <K> boolean revealed(Node<K> node, int ownedRank, Map<K, Integer> owned) {
+        return ownedRank > 0 || node.prerequisites().stream().allMatch(id -> owned.getOrDefault(id, 0) > 0);
+    }
+
     public static int nextCost(Node<?> node, int ownedRank) {
         return node.cost().get(ownedRank);
     }

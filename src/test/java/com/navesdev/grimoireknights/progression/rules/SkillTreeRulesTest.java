@@ -1,6 +1,8 @@
 package com.navesdev.grimoireknights.progression.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,14 @@ class SkillTreeRulesTest {
     void buysWhenEverythingIsMet() {
         assertEquals(SkillTreeRules.Result.OK, SkillTreeRules.canBuy(CONTROL, 0, 1, Map.of(), Rank.RECRUIT));
         assertEquals(SkillTreeRules.Result.OK, SkillTreeRules.canBuy(PASSIVE, 0, 4, Map.of("z1", 1, "x1", 1), Rank.KNIGHT));
+    }
+
+    @Test
+    void showsOnlyWhatIsBoughtOrNextInLine() {
+        assertTrue(SkillTreeRules.revealed(CONTROL, 0, Map.of()));
+        assertFalse(SkillTreeRules.revealed(PASSIVE, 0, Map.of("z1", 1)));
+        assertTrue(SkillTreeRules.revealed(PASSIVE, 0, Map.of("z1", 1, "x1", 1)));
+        assertTrue(SkillTreeRules.revealed(PASSIVE, 1, Map.of()));
     }
 
     @Test

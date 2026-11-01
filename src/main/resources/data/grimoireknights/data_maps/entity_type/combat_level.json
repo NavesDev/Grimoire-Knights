@@ -1,0 +1,61 @@
+{
+  "values": {
+    "minecraft:witch": {
+      "level": 5
+    },
+    "minecraft:pillager": {
+      "level": 5
+    },
+    "minecraft:vindicator": {
+      "level": 10
+    },
+    "minecraft:enderman": {
+      "level": 10
+    },
+    "minecraft:guardian": {
+      "level": 10
+    },
+    "minecraft:evoker": {
+      "level": 15
+    },
+    "minecraft:ravager": {
+      "level": 15
+    },
+    "minecraft:blaze": {
+      "level": 15
+    },
+    "minecraft:ghast": {
+      "level": 15
+    },
+    "minecraft:hoglin": {
+      "level": 15
+    },
+    "minecraft:piglin": {
+      "level": 15
+    },
+    "minecraft:zoglin": {
+      "level": 15
+    },
+    "minecraft:wither_skeleton": {
+      "level": 20
+    },
+    "minecraft:piglin_brute": {
+      "level": 20
+    },
+    "minecraft:shulker": {
+      "level": 20
+    },
+    "minecraft:elder_guardian": {
+      "level": 25
+    },
+    "minecraft:warden": {
+      "level": 30
+    },
+    "minecraft:wither": {
+      "level": 35
+    },
+    "minecraft:ender_dragon": {
+      "level": 40
+    }
+  }
+}

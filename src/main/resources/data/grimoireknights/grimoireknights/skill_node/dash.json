@@ -6,7 +6,7 @@
   "effect": {
     "type": "grimoireknights:dash"
   },
-  "icon": "minecraft:rabbit_foot",
+  "icon": "grimoireknights:ability/dash",
   "x": 0,
   "y": 0
 }

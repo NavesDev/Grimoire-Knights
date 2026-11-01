@@ -1,0 +1,12 @@
+{
+  "branch": "body",
+  "cost": [
+    2
+  ],
+  "effect": {
+    "type": "grimoireknights:vigor"
+  },
+  "icon": "grimoireknights:skill/vigor",
+  "x": 2,
+  "y": 0
+}

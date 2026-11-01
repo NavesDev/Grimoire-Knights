@@ -13,7 +13,7 @@
   "effect": {
     "type": "grimoireknights:mana_regen"
   },
-  "icon": "minecraft:ghast_tear",
+  "icon": "grimoireknights:skill/mana_regen",
   "x": 5,
   "y": 1
 }

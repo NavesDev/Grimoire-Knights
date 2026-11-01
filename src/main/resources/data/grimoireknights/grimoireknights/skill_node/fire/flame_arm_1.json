@@ -9,7 +9,7 @@
     "ability": "grimoireknights:flame_arm",
     "level": 1
   },
-  "icon": "minecraft:blaze_rod",
+  "icon": "grimoireknights:ability/flame_arm",
   "x": 8,
   "y": 1,
   "required_rank": "knight"
