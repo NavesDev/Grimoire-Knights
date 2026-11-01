@@ -20,10 +20,15 @@ import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-/** White gale bow: floats in front of its caster and shoots its arrows in sequence toward where they look, then fades. */
+/** White gale bow: floats in front of its caster, a little away, and shoots its arrows in sequence from itself toward where they look, then fades. */
 public class WindBowEntity extends Entity implements GeoEntity {
     private static final RawAnimation SUMMON = RawAnimation.begin().thenPlay("animation.wind_bow.summon").thenLoop("animation.wind_bow.draw");
     private static final int WARMUP = 6;
+    /** Blocks in front of the eyes and below them; the renderer centers the model on this spot. */
+    private static final double DISTANCE = 2.2;
+    private static final double DROP = 0.3;
+    /** Blocks ahead of the eyes the arrows converge on. */
+    private static final double AIM = 24;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private UUID owner;
     private int upgrade;
@@ -58,7 +63,7 @@ public class WindBowEntity extends Entity implements GeoEntity {
 
     private void follow(ServerPlayer player) {
         Vec3 look = player.getLookAngle();
-        setPos(player.getEyePosition().add(look.scale(1.2)).subtract(0, 0.4, 0));
+        setPos(player.getEyePosition().add(look.scale(DISTANCE)).subtract(0, DROP, 0));
         setYRot(player.getYRot());
         setXRot(player.getXRot());
     }
@@ -66,7 +71,10 @@ public class WindBowEntity extends Entity implements GeoEntity {
     private void shoot(ServerLevel server, ServerPlayer player) {
         WindArrowEntity arrow = new WindArrowEntity(server, player, false);
         arrow.withUpgrade(upgrade);
-        arrow.launch(player, player.getLookAngle(), AbilityConfig.ARROW_SPEED.get(), 40);
+        // from the bow toward the point the caster looks at, so the arrow lands under the crosshair
+        Vec3 aim = player.getEyePosition().add(player.getLookAngle().scale(AIM)).subtract(position()).normalize();
+        arrow.launch(player, aim, AbilityConfig.ARROW_SPEED.get(), 40);
+        arrow.setPos(position());
         server.addFreshEntity(arrow);
         server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.6f, 1.5f);
     }

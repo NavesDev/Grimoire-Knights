@@ -91,6 +91,29 @@ public class SpellGameTest {
     }
 
     @GameTest(template = "empty")
+    public static void tornadoFangFliesOutLevelAndUp(GameTestHelper helper) {
+        ServerPlayer caster = TestPlayers.create(helper);
+        GrimoireService.give(caster, Ids.id("wind"), GrimoireService.CEREMONY_LEAVES);
+        RankService.set(caster, Rank.KNIGHT);
+        AbilityService.ensureMana(caster);
+        // standing on the floor (y 1 is inside it), so a tornado thrown level must clear the ground
+        caster.setPos(helper.absoluteVec(new Vec3(1.5, 2, 1.5)));
+        caster.setYRot(0);
+        caster.setXRot(0);
+        helper.assertTrue(AbilityService.tryCast(caster, 1) == CastRules.Result.OK, "tornado thrown level");
+        AbilityService.resetCooldowns(caster);
+        caster.setXRot(-60);
+        helper.assertTrue(AbilityService.tryCast(caster, 1) == CastRules.Result.OK, "tornado thrown up");
+        // one tick in: later they reach the barriers around the test
+        helper.runAfterDelay(1, () -> {
+            var tornadoes = helper.getLevel().getEntities(AbilityModule.TORNADO.get(), caster.getBoundingBox().inflate(16), entity -> true);
+            helper.assertTrue(tornadoes.size() == 2, "both tornadoes still fly, got " + tornadoes.size());
+            helper.assertTrue(tornadoes.stream().anyMatch(tornado -> tornado.getDeltaMovement().y > 0.5), "one goes up");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "empty")
     public static void windHitsHarderFromAfar(GameTestHelper helper) {
         ServerPlayer caster = TestPlayers.create(helper);
         Pig near = helper.spawnWithNoFreeWill(EntityType.PIG, new Vec3(1.5, 1, 4.5));

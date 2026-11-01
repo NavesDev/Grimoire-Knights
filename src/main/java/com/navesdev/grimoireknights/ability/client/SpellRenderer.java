@@ -5,6 +5,7 @@ import com.mojang.math.Axis;
 import com.navesdev.grimoireknights.ability.entity.BroomEntity;
 import com.navesdev.grimoireknights.ability.entity.SpellProjectile;
 import com.navesdev.grimoireknights.ability.entity.TornadoEntity;
+import com.navesdev.grimoireknights.ability.entity.WindBowEntity;
 import com.navesdev.grimoireknights.core.client.FixedGeoModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -27,6 +28,7 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 class SpellRenderer<T extends net.minecraft.world.entity.Entity & GeoEntity> extends GeoEntityRenderer<T> {
     private static final float TORNADO_TAIL = 11 / 16f;
     private static final float TORNADO_AXIS = 8 / 16f;
+    private static final float BOW_CENTER = 16 / 16f;
     private final boolean translucent;
     private final float size;
     private final String[] upgradeBones;
@@ -57,6 +59,8 @@ class SpellRenderer<T extends net.minecraft.world.entity.Entity & GeoEntity> ext
             return;
         }
         pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, entity.xRotO, entity.getXRot())));
+        // the bow is modeled 16 pixels up: centered on the entity so it turns around its middle
+        if (entity instanceof WindBowEntity) pose.translate(0, -BOW_CENTER, 0);
     }
 
     @Override
