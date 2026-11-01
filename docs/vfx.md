@@ -31,12 +31,14 @@ Playing in game: the server calls `Vfx.play(level, Ids.id("<effect>"), position,
 | `ember_burst_caster` | `radius` | Ember burst: once around the caster |
 | `burn` | `height` | 1 s of flames on the body; replayed every second while the burn lasts (one state, no stacks) |
 | `phoenix_revive` | - | Phoenix passive: fire wings open around the player |
-| `tornado_gust` | - | Every 2 ticks at the tornado while it lives; once on the gale bow as it comes apart |
+| `tornado_gust` | - | Every 2 ticks at the tornado while it lives |
 | `gale_bow_summon` | - | Once at the gale bow as it appears: wisps and streaks rushing in from all around |
-| `wind_trail` | - | Every tick behind crescent blades, wind arrows and the dashing player |
+| `gale_bow_dissipate` | `aimed`, `right_x/z`, `fwd_x/y/z` | Once at the gale bow as it comes apart: wisps and streaks drift off along the bow and blow ahead; `right` is the bow's line, `fwd` its aim (`aimed` = 1 when sent) |
+| `wind_trail` | - | Every tick behind crescent blades and wind arrows |
 | `wind_hit` | `bonus` | Wind hit; grows with the distance bonus (0 to 0.6) |
 | `tailwind_aura` | `stacks` | Tailwind passive: replayed every second while there are stacks; more rings per stack (1 to 5) |
-| `dash` | - | Once where the dash starts |
+| `dash` | `dir_x`, `dir_z` | Once where the dash starts: a few thick blue streaks bursting back against the dash direction |
+| `dash_trail` | `dir_x`, `dir_z` | Every tick of the dash: two thick blue streaks behind the player |
 | `grimoire_sparkle` | `tint_r/g/b` | Floating grimoire grows or shrinks |
 
 Fire is additive (`particles_add`); wind is white with alpha (`particles_blend`).

@@ -114,7 +114,7 @@ Fire magic 2 (flame arm): a giant hand of fire that flies open, grabs the first 
 | Tornado | `hold` | loop | Unused since the tornado drills through instead of holding: twice as fast, rings squeeze in and out |
 | Wind bow | `summon` | hold | White gale bow (magic 3), 0.3 s: gathers out of the wind, each limb growing from the grip while twisting, tips unfurling last, string stretching; no arrows yet (code plays `gale_bow_summon`) |
 | Wind bow | `draw` | hold | 0.5 s: the six arrows appear from the middle out and are pulled back together, tips flex toward the player |
-| Wind bow | `release` | once | 0.6 s: the arrows leave at once, tips snap forward, then the limbs unravel back into wind, twisting and thinning out (code plays `tornado_gust`) |
+| Wind bow | `release` | once | 0.6 s: the arrows leave at once, tips snap forward, then the bow thins out into the wind without turning: tips first, then limbs and string (code plays `gale_bow_dissipate`) |
 | Wind arrow | `fly` | loop | Spins around the shaft (">" head of swept-back barbs, wind hooks along the shaft, tail wisps) |
 
 ### Swords (`sword_anim.js`)
@@ -197,10 +197,14 @@ Rig `player_cast.js`: casting and dash. The cast poses key only `torso` and the 
 | `cast_z` | 0.6 s | 0.15 s | Z (fireball, crescent blade): right hand thrown forward |
 | `cast_x_fire` | 0.45 s, hold | 0.25 s | X fire (flame arm): pulls the arm back and thrusts the open hand; holds the reach until the grab |
 | `cast_x_fire_slam` | 0.8 s | - | X fire, on the grab: hauls the fist overhead and yanks it down with the hand's `slam` (impact at 0.45 s) |
+| `cast_x_fire_release` | 0.3 s | - | X fire when the hand explodes without grabbing: the held arm drops back to rest |
 | `cast_x_wind` | 0.8 s | 0.3 s | X wind (tornado fang): two hands from the chest, pushed forward |
 | `cast_c_fire` | 1 s | 0.45 s | C fire (ember burst): arms crossed, then flung open |
 | `cast_c_wind` | 1.4 s | 0.8 s | C wind (white gale bow): left arm holds the upright bow, right hand draws the arrows and lets go, in step with the bow's `summon`, `draw` and `release` |
-| `dash` | 0.3 s | - | Whole body leans into the dash, arms swept back, legs split |
+| `dash` | 0.3 s | - | Quick lunge: slight lean, long stride, arms swinging opposite the legs |
+| `dash_back` | 0.3 s | - | Dash backward: leans away, arms thrown forward for balance, feet leading |
+| `dash_left`, `dash_right` | 0.3 s | - | Side dash: leans into it, leading arm and leg out, the other arm tucked; code picks the pose from the dash direction against the look |
+| `roll` | 0.5 s | - | Roll on landing (Body node): forward somersault, tucked, one full turn of the body, opening up standing at the end |
 
 Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering: the rider is drawn with the broom's yaw and no head pitch (the camera doesn't turn the pose), and the broom banks 16° into strafes with the rider drawn banked with it around the handle, so the feet stay on it (the strafe poses themselves don't roll).
 
