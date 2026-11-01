@@ -145,7 +145,7 @@ Wings modeled open; `idle` and `walk` fold the wings over the body. Death and da
 | Tower core | `idle` / `active` | loop | Orb floats and spins, rings spin; `active` 4x faster with the orb pulsing |
 | Magic torch | `idle` | loop | Crystal spins and floats, glow pulses |
 | Banner | `wave` | loop | Cloth sways on the crossbar, forward only (it sits 0.25 from the pole), bottom lagging |
-| Broom | `hover` / `fly` | loop | Hovering in the air swaying / bristles fluttering in flight; tilt while riding comes from code |
+| Broom | `hover` / `fly` | loop | Bristles only (slow sway / fluttering in flight); the bob, sway and bank come from code (`BroomEntity.bob`, `bank`), drawn on broom and rider together |
 | Mantle | `idle` / `walk` | loop | Tail and hood sway; in `walk` they go back |
 
 ### Demon form
@@ -206,7 +206,7 @@ Rig `player_cast.js`: casting and dash. The cast poses key only `torso` and the 
 | `dash_left`, `dash_right` | 0.3 s | - | Side dash: leans into it, leading arm and leg out, the other arm tucked; code picks the pose from the dash direction against the look |
 | `roll` | 0.5 s | - | Roll on landing (Body node): forward somersault, tucked, one full turn of the body, opening up standing at the end |
 
-Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering: the rider is drawn with the broom's yaw and no head pitch (the camera doesn't turn the pose), and the broom banks 16° into strafes with the rider drawn banked with it around the handle, so the feet stay on it (the strafe poses themselves don't roll).
+Rig `player_ride.js`: standing flight, like a hoverboard, on the broom and the greatsword. Body sideways on the board (right foot toward the nose, `body` y -90), head turned where it goes, arms open along the board. The renderer stands the player on the broom or the laid-down sword and tilts both while maneuvering: the rider is drawn with the broom's yaw and no head pitch (the camera doesn't turn the pose), and the broom banks 16° into strafes with the rider drawn banked with it around the handle, so the feet stay on it (the strafe poses themselves don't roll). The broom poses don't bob either: the code lifts broom and rider by the same hover bob, since a pose and the broom animation run on separate clocks and drift apart.
 
 - With the body turned 90°, the `body`'s `x` and `z` rotate on the same axis (gimbal lock): the tilt is built on world axes and converted to ZYX Euler in `player_ride.js`.
 - With no knee, leaning forward or back lowers a hip: each leg opens along the board just enough for both feet (by the lowest corner) to stay on the board's floor.

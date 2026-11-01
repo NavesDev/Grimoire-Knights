@@ -77,11 +77,11 @@ const flight = (prefix, prop) => Object.fromEntries(Object.entries(DIRS).map(([d
 }));
 
 const animations = {
-  // Broom: hover pairs with broom hover (2 s: bob 0.6, pitch 1.5, roll 3), the directions with broom fly
-  // (0.5 s: bob 0.15, no roll).
+  // Broom: no bob or roll here; the code moves broom and rider together (BroomEntity.bob, bank), since a pose
+  // and the broom animation run on separate clocks and drift apart.
   ...flight('broom', {
-    hover: { length: 2, bob: p => 0.6 * sin(p), pitch: p => 1.5 * cos(p), roll: p => 3 * sin(p / 2) },
-    move: { length: 0.5, bob: p => 0.15 * sin(p), roll: () => 0 } }),
+    hover: { length: 2, bob: () => 0, roll: () => 0 },
+    move: { length: 0.5, bob: () => 0, roll: () => 0 } }),
   // Greatsword: every direction pairs with the sword ride (2 s: bob 0.4, roll 3 on the blade, opposite sign
   // because the blade's y runs tail to nose).
   ...flight('sword', {

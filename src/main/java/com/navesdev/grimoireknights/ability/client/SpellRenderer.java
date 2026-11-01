@@ -38,6 +38,7 @@ class SpellRenderer<T extends net.minecraft.world.entity.Entity & GeoEntity> ext
 
     @Override
     protected void applyRotations(T entity, PoseStack pose, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
+        if (entity instanceof BroomEntity broom) pose.translate(0, broom.bob(partialTick), 0);
         float scale = size * (entity instanceof SpellProjectile spell ? spell.scale() : 1);
         pose.scale(scale, scale, scale);
         float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());

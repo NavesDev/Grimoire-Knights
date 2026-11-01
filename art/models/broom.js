@@ -31,13 +31,12 @@ const painter = (ctx, r, m) => {
 };
 
 const sin = (speed, amp, phase = 0) => `math.sin(query.anim_time * ${speed}${phase ? ' + ' + phase : ''}) * ${amp}`;
-// hover: parked in the air; fly: bristles flutter in the wind. The bank into strafes comes from code.
+// hover: parked in the air; fly: bristles flutter in the wind. The bob, sway and bank come from code
+// (BroomEntity.bob, bank), applied to broom and rider alike so the rider never drifts off it.
 const animations = {
   hover: { loop: 'loop', length: 2, bones: {
-    broom: { position: [0, sin(180, 0.6), 0], rotation: [sin(180, 1.5, 90), 0, sin(90, 3)] },
     bristles: { rotation: [0, sin(180, 4, 60), 0] } } },
   fly: { loop: 'loop', length: 0.5, bones: {
-    broom: { position: [0, sin(720, 0.15), 0] },
     bristles: { rotation: [sin(1440, 3), sin(720, 7), 0] } } }
 };
 

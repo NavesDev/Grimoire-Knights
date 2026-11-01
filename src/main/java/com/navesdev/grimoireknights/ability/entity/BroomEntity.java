@@ -55,6 +55,10 @@ public class BroomEntity extends Entity implements GeoEntity {
     private static final double MOVING = 0.01;
     /** Degrees it banks into a strafe; the rider is drawn banked with it, standing straight on the handle. */
     private static final float BANK = 16;
+    /** Hover bob (blocks, over BOB_TICKS) and sway (degrees of roll, over twice that), drawn on broom and rider alike. */
+    private static final float BOB = 0.6f / 16;
+    private static final float SWAY = 3;
+    private static final int BOB_TICKS = 40;
     /** Blocks of air it keeps under it while flown, and while parked (it never lies on the ground). */
     private static final double CUSHION = 1.5;
     private static final double PARKED_CUSHION = 0.75;
@@ -258,7 +262,16 @@ public class BroomEntity extends Entity implements GeoEntity {
     }
 
     public float roll(float partialTick) {
-        return Mth.lerp(partialTick, rollO, roll);
+        return Mth.lerp(partialTick, rollO, roll) + SWAY * Mth.sin(phase(partialTick) / 2);
+    }
+
+    /** Client: height of the hover bob; the renderer lifts broom and rider by it together, so the feet stay on it. */
+    public float bob(float partialTick) {
+        return BOB * Mth.sin(phase(partialTick));
+    }
+
+    private float phase(float partialTick) {
+        return (tickCount + partialTick) * Mth.TWO_PI / BOB_TICKS;
     }
 
     /** Bank around its flight axis in world space, the top toward the strafe; the renderer turns broom and rider by it. */

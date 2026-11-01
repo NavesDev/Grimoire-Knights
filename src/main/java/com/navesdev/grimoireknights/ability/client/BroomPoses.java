@@ -61,9 +61,10 @@ final class BroomPoses {
     static void lock(Player player, float partialTick, PoseStack pose) {
         if (!(player.getVehicle() instanceof BroomEntity broom)) return;
         locked = player;
-        // banked with the broom around its handle, so the feet stay on it
+        // bobbing and banked with the broom around its handle, so the feet stay on it
         Vec3 pivot = broom.getPosition(partialTick).subtract(player.getPosition(partialTick));
         pose.pushPose();
+        pose.translate(0, broom.bob(partialTick), 0);
         pose.translate(pivot.x, pivot.y, pivot.z);
         pose.mulPose(broom.bank(partialTick));
         pose.translate(-pivot.x, -pivot.y, -pivot.z);
